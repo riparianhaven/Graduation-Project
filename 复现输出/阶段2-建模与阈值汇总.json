@@ -74,17 +74,32 @@
       13.0,
       14.0
     ],
+    "pstd_at_lambda0p73": [
+      0.394995,
+      0.301848,
+      0.070497,
+      0.087734,
+      0.029553,
+      3.1e-05,
+      0.090392,
+      0.09684,
+      0.061485,
+      0.064605,
+      0.340997
+    ],
     "spurious_low_pstd_R": [
       8.0,
       9.5,
       12.0,
       13.0
     ],
-    "coherence_range": [
-      0.758,
-      0.995
+    "tight_1e-3_pass": [
+      10.0
     ],
-    "verdict": "phase transition alone cannot identify frequency; noise aliasing risk"
+    "coherence_r_true": 0.9954,
+    "coherence_others_max": 0.9931,
+    "verdict": "frequency IS identifiable, but only via the absolute pstd level (spurious >= 3e-2 vs true ~3e-5, about 3 orders of magnitude); coherence rho does NOT separate them (0.9954 vs 0.9931)",
+    "note": "nu=omega/R here is verification mode (omega assumed known); blind data-driven test is in s2-jupyterbook chapter 3"
   },
   "stage1_questions_answered": [
     "Q6 (step-size dimension only)",

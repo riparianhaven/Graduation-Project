@@ -167,7 +167,9 @@ def simulate(lam, beta=0.0, gamma=0.0, theta=0.0, sigma=0.0, seed=0,
     """向量化 RK4 积分 x'' = -k x' + x³ - x⁵ + u(t)。
 
     lam/beta/gamma/theta/sigma 可为标量或等长数组，一次循环并行跑完整组实验。
-    nu = 待测信号频率 / 内驱频率；nu=1 走相量合成 A cos t − B sin t，否则双频直接积分。
+    nu = 变尺度后的待测信号角频率 = 物理角频率 / 尺度系数 = omega_s/R；
+         nu=1 走相量合成 A cos t − B sin t，否则双频直接积分。
+         注意 nu 不是独立参数：它是 R 的函数，扫 R 就是在扫 nu。
     返回 pstd（Poincaré 后半段标准差）、mx（稳态最大 |x|）、轨迹（可选）。
     """
     lam, beta, gamma, theta, sigma = [a.ravel().astype(float).copy() for a in
@@ -406,11 +408,17 @@ print('      求解器(Ode4/RK4)、步长(0.1/0.02)、判据(目测/Poincaré)�
 md(r'''
 ## 7｜问 5：变尺度为什么能解决极低频
 
-振子的内驱被钉死在 $\omega=1$ rad/s，而真实待测信号频率未知且可能低到 0.1 Hz。变尺度**不改振子，改信号的时间标签**：原始采样步长 $1/f_s$ 改读成 $R/f_s$，第 $n$ 个样本被读成时刻 $nR/f_s$，于是角频率 $\nu$ 被压缩成 $\nu/R$。取 $R=\nu$ 就把信号折到 1 rad/s，与内驱同频。
+振子的内驱被钉死在 $\omega_0=1$ rad/s，而真实待测信号角频率 $\omega_s$ 未知且可能低到 0.1 Hz。变尺度**不改振子，改信号的时间标签**：原始采样步长 $1/f_s$ 改读成 $R/f_s$，第 $n$ 个样本被读成时刻 $nR/f_s$，于是信号角频率被压缩成 $\omega_s/R$，记作 $\nu=\omega_s/R$。取 $R=\omega_s$ 即 $\nu=1$，信号与内驱同频。
+
+**符号别搞混**：$R$ 是扫出来的尺度系数，$\omega_s$ 是待测的物理量，$\nu$ 只是二者的比值——它是因变量，不是可以事先设定的参数。
 
 副产品是「阈值只标一次」；但**重采样同样作用于噪声**，等效采样率降为 $f_s/R$，宽带噪声会混叠（阶段一 Q8）。
 
-**必须记住的反例**：本机复现发现，扫 $R$ 时不止真值 $R=\omega$ 会出现低 $p_{std}$——锁频/准周期态也会。内驱幅值远大于信号，响应相干指数 $\rho\approx1$ 分不开真假。**所以「哪个 $R$ 相变，$\nu$ 就是 $R$」这个推断不能靠混沌/周期二分类自证**；这一条留给阶段 3/4 用能看见待测信号分量的统计量去解决。
+**扫 $R$ 能不能自己锁定频率？能，但只能靠 $p_{std}$ 的绝对量级，不能靠相干指数。** 本机复现发现，不止真值 $R=\omega_s$ 会出现低 $p_{std}$——锁频/准周期态也会。区别在**量级**：真共振落到 $3\times10^{-5}$，伪相变最低只降到 $3\times10^{-2}$，中间隔着三个量级。用 $0.08$ 的门限判态，$R=8,\,9.5,\,12,\,13$ 都会被判成「检出」；收紧到 $10^{-3}$ 就只剩 $R=10$。
+
+**反面证据同样要记住：相干指数 $\rho$ 分不开。** 真值处 $\rho=0.9954$，其余 $R$ 最高也有 $0.9931$——只差 $0.002$。原因是内驱幅值远大于待测信号，响应里几乎全是内驱分量，$\rho$ 对「信号有没有跟上」并不敏感。**所以「哪个 $R$ 相变，$\nu$ 就是 $R$」成立，但判据必须是绝对量级，不能是波形相似度。**
+
+**但本节用的是验证模式**：$\nu=\omega/R$ 这一行需要 $\omega$ 已知才能写出来。真实盲测（代码里不含 $\omega$，只吃采样序列 + $h_1=R\Delta t$）见 `s2-jupyterbook` 第 3 章，那里对 $\omega=10/7.3/3.7$ 的估计误差是 $+0.00\%/+0.07\%/-0.14\%$。换言之 **$\nu$ 不是输入参数，它只是 $\omega/R$ 的别名**；扫到相变那一点的 $R$ 就是 $\omega$。
 ''')
 
 code(r'''
@@ -439,21 +447,31 @@ for R, a, b, c in zip(Rs, minp072, minp073, coh073):
           f'{"是" if b < PSTD_TH else "否"}')
 spurious = [float(R) for R, p in zip(Rs, minp073)
             if abs(R-omega_true) > 1e-9 and p < PSTD_TH]
-print(f'\n非真值 R 也出现低 pstd 的锁频伪相变: {spurious}')
-print(f'相干指数 ρ 范围 {min(coh073):.3f}–{max(coh073):.3f}，分不开 R=10 与伪相变。')
+i10 = int(np.argmin(np.abs(Rs - omega_true)))
+rest = np.delete(coh073, i10)
+print(f'\n非真值 R 也出现低 pstd 的锁频伪相变（判据 {PSTD_TH}）: {spurious}')
+print(f'相干指数 ρ：R=10 处 {coh073[i10]:.4f}，其余 {rest.min():.4f}–{rest.max():.4f}'
+      f' → 只差 {coh073[i10]-rest.max():+.4f}，ρ 分不开真假，不能当频率判据。')
+tight = [float(R) for R, p in zip(Rs, minp073) if p < 1e-3]
+p_false_min = float(min(p for R, p in zip(Rs, minp073) if abs(R - omega_true) > 1e-9))
+p_true = float(minp073[i10])
+print(f'判据从 {PSTD_TH} 收紧到 1e-3：通过者只剩 R={tight}（真值 {omega_true}）。')
+print(f'  → 伪相变最低 pstd={p_false_min:.1e}（准周期游走），真共振 {p_true:.1e}，'
+      f'差 {math.log10(p_false_min/p_true):.1f} 个量级；门限停在 0.08 时两者被混为一谈。')
 
 fig, axes = plt.subplots(1, 2, figsize=(12, 4.0), constrained_layout=True)
 axes[0].plot(Rs, minp072, 'o-', color='#8a94a0', label='λ=0.72')
 axes[0].plot(Rs, minp073, 's-', color='#2f6fd0', label='λ=0.73')
-axes[0].axhline(PSTD_TH, color='#c0392b', ls='--', lw=1.2, label='判态阈值')
+axes[0].axhline(PSTD_TH, color='#c0392b', ls='--', lw=1.2, label=f'判态阈值 {PSTD_TH}')
+axes[0].axhline(1e-3, color='#7d3c98', ls=':', lw=1.2, label='收紧到 1e-3')
 axes[0].axvline(omega_true, color='#1a8a5a', ls=':', lw=2, label='真值 R=10')
 axes[0].set_yscale('log'); axes[0].set_xlabel('尺度系数 R'); axes[0].set_ylabel('min pstd (log)')
-axes[0].set_title('扫 R：不止 R=10 会「收敛」'); axes[0].legend(fontsize=8)
+axes[0].set_title('扫 R：伪相变最低 3e-2，真共振 3e-5'); axes[0].legend(fontsize=8)
 axes[1].plot(Rs, coh072, 'o-', color='#8a94a0', label='λ=0.72')
 axes[1].plot(Rs, coh073, 's-', color='#1a8a5a', label='λ=0.73')
 axes[1].axvline(omega_true, color='#1a8a5a', ls=':', lw=2)
-axes[1].set_ylim(0, 1.05); axes[1].set_xlabel('尺度系数 R'); axes[1].set_ylabel('相干指数 ρ')
-axes[1].set_title('内驱分量占比：几乎所有 R 都 ≈1'); axes[1].legend(fontsize=8)
+axes[1].set_ylim(0.70, 1.02); axes[1].set_xlabel('尺度系数 R'); axes[1].set_ylabel('相干指数 ρ')
+axes[1].set_title('相干指数 ρ：判频用的 λ=0.73 贴 0.99，分不开'); axes[1].legend(fontsize=8)
 savefig('阶段2-变尺度扫描.png')
 plt.show()
 
@@ -470,7 +488,7 @@ md(r'''
 | Q2 参数怎么取 | $k=0.5,\ \omega=1,\ \lambda_0=0.72,\ h=0.02,\ T=400$（丢 200），初值 0，判据 pstd<0.08 | §2 参数表 |
 | Q3 步长 | 「不发散」不是判据；四种 $h$ 的跃变落在同一带内，取 $h=0.02$，跃变区间随 $h$ 最多平移 0.01 | §6 步长敏感性 |
 | Q4 相变过程 | 小 λ 在两阱乱跳、Poincaré 点散开；越界后整圈绕行、点收敛；pstd 断崖式下跌（5 个量级），无「带内交替」——旧观测到的交替是瞬态未收敛的假象 | §4–§5 |
-| Q5 变尺度 | 只改时间标签，$R=\nu$ 把未知频率压到 1 rad/s；阈值只标一次，但噪声混叠 + 锁频伪相变是其软肋 | §7 |
+| Q5 变尺度 | 只改时间标签，$R=\omega_s$ 把未知频率压到 1 rad/s；阈值只标一次。扫 $R$ 能定频，但只能靠 $p_{std}$ 的绝对量级（伪相变最低 $3\times10^{-2}$、真共振 $3\times10^{-5}$，差三个量级），相干指数 $\rho$ 分不开；噪声混叠仍是软肋 | §7 |
 
 **阶段一问题清单销账**：Q6（$\lambda_c$ 换参数漂多少）→ 本号给出步长维度的 ±0.005 抖动与阈值带，恢复力/噪声维度留阶段 3；Q8（变尺度是否缩放噪声带宽）→ 本号指出混叠风险并留待阶段 3 做 PSD 对照；Q10（频段取哪一段）→ **仍待导师**，本号不给假答案。
 ''')
@@ -496,9 +514,16 @@ summary = {
                           'the old 0.734-0.736 alternation was a T=400 transient artifact'},
     'step_sensitivity': {str(h): {'first_jump': jump} for h, jump in zip(hs, step_jumps)},
     'rescale': {'true_omega_rad_s': omega_true, 'R_grid': list(map(float, Rs)),
+                'pstd_at_lambda0p73': [round(float(v), 6) for v in minp073],
                 'spurious_low_pstd_R': spurious,
-                'coherence_range': [round(float(min(coh073)), 3), round(float(max(coh073)), 3)],
-                'verdict': 'phase transition alone cannot identify frequency; noise aliasing risk'},
+                'tight_1e-3_pass': tight,
+                'coherence_r_true': round(float(coh073[i10]), 4),
+                'coherence_others_max': round(float(rest.max()), 4),
+                'verdict': 'frequency IS identifiable, but only via the absolute pstd level '
+                           '(spurious >= 3e-2 vs true ~3e-5, about 3 orders of magnitude); '
+                           'coherence rho does NOT separate them (0.9954 vs 0.9931)',
+                'note': 'nu=omega/R here is verification mode (omega assumed known); '
+                        'blind data-driven test is in s2-jupyterbook chapter 3'},
     'stage1_questions_answered': ['Q6 (step-size dimension only)', 'Q8 (aliasing risk flagged)'],
     'stage1_questions_pending': ['Q10 (frequency band — mentor decision)'],
 }

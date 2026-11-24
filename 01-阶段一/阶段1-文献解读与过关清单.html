@@ -1,0 +1,178 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>01-阶段一/阶段1-文献解读与过关清单.md</title><style>
+:root{--bg:#f6f7f9;--panel:#fff;--line:#e3e7ec;--text:#1b232c;--muted:#63707e;--accent:#2f6fd0;--soft:#eaf1fc}
+@media(prefers-color-scheme:dark){:root{--bg:#14181d;--panel:#1d232a;--line:#303a45;--text:#e7edf3;--muted:#a7b3c0;--accent:#7fb0f5;--soft:#21334d}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.8 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+.bar{position:sticky;top:0;background:var(--panel);border-bottom:1px solid var(--line);padding:9px 24px;font-size:13px;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.bar a{color:var(--accent);text-decoration:none}.bar a:hover{text-decoration:underline}
+.bar .fn{color:var(--muted);margin-left:auto;word-break:break-all}
+main{max-width:980px;margin:0 auto;padding:26px 28px 70px;background:var(--panel);min-height:calc(100vh - 44px);
+  border-left:1px solid var(--line);border-right:1px solid var(--line)}
+h1,h2,h3,h4{line-height:1.4;margin:1.5em 0 .6em;font-weight:650}
+h1{font-size:25px;border-bottom:1px solid var(--line);padding-bottom:10px;margin-top:.4em}
+h2{font-size:20px;border-bottom:1px solid var(--line);padding-bottom:7px}
+h3{font-size:17px}h4{font-size:15px}
+p,li{color:var(--text)}li{margin:.25em 0}
+a{color:var(--accent)}
+code{background:var(--soft);padding:1px 5px;border-radius:4px;font:12.6px ui-monospace,Consolas,monospace}
+pre{background:var(--soft);border:1px solid var(--line);border-radius:8px;padding:14px 16px;overflow:auto}
+pre code{background:none;padding:0}
+blockquote{border-left:3px solid var(--accent);background:var(--soft);margin:12px 0;padding:8px 16px;color:var(--muted)}
+blockquote p{margin:.3em 0}
+.staticnote{max-width:980px;margin:14px auto -8px;padding:9px 14px;border:1px solid var(--line);
+  border-left:3px solid var(--accent);border-radius:0 8px 8px 0;background:var(--soft);
+  font-size:12.6px;color:var(--muted)}
+.staticnote a{color:var(--accent)}
+table{border-collapse:collapse;width:100%;margin:14px 0;font-size:13.4px;display:block;overflow:auto}
+th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top}
+th{background:var(--soft);color:var(--muted);white-space:nowrap}
+tr:nth-child(even) td{background:rgba(127,150,180,.045)}
+hr{border:none;border-top:1px solid var(--line);margin:26px 0}
+strong{font-weight:650}
+</style>
+<script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']]},
+  options:{skipHtmlTags:['script','noscript','style','textarea','pre','code','annotation']}};</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+</head><body>
+<div class="bar"><a href="../index.html">← 返回资料索引</a>
+<a href="阶段1-文献解读与过关清单.md">查看 Markdown 源码</a><span class="fn">01-阶段一/阶段1-文献解读与过关清单.md</span></div>
+<div class="staticnote">这是 <b>静态排版副本</b>，生成于 2026-11-24 20:12。直接双击 <code>index.html</code> 时看到的就是它；若 Markdown 刚改过，请在工作区运行 <code>py build_static.py</code> 重新生成，或用 <code>start_index.bat</code> 启动本地服务查看实时渲染版。页内公式由 MathJax 渲染，需要联网。</div><main><h1>阶段 1 文献解读与过关清单</h1>
+<blockquote><p><strong>阶段定位</strong>：第 1–2 周｜背景与动机——回答「为什么难、别人怎么做」。</p><p><strong>本阶段五篇</strong>：D1 → D5 → A5 → ★[3] → E1/E3。深度标记 🅱（速读，抓结论与局限）／🅲（只读指定章节）。</p><p><strong>阅读原则</strong>：按问题链读，不按编号读；每篇只带走「一句结论 + 三个带条件的数字 + 一条局限」。</p><p><strong>核实口径</strong>：五篇<strong>均据本地 PDF 全文</strong>逐段核对（2026-11-15 更新：E1 / E3 全文到手，「仅摘要级」标注已全部撤销）。正文每个数字都注明条件（量程/频段/噪声类型/判据）。</p></blockquote>
+<hr>
+<h2>一、逐篇解读</h2>
+<h3>1. D1｜Zhao 等，<em>A brief review of magnetic anomaly detection</em>，MST 2021, 32(4): 042002</h3>
+<p><strong>性质</strong>：Topical Review，不是算法论文。它交付的是「分类 + 选型规则 + 局限清单」，不是新检测器。</p>
+<p><strong>核心内容</strong></p>
+<ul><li><strong>共同困难</strong>：地磁场 $T$ 远大于目标感应场 $B$，磁强计读数是 $B_s=B+T$；线性化后有用信号退化成目标场在地磁方向的投影 $S=\mathbf{B}\cdot\mathbf{T}/T$。异常信号只有地磁噪声的「万分之几」，时域直接检测太弱；环境噪声是 $1/f^{\alpha}$ 有色噪声，且地质噪声特征与铁磁目标几乎相同。</li><li><strong>唯一分类判据</strong>：能不能<strong>预先写出「目标经过时信号长什么样」</strong>。能 → target-based（偶极子 + CPA 航迹模板 + OBF 正交基分解）；不能 → noise-based（熵、高阶过零 HOC、随机共振、小波）。</li><li><strong>两条技术主线</strong>：OBF 把时域找波形变成基空间求系数，用能量函数提 SNR；3 基单探头 / 5 基梯度计 / 4 基近距离降维。改进版引入 AR 白化，<strong>关键教训是「基函数也必须同步白化」</strong>，否则滤波把目标信号一起扭曲，匹配失配。</li><li><strong>噪声派四法</strong>：最小熵与差分熵（NP 准则定阈值，窗长是折中）、HOC（判别式 $\psi^2$ 比较窗内与背景的过零率偏差，<strong>无需乘法</strong>）、随机共振（用噪声增强，只对一类信号有效）、小波（多尺度稀疏性去非高斯噪声，强噪下幅度衰减）。</li></ul>
+<p><strong>关键结论</strong>【原文】</p>
+<ol><li>OBF 族对磁矩方向不敏感、提 SNR 显著，但<strong>计算密集、不适合实时</strong>，且<strong>用前必须先白化</strong>。</li><li>熵类与 HOC 都受<strong>低 SNR</strong> 限制，且需要干净背景或给定虚警率。</li><li>随机共振不需确定性参数、适用有色噪声，但<strong>泛化差</strong>。</li><li>小波降噪好，但<strong>强噪声下损失信号幅度</strong>。</li><li>全文<strong>没有统一的 SNR 定义、$P_{fa}$ 或 ROC 口径</strong>——各方法灵敏度是叙述性比较，不是同条件实测。</li></ol>
+<p><strong>对后续工作的参考价值</strong></p>
+<table><thead><tr><th>用途</th><th>怎么用</th></tr></thead><tbody>
+<tr><td>开题「国内外研究现状」骨架</td><td>直接用两派 + 四类噪声法做小标题，比自己搭框架稳</td></tr>
+<tr><td>环节 1 的信号与噪声模型</td><td>$T\gg B$ 的投影近似、$1/f^{\alpha}$ 有色噪声，是阶段 1 噪声模型假设的直接出处</td></tr>
+<tr><td>对照组设计</td><td>OBF / EMD / CEEMDAN 是 MAD 领域的标准对手，阶段 4 的性能对比绕不开</td></tr>
+<tr><td>工序 4 的 FPGA 动机</td><td>「OBF 计算密集、不适合实时」是上板最硬的理由；HOC「无需乘法」是定点化的现成思路</td></tr>
+<tr><td>反向定位</td><td>课题走的混沌相变路线<strong>不在两派之内</strong>，写现状时应表述为「两派之外的另一条路线」</td></tr>
+</tbody></table>
+<p><strong>边界（必须守住）</strong>：D1 全文 <strong>0 次</strong>出现 Duffing / chaos / Lyapunov / bifurcation / Poincaré，也<strong>没有</strong>深度学习方法（"neural networks" 4 次都是随机共振应用举例）。它的 target-based 特指<strong>磁偶极子空间波形匹配</strong>，前提是已知直线航迹与 $\tau_0$；本课题假设的是<strong>已知频率的时间周期信号</strong>。<strong>不要把课题硬塞进 D1 任何一派，也不要搬用其中任何灵敏度数字做性能对比。</strong></p>
+<blockquote><p>已有深化文档：<a href="../04-论文精读/论文精读-D1_磁异常检测综述_MST2021.html">论文精读-D1_磁异常检测综述_MST2021.md</a></p></blockquote>
+<hr>
+<h3>2. D5｜Murzin 等，<em>Ultrasensitive magnetic field sensors for biomedical applications</em>，Sensors 2020, 20(6): 1569</h3>
+<p><strong>性质</strong>：32 页器件综述，面向生物磁测量。它回答的不是「怎么检测」，而是「<strong>用什么器件、能测到多弱</strong>」。</p>
+<p><strong>核心内容（按噪声底排序）</strong></p>
+<table><thead><tr><th>类型</th><th>噪声底【原文】</th><th>工作条件</th><th>关键限制</th></tr></thead><tbody>
+<tr><td>SQUID</td><td>逼近 <strong>fT/√Hz</strong>，最灵敏</td><td>需低温、需磁屏蔽室</td><td>工程门槛最高，难小型化</td></tr>
+<tr><td>光泵磁力仪 OPM（含 SERF）</td><td>数 <strong>fT/√Hz</strong>， sensing 面积仅零点几 mm²</td><td>气室加热至约 400 K</td><td>仍需实时精密磁屏蔽</td></tr>
+<tr><td>NV 色心（金刚石）</td><td>十分之几 <strong>pT/√Hz</strong></td><td>室温、可纳米尺度</td><td>灵敏度受限于此量级</td></tr>
+<tr><td>磁通门</td><td><strong>1 pT/√Hz</strong> 量级；外延 YIG 梯度边缘结构可到 <strong>100 fT/√Hz</strong></td><td>低频段 <strong>1–100 Hz</strong></td><td><strong>Barkhausen 磁噪声</strong>（磁芯磁化反转的微磁过程）</td></tr>
+<tr><td>AMR / GMR / TMR、GMI、磁电复合</td><td>见原文分节</td><td>室温、易集成、低成本</td><td>低频噪声与温漂</td></tr>
+</tbody></table>
+<ul><li><strong>磁通门的两大流派</strong>：平行式（激励线圈绕磁芯）与正交式（微丝中通交流电，结构更简单）。抑制 Barkhausen 噪声的工程解是<strong>基模正交磁通门</strong>：加偏置使磁芯饱和，交流磁化对 $H_{ext}$ 线性，拾取线圈得到与激励同频的电压，从根本上避开磁化反转。</li><li><strong>结论段的核心判断</strong>【原文】：SQUID 仍是最常用且最灵敏，但低温 + 屏蔽室使其难用；最有希望替代 SQUID 的是光泵（尤其 SERF）；NV 胜在室温与纳米分辨；而 AMR/GMR/TMR、GMI、磁通门、磁电这几类「成熟且易制造」的器件<strong>已足够覆盖大量生物磁测量</strong>。</li></ul>
+<p><strong>关键结论</strong></p>
+<ol><li><strong>灵敏度不是一个数，而是「噪声底 + 带宽 + 屏蔽条件」三件套</strong>；跨类型只比 pT/√Hz 会得出错误结论。</li><li>低频段（1–100 Hz）的主敌是 <strong>1/f 漂移与 Barkhausen 噪声</strong>，不是白噪。</li><li>器件选型由应用倒推：要 fT 就得接受低温或屏蔽，要便携就得接受 pT 级噪声底。</li></ol>
+<p><strong>对后续工作的参考价值</strong></p>
+<ul><li><strong>噪声底预算的唯一依据</strong>：课题最终要交「最低可检测信噪比」，而这个门限的下限由前端噪声底决定。写论文时必须先声明「用哪类传感器、噪声底多少、带宽多少」，否则 SNR 数字没有意义。</li><li>给「极低频」一个可引用的频段锚点（磁通门 1–100 Hz 低频段），避免拿 ITU 的 3–30 Hz 定义硬套。</li><li>解释为什么 E3 要做「磁通门 + TMR 互补」：单一器件无法同时覆盖低噪声与宽频带。</li><li>序贯提醒：D5 面向生物磁（pT 级、屏蔽室、无机动平台），<strong>与本课题的 MAD 场景不同</strong>，其灵敏度数字不可直接搬为本课题指标。</li></ul>
+<blockquote><p>⚠️ 注意：D5 是器件综述，不含任何检测算法、不含 SNR 定义、不含 ROC。它在阶段 1 只承担「输入信号有多脏」这一件事。</p></blockquote>
+<hr>
+<h3>3. A5｜Gammaitoni, Hänggi, Jung, Marchesoni，<em>Stochastic resonance</em>，Rev. Mod. Phys. 1998, 70(1): 223-287</h3>
+<p><strong>性质</strong>：65 页权威综述，随机共振（SR）领域的奠基性文献。本阶段只读<strong>第 I 章（引言与三要素）+ 第 II 章的 SNR 定义 + 第 VI.C 节（SR 与混沌）+ 第 VII.C.3 节（非周期 SR）+ 结论</strong>。</p>
+<p><strong>核心内容</strong></p>
+<ul><li><strong>SR 三要素</strong>【原文】：① 存在能量势垒或某种<strong>阈值</strong>；② 一个<strong>弱的相干输入</strong>（如周期信号）；③ 一个噪声源（系统固有或外加）。三者齐备时，系统响应随噪声强度呈<strong>共振型</strong>变化——噪声太弱跨不过势垒，太强则淹没信号，中间存在最优值。</li><li><strong>标准模型</strong>：过阻尼双稳 Langevin 方程 $\dot x=-U'(x)+A_0\cos(\Omega t)+\xi(t)$，$U(x)=-\frac{a}{2}x^2+\frac{b}{4}x^4$；两态模型用 Kramers 逃逸率描述阱间跃迁，信噪比在两态近似下有解析式，且<strong>谱放大系数</strong>在某个噪声强度处出现峰值。</li><li><strong>判据的细节</strong>（最容易被误用的一点）：真正的 SR（bona fide）要求<strong>谱放大系数</strong>出现峰值；而<strong>SNR 在 $D\to0$ 时反而发散</strong>（原文 Fig. 8），所以「SNR 提升了多少 dB」本身不足以证明 SR 发生。</li><li><strong>非周期 SR</strong>（第 VII.C.3 节）：噪声也能增强<strong>非周期</strong>小信号，代价是谱峰变宽、效应被削弱——这一点对 MAD 尤其关键，因为磁异常本来就是瞬态非周期信号。</li><li><strong>SR 与混沌</strong>（第 VI.C 节）：Carroll &amp; Pecora 用<strong>混沌源替代噪声</strong>去驱动 Duffing 振子，在倍周期响应区得到振子在两支相移响应之间、沿轨道特定位置同步切换，观察到 SR。这条线索把「混沌」与「随机共振」直接连了起来。</li></ul>
+<p><strong>关键结论</strong></p>
+<ol><li>噪声在非线性阈值系统中可以「帮忙」，且存在<strong>最优噪声强度</strong>——这是与「滤波去噪」完全相反的世界观。</li><li><strong>时间尺度匹配</strong>是 SR 成立的前提（驱动周期与 Kramers 逃逸时间可比），换频段就要重调参数。</li><li>度量要小心：SNR 增益 ≠ SR 发生；必须看谱放大或驻留时间分布。</li><li>SR 在<strong>混沌系统</strong>中同样可观测，且可由混沌（而非噪声）驱动。</li></ol>
+<p><strong>对后续工作的参考价值</strong></p>
+<ul><li>★[3] 与 D1 §5.3 的理论根都在这里；读它能判断「对方的方法到底改进了什么、有没有越过 SR 的适用边界」。</li><li>给毕设一条清晰的<strong>对照路线</strong>：SR 用噪声增强信号幅度，本课题用相变判别信号有无——<strong>同属非线性系统，机制不同</strong>。开题写「技术路线对比」时这一段直接可用。</li><li>「非周期 SR」提醒：MAD 信号不是单频正弦，若把 SR 文献的 SNR 指标套到瞬态信号上，结论会失真。</li><li>「SNR 在 $D\to0$ 发散」是一条可写进论文的方法学注脚：<strong>任何以 SNR 增益为唯一卖点的工作都需要额外证据</strong>。</li></ul>
+<p><strong>边界</strong>：1998 年文献，主体是双稳系统、光学、神经与量子 SR；<strong>不含</strong> Duffing 混沌判据、不含检测器设计与 ROC。它提供物理直觉与度量规范，不提供可比的检测性能数字。</p>
+<hr>
+<h3>4. ★[3]｜Sun 等，<em>A Weak Anomaly Signal Enhancement Method Based on Vector Magnetic Sensor</em>，IEEE Sensors J. 2025, 25(12): 22479-22487</h3>
+<p><strong>性质</strong>：研究论文（非综述）。本课题自带的 3 篇核心文献之一，在阶段 1 里充当<strong>最新的对照基线</strong>。</p>
+<p><strong>核心内容</strong></p>
+<ul><li><strong>问题设定</strong>：MAD 信号极弱且与背景噪声<strong>频带重叠</strong>，传统滤波失效；目标是<strong>增强</strong>信号、压低虚警位置，而不是直接给出判决。</li><li><strong>指数势函数 SR</strong>（本文主要创新）：</li></ul>
+<p>$$U_e(x)=A\left(e^{-kx^2}-1\right)+Bx^4,\qquad \frac{dx}{dt}=2Akx\,e^{-kx^2}-4Bx^3+s(t)+\xi(t)$$</p>
+<p>三参数分工明确：$A$ 控<strong>中垒高度</strong>、$B$ 控<strong>外壁斜率</strong>、$k$ 控<strong>内壁斜率</strong>。相对经典双稳 $U_b=-\frac{a}{2}x^2+\frac{b}{4}x^4$ 的优势是：<strong>只调 $B$ 就能改外壁形状而不动中垒</strong>，而双稳必须同时协调 $a,b$ 且必然改变中垒。用四阶 Runge–Kutta 数值求解，并采用<strong>并行结构</strong>抵消初值影响。</p>
+<ul><li><strong>矢量增强因子</strong>：对总场 $B_t$ 与 $B_x,B_y,B_z$ 共 4 路分别过 SR，取滑窗标准差 $\omega_m(n)$、归一化得 $\omega'_m(n)$，合成</li></ul>
+<p>$$W(n)=\sqrt{\sum_{m=1}^{4}\left(\omega'_m(n)\right)^2}$$</p>
+<p>再乘回预处理后的总场信号。<strong>物理依据</strong>：真实磁异常是三轴同时出现的确定性起伏，而噪声在三轴上是随机的、不同步的——四路合成能拉开「异常区 / 噪声区」的对比度。预处理为：低通 → $3\sigma$ 剔除野值 → 求残差 → 去趋势 → 滑动平均。</p>
+<ul><li><strong>仿真条件</strong>：MATLAB；目标为磁偶极子，CPA = 5 m，4 个目标分别作磁矩大小 / 方向 / 速度的对照；噪声 PSD 取 $1/f^{0.5}$、$1/f$、$1/f^{1.2}$、$1/f^{1.5}$。</li></ul>
+<p><strong>关键结论</strong>【原文】</p>
+<table><thead><tr><th>项目</th><th>结果</th></tr></thead><tbody>
+<tr><td>输入 SNR = −20 dB 时的增强效果</td><td>相比经典双稳模型减少 3 处误判异常区，异常区增强因子更大</td></tr>
+<tr><td>仅用总场 vs 用矢量</td><td>仅用总场时异常区内外增强因子接近，难以区分；矢量方案明显更好</td></tr>
+<tr><td><strong>检出概率</strong>（100 组，$1/f$ 色噪）</td><td><strong>23% @ −20 dB；72% @ −15 dB；98% @ −10 dB</strong></td></tr>
+<tr><td>建议适用范围</td><td>一般场景 SNR ≥ −15 dB；高可靠场景 ≥ −10 dB</td></tr>
+<tr><td>与其他方法对比（同一批 −15 dB 输入）</td><td>比原始信号平均提升 <strong>16.50 dB</strong>；比 OBF 高 <strong>7.56 dB</strong>、比 EMD 高 <strong>7.79 dB</strong>、比 CEEMDAN 高 <strong>7.86 dB</strong></td></tr>
+<tr><td>外场实验</td><td>3 个目标磁矩约 12 / 3.5 / 17 A·m²，非磁小车匀速拖动；多目标且磁矩差异大时<strong>必须先做降噪预处理</strong>，否则弱目标仍不清晰</td></tr>
+</tbody></table>
+<p><strong>对后续工作的参考价值</strong></p>
+<ul><li><strong>最近的对手</strong>：阶段 4 的性能对比至少要包含 SR 类方法，本文是 2025 年最新、且同时给出仿真与实测的代表。</li><li><strong>可借鉴的工程思路</strong>：「多路（这里是三轴）SR 输出 + 滑窗统计 + 归一化合成」这套结构，与 Duffing 阵列「三相位 OR 判决」是<strong>同构的冗余设计</strong>——一个用空间分量冗余，一个用参考相位冗余。写方法章时可作对照论证。</li><li><strong>它做不到的事正是本课题的差异化</strong>：它只报「检出概率」，<strong>没有虚警率、没有 ROC、没有阈值选择规则</strong>；SNR 定义是整段序列的能量比</li></ul>
+<p>$$\mathrm{SNR}=10\lg\frac{\sum_i s(i)^2}{\sum_i n(i)^2}$$</p>
+<p>与 ★[2] 的窄带 SNR（−23 dB）<strong>不是一套口径</strong>，两个 −15/−20 dB 不可横向比较。本课题若同时给 $P_d$、$P_{fa}$ 与 ROC，方法学上就比它完整。</p>
+<ul><li><strong>一条明确的可做工作</strong>：把它的「检出概率 vs SNR」曲线升级成「$P_d$–$P_{fa}$–SNR 曲面」，正好对应课题要交的「最低可检测信噪比」。</li></ul>
+<p><strong>边界</strong>：这是<strong>增强/预处理</strong>方法，不是判决器；其「检出」由增强因子峰位人工判读，缺少统计判决门限。指数势的可调性优势主要体现在仿真图（Fig. 6–7），文中<strong>没有</strong>给出与经典双稳在同条件下的 $P_d$ 定量对比表。</p>
+<hr>
+<h3>5. E1 / E3｜导师组磁通门成果（工程背景，开题必引）</h3>
+<p>这两篇是本阶段的「工程落地锚点」，作用是回答<strong>「我们组自己能做到什么水平」</strong>。<strong>2026-11-15 两篇全文均已入库</strong>（<code>文献/E1_韩维维_环形磁通门非线性误差_电子测量技术2013.pdf</code>、<code>文献/E3_许朋博_磁通门磁阻混合宽带传感器_仪表技术与传感器2021.pdf</code>），以下结论不再受「摘要级」限制，方法细节与实验数字均可直接引用。</p>
+<h4>E1｜韩维维, 杨晓非, 欧阳君, 陈实. 环形磁通门的非线性误差及补偿技术[J]. 电子测量技术, 2013, 36(3): 98-101. DOI: 10.19651/j.cnki.emt.2013.03.022.</h4>
+<p><strong>核心内容</strong></p>
+<ul><li><strong>问题定位</strong>：地磁精确测量要求磁力仪误差极小，而国内外补偿研究集中在<strong>比例因子误差、温度误差、零偏、非正交误差</strong>，且重点在补偿系数算法上，<strong>对非线性误差（尤其数学建模）研究很少</strong>。本文补的就是这一块。</li><li><strong>建模三步</strong>：① 软磁芯磁化曲线 $f(H)$ 用<strong>高阶多项式</strong>拟合，$f=a_0+a_1H+a_2H^2+a_3H^3+\cdots$；② 环形探头绕线不可能完全均匀，圆周各点磁导率不等，故取<strong>对称点 A、B</strong> 先算局部感应电动势、再沿环路积分；③ 只保留含 $(H_m\sin\omega t)^2$ 的项，截断到 $i=2,3,4,5$，对 $\theta$ 在 $(0,\pi)$ 积分，得<strong>二次谐波分量</strong></li><li>核心式：$V_2=b_0+b_1H_0+b_2H_0^2+b_3H_0^3$。其中 $b_0$ 为零偏、$b_1$ 为比例因子、$b_2$ 与 $b_3$ 为<strong>非线性系数</strong>——传感器的输出因此可写成外磁场的三次多项式。</li><li><strong>补偿路线</strong>：明确否掉硬件补偿（设备多、电路复杂、成本高），选软件补偿中的<strong>矢量补偿法</strong>（对比已知矢量外磁场与三轴输出求系数）；理由是标量补偿在含高阶项时解算更复杂。</li><li><strong>实验</strong>：高精度三维<strong>亥姆霍兹线圈</strong>标定，灵敏轴对准线圈磁场方向，精密直流电流源在 <strong>−0.5 ~ +0.5 gauss（±50 μT）</strong> 内产生若干连续磁场点，记录一维环形磁通门的输出电压。</li></ul>
+<p><strong>关键结论</strong></p>
+<ul><li>实测非线性误差与所建模型「较为吻合」，模型准确性获得实验支持。</li><li>数据处理顺序是：先线性拟合消掉零漂与比例因子，再取实测曲线与拟合曲线之差作为非线性误差；用该数据解非线性系数并补偿后，<strong>非线性误差最大值从约 100 nT 降到约 20 nT</strong>，压到原来的约 1/5（相对 ±50 μT 满量程约 0.20% → 0.04% FS，此换算为本文数值推算）。</li><li>补偿算法能较好抑制环形磁通门的非线性误差，对后续高精度弱磁测量有指导意义。</li></ul>
+<p><strong>参考价值</strong></p>
+<ul><li>① 环节 1 的「传感器非理想性」条目：若毕设用磁通门实测，必须先把静态误差（比例因子/零偏/非正交/<strong>非线性</strong>）压下去，否则会把传感器非线性当成被测信号。</li><li>② <strong>建模方法论可直接借用</strong>：多项式拟合磁化曲线 + 对称点积分 + 只保留偶次谐波这一套，思路与「用解析式刻画非线性器件」完全一致，写开题「工程基础」时它是本组能力的证据。</li><li>③ 与 E3 合起来构成「<strong>单器件精度 → 多器件融合</strong>」的递进叙事：E1 管「准」，E3 管「宽」。</li></ul>
+<p><strong>边界（全文已读，以下为确定结论）</strong></p>
+<ul><li>一维、单台、<strong>静态标定</strong>；补偿系数逐台由亥姆霍兹线圈标定，<strong>换探头必须重标</strong>。</li><li>多项式截断到三次（$i\le5$），强非线性区/大信号外推能力未验证；全文<strong>未涉及温度漂移、动态响应、三轴交叉耦合</strong>。</li><li>交付的是<strong>测量误差</strong>指标（nT 级），<strong>不是噪声底、也不是最小可测信号</strong>——不能把 20 nT 当作本课题的检测门限。</li><li>4 页短文，无 SNR、无 $P_d/P_{fa}$、无检测门限。</li></ul>
+<h4>E3｜许朋博, 王鲜然, 欧阳君, 杨晓非. 基于磁通门和磁阻传感器的混合宽带磁传感器的研究与设计[J]. 仪表技术与传感器, 2021(4): 14-19.</h4>
+<p><strong>核心内容</strong></p>
+<ul><li><strong>动机</strong>：频域电磁法被测磁场频率从 <strong>mHz 到 kHz</strong>、幅值从 <strong>pT 到 μT</strong>，动态范围与频带都极宽；而磁通门低频噪声小但响应一般 ≤1 kHz，TMR 频响可到 MHz 量级但低频噪声大——两者<strong>噪声谱互补</strong>。</li><li><strong>融合原理</strong>：互补滤波满足 $F_1(s)+F_2(s)=1$，估计输出 $\hat X(s)=F_1Y_1+F_2Y_2=X+F_1n_1+F_2n_2$，信号无损通过，只让各传感器噪声留在自己噪声小的频段（故称「无损滤波器」）。</li><li><strong>落地判据</strong>（比纯互补滤波多做一步）：设磁通门低通通带 $0\sim f_{p1}$、TMR 高通通带 $f_{p2}\sim f_n$ 且 $f_{p2}&lt;f_{p1}$，重叠区 $(f_{p2},f_{p1})$ 按段判断——a 段 $V_C$ 明显大于 $V_T$ 且磁通门噪声低，直接输出 $V_C$；b 段当 $|V_C-V_T|\le r_1$ 时取 $V_O=(V_C+V_T)/2$，否则按比较判断；c 段磁通门频带受限、$V_C&lt;V_T$，直接输出 $V_T$。融合后上限只取决于 TMR 最高工作频率，残差 $r_1$ 由多次实验与数据分析选定。</li><li><strong>工程实现</strong>：硬件 = 磁通门 + TMR + 放大 + 低通/高通 + <strong>全通滤波器（调相位差）</strong> + ADC（含衰减与抗混叠）+ FPGA + DAC/重构滤波 + UART-USB；软件用 <strong>Verilog</strong>，模块含 ADC/DAC 驱动、前/后级 FIFO、滑动平均、绝对值、融合决策、FIR 多级滤波、UART 收发。</li><li><strong>测试</strong>：磁屏蔽筒（剩磁 <strong>&lt; 5 nT</strong>，近似零场）+ 螺线管 + 高精度交直流源；灵敏度标定按 5 mA 步进、60 → −60 mA 扫点；噪声按 10 s 采 10 点取峰峰值。</li></ul>
+<p><strong>关键结论</strong></p>
+<ul><li>最小二乘标定得 $V_H=0.000113\,B_H-0.030664$（$V_H$ 单位 V，$B_H$ 单位 nT）→ <strong>灵敏度 0.113 mV/nT</strong>、偏置 −0.030664 V、<strong>量程 ±0.8 Gs（±80 μT）</strong>。</li><li>频响：磁通门 100 Hz 起衰减、<strong>500 Hz 处降至 0.707（−3 dB）</strong>；TMR 经高通后可到 <strong>10 kHz</strong>；融合后<strong>频带达 10 kHz 且曲线平坦度较高</strong>。</li><li>噪声：屏蔽筒内<strong>峰峰值 0.5 nT</strong>（表 2 实测 $B_n=0.56$ nT，摘要取整为 0.5 nT——同一文献内两个数字口径一致，引用时说明是峰峰值即可）。噪声谱上融合后低频接近磁通门、高频进一步降低（数字滤波的贡献）。</li><li>作者自陈局限：<strong>实际制作需反复调试参数、灵活度不够，如何提高自适应能力是后续要解决的问题</strong>。</li></ul>
+<p><strong>参考价值</strong></p>
+<ul><li>① 环节 1 的前端方案与噪声底参照：注意 <strong>0.5 nT 是峰峰值、10 s 内 10 个采样点、屏蔽筒内</strong>，不能直接当本课题的灵敏度门限；换算噪声密度需另行测量（本文未给）【推断】。</li><li>② 环节 5 嵌入式实现的<strong>同组先例</strong>：FPGA 上「同步采样 → 滑动平均 → 比较判断/融合 → FIR」的流水线，可直接迁移到定点化 RK4 与相变判据的数字实现；Verilog 分模块写法可照搬。</li><li>③ <strong>「分工况拼接 + 残差判据」</strong>这一思路，对本课题「多尺度/多振子并行 + 判决融合」有方法论借鉴：先按物理特性分工，再用一个可调阈值决定交接。</li><li>④ 开题时是「本组已有 FPGA 磁传感平台 + 屏蔽筒/线圈标定能力」的直接证据。</li></ul>
+<p><strong>边界（全文已读，以下为确定结论）</strong></p>
+<ul><li>面向<strong>地磁宽频带测量</strong>，不是微弱周期信号检测；全文<strong>无 SNR、无 $P_d/P_{fa}$、无检测门限</strong>。</li><li>噪声指标用<strong>峰峰值</strong>（10 s / 10 点），不是噪声谱密度，与 D5 的 pT/√Hz 口径不同，<strong>不可并列比较</strong>。</li><li>只在屏蔽筒内做静态与扫频标定，<strong>没有野外或动态目标实测</strong>；相位差靠全通滤波器人工调整，随温度/器件漂移的稳定性未讨论。</li><li>版面未印 DOI（文章编号 1002-1841(2021)04-0014-06，共 6 页），著录时<strong>不补 DOI</strong>。</li></ul>
+<blockquote><p>两篇的共同提醒：<strong>磁通门的真正对手是它自己的非理想性与噪声底，而不是算法。</strong> 阶段 1 读完应当能回答「我们的前端能做到几 nT / 几 pT，因此 SNR 门限的天花板在哪里」。E1 给的是「准」（静态非线性 100 → 20 nT），E3 给的是「宽」（10 kHz、峰峰 0.5 nT），<strong>两者都不解决「弱」</strong>——弱周期信号检测正是本课题要接的那一段。</p></blockquote>
+<hr>
+<h2>二、E1 / E3 的来源与获取路径（✅ 全文已入库，留档备查）</h2>
+<blockquote><p>说明：两篇均为中文期刊论文（非 OA）。<strong>2026-11-15 全文已到手并入库</strong>（见 <a href="../文献/00-下载索引.html">下载索引</a> 第一节），下表转为<strong>来源与获取路径记录</strong>，供开题/答辩时说明引用依据；凡实测异常者已标出，未提供任何猜测性替代地址。</p></blockquote>
+<h3>E1｜环形磁通门的非线性误差及补偿技术</h3>
+<table><thead><tr><th>优先级</th><th>入口</th><th>链接</th><th>可得内容</th><th>实测状态</th></tr></thead><tbody>
+<tr><td><strong>主</strong></td><td>维普期刊（中文期刊服务平台）</td><td><a href="http://dianda.cqvip.com/Qikan/Article/Detail?id=45322882">维普 ↗</a></td><td>中英文题录、摘要、关键词、17 条参考文献；全文需机构/个人权限</td><td>✅ HTTP 200，题录页正常</td></tr>
+<tr><td><strong>次</strong></td><td>NSTL 国家科技图书文献中心</td><td><a href="https://www.nstl.gov.cn/paper_detail.html?id=f9ba6ebe508e7f03ac04632c581b047b">NSTL ↗</a></td><td>题录 + 摘要 + 馆藏号 <code>0120130800303236</code>；可走<strong>文献传递/馆际互借</strong>取全文</td><td>✅ HTTP 200</td></tr>
+<tr><td>备用（<strong>实测不可用</strong>）</td><td>期刊界 alljournals</td><td><a href="https://it.alljournals.cn/view_abstract.aspx?aid=4B5D3128816DCC7C407E2718B0D0D4AA&amp;pcid=5B3AB970F71A803DEACDC0559115BFCF0A068CD97DD29835">期刊界 ↗</a></td><td>检索结果中曾返回摘要全文</td><td>⚠️ 直接访问返回 <strong>58 字节空白页</strong>，判定当前不可用，<strong>不要作为交付依据</strong></td></tr>
+<tr><td>官网（<strong>无此文</strong>）</td><td>《电子测量技术》官网过刊</td><td><a href="http://emt.etmchina.com/emt/article/issue/2013_36_3">官网过刊 ↗</a></td><td>期望 2013 年 36 卷第 3 期目次</td><td>❌ HTTP 200 但<strong>目次为空</strong>；该站过刊实际回溯约自 2015 年起，2013 年无电子版</td></tr>
+<tr><td><strong>最省事</strong></td><td>向导师组索取</td><td>—</td><td>全文 PDF</td><td>欧阳君为通讯作者、本单位成果；E5 学位论文同样建议直接索取</td></tr>
+</tbody></table>
+<blockquote><p><strong>不建议</strong>走非授权转载站（道客巴巴、百度文库等）：版本不可核、页码易错，且引用风险高。若必须用，先与维普题录页的卷期页码（36(3): 98-101）核对一致。</p><p></p><p><strong>旧链接更正</strong>：下载索引里原先记的短链 <code>https://aipub.ijournals.cn/Jzq297Z</code> 实测只返回 59 字节跳转壳、页面无题录内容，已不列为可用入口；请以上表维普 / NSTL 两条为准。</p></blockquote>
+<h3>E3｜基于磁通门和磁阻传感器的混合宽带磁传感器的研究与设计</h3>
+<table><thead><tr><th>优先级</th><th>入口</th><th>链接</th><th>可得内容</th><th>实测状态</th></tr></thead><tbody>
+<tr><td><strong>主</strong></td><td>中国知网（手机版，免登录看摘要）</td><td><a href="https://wap.cnki.net/touch/web/Journal/Article/YBJS202104004.html">知网 ↗</a></td><td>题录（2021 年 04 期）、中英文摘要、作者单位、关键词；PDF/EPUB 需登录</td><td>✅ HTTP 200，摘要完整</td></tr>
+<tr><td><strong>主</strong></td><td>国家学术搜索 NAPSTIC</td><td><a href="https://search.napstic.cn/literature/periodical/010ybjsycgq202104004">国家学术搜索 ↗</a></td><td>题录 + 中英文题名 + 摘要 + 作者单位；聚合 NSTL／维普／万方来源</td><td>✅ HTTP 200，内容完整</td></tr>
+<tr><td>次</td><td>国家知识仓储（同源镜像）</td><td><a href="https://pubnr.napstic.cn/periodicalArticle/010ybjsycgq202104004">镜像 ↗</a></td><td>同上，作为 NAPSTIC 不可达时的备份</td><td>✅ HTTP 200，但返回的是 1.4 KB 前端壳，<strong>需浏览器渲染</strong>才见内容</td></tr>
+<tr><td>次</td><td>掌桥科研</td><td><a href="https://m.zhangqiaokeyan.com/academic-journal-cn_instrument-technique-sensor_thesis/0201289458638.html">掌桥 ↗</a></td><td>题录 + 摘要 + 著录项（14-19 页，共 6 页）</td><td>✅ HTTP 200，<strong>无免费 PDF</strong></td></tr>
+<tr><td>官网（<strong>无过刊全文</strong>）</td><td>《仪表技术与传感器》官网</td><td><a href="http://www.17sensor.com">官网 ↗</a></td><td>投稿与期刊信息</td><td>⚠️ 纯前端应用，仅投稿系统，不提供过刊全文</td></tr>
+<tr><td><strong>最省事</strong></td><td>向导师组索取</td><td>—</td><td>全文 PDF</td><td>欧阳君、杨晓非均为作者</td></tr>
+</tbody></table>
+<h3>取全文的三条正路（2026-11-15 已走通，留档备查）</h3>
+<ol><li><strong>校内 IP / 图书馆</strong>：知网、万方、维普对校园网通常已购，直接下载 PDF 最快。两篇的卷期页码分别为 <code>36(3): 98-101</code> 与 <code>2021(4): 14-19</code>，检索时按此核对，避免同名文章。<strong>本次即由此路径取到全文</strong>，文件已按编号改名入库。</li><li><strong>NSTL 文献传递</strong>：E1 的馆藏号已确认存在，按页付费或免费（视单位协议）传递，一般 1–2 个工作日。</li><li><strong>直接问作者</strong>：两篇通讯作者都是欧阳君老师，本单位成果，邮件索取最省时且版本可靠。</li></ol>
+<blockquote><p>✅ <strong>取得全文后应做的事已全部执行（2026-11-15）</strong>：① <code>文献/00-下载索引.md</code> 中 E1/E3 已从「🔒 需校园网」移入「已下载全文」表，统计改为 17 篇题录内全文、🔒 余 7 条；② <a href="../00-总览/参考资料-极低频磁场混沌振子微弱信号检测.html">参考资料主清单</a> 的 E 组条目已补 DOI/页码与本地全文；③ <a href="../00-总览/阅读路线.html">阅读路线</a> 阶段 1 表格状态已改为 ✅ 并挂 PDF 链接；④ 本文件第 5 节「仅摘要级」标注已撤销，补入真实数字；⑤ <code>文献/参考文献.bib</code> 已补 E1 的 DOI 与 E3 的页码。<strong>同期发现的两个同名 <code>.caj</code> 副本（实为 PDF 改名，MD5 与主文件一致）已归档，未留在主目录。</strong></p></blockquote>
+<hr>
+<h2>三、阶段 1 过关产物清单</h2>
+<p>阶段 1 的交卷标准不是「读完五篇」，而是<strong>五件可检查的东西</strong>。前两件是阅读路线原文规定的硬产出，后三件是把「读过」变成「可用」的中间件。</p>
+<table><thead><tr><th>#</th><th>产物名称</th><th>用途</th><th>完成标准（可逐条打勾）</th><th>验收方式</th></tr></thead><tbody>
+<tr><td><strong>1</strong></td><td><code>阶段1-现状综述草稿.md</code>（约 800 字）</td><td>开题报告「国内外研究现状」第一小节</td><td>□ 四段结构齐全：领域困难 → 两派方法 → 非线性/混沌路线 → 本课题定位&lt;br&gt;□ 引文 ≥ 8 条，全部来自已入库文献或标注获取状态&lt;br&gt;□ 每个数字后面跟条件（频段/带宽/噪声类型/判据）&lt;br&gt;□ <strong>不出现任何未读全文文献的方法细节</strong>&lt;br&gt;□ 明确写出「本课题不属于 D1 两派」这句定位&lt;br&gt;□ 自查无整句照抄（为后续查重留余地）</td><td>出声讲 3 分钟；或让导师只看这一段能否说出「你要解决什么」</td></tr>
+<tr><td><strong>2</strong></td><td><code>阶段1-信号与噪声模型假设.md</code></td><td>阶段 2 建模的输入、阶段 4 指标的基准</td><td>□ 写出 $s(t)=\gamma\cos(\omega t+\theta)$，注明 $\omega,\gamma,\theta$ 均未知&lt;br&gt;□ 噪声写成<strong>两档可切换</strong>：高斯白噪（基线）+ $1/f^{\alpha}$（$0&lt;\alpha&lt;2$，贴近实测）&lt;br&gt;□ 给出参数表：$\omega$、$\gamma$、$\sigma$、采样率、时长、带宽&lt;br&gt;□ <strong>写死一套 SNR 定义</strong>（写清是窄带还是全序列能量比）并注明与 ★[2]、★[3] 口径的差异&lt;br&gt;□ 给出 $H_0$（仅噪声）／$H_1$（信号+噪声）二元假设&lt;br&gt;□ 显著标注「<strong>待导师实测数据替换</strong>」</td><td>拿给导师看一眼参数表是否能对上任一实际传感器；能一句话说清「我的 SNR 是怎么算的」</td></tr>
+<tr><td><strong>3</strong></td><td><code>阶段1-文献卡片.md</code>（5 张卡）</td><td>写作时快速取用，避免二次通读</td><td>每张卡含：题录（GB/T 7714）＋一句话结论＋<strong>3 个带条件的数字</strong>＋1 条局限＋1 句「我能用在哪」&lt;br&gt;□ 5 张齐全（D1 / D5 / A5 / ★[3] / E1-E3 合并卡）&lt;br&gt;□ E1/E3 卡补齐 3 个带条件的数字（E1：±0.5 gauss 内非线性误差 100 → 20 nT；E3：10 kHz / 0.113 mV/nT / 峰峰 0.56 nT@屏蔽筒）&lt;br&gt;□ 每张卡都写出「这篇不能用来干什么」</td><td>遮住原文，只看卡片能否复述该文结论</td></tr>
+<tr><td><strong>4</strong></td><td><code>阶段1-E1E3获取记录.md</code>（可并入下载索引）</td><td>交付时说明引用依据，避免「引了没读过的文献」</td><td>□ 登记每条来源的 URL、访问日期、可得层级（题录/摘要/全文）、是否需权限&lt;br&gt;□ E1 记下 NSTL 馆藏号（留档用）&lt;br&gt;□ E1/E3 均标为<strong>全文</strong>层级，并写出本地文件名&lt;br&gt;□ 更新 <code>文献/00-下载索引.md</code> 的 E 组状态与统计</td><td>抽查任一条目，链接能打开且层级描述与实际一致</td></tr>
+<tr><td><strong>5</strong></td><td><code>阶段1-问题清单.md</code></td><td>驱动阶段 2 的建模选择</td><td>□ ≥ 8 条具体问题，每条指向某篇文献或某次待做实验&lt;br&gt;□ 至少 3 条是「<strong>论文没回答的</strong>」（例：★[2] 无 $H_0$ 对照；★[3] 无虚警率；D1 无统一 SNR 口径）&lt;br&gt;□ 每条标注「在哪篇/哪节能找到线索」</td><td>阶段 2 开工时逐条对照，看哪几条已被建模回答</td></tr>
+</tbody></table>
+<p><strong>阶段 1 不交的东西</strong>（防止提前欠账）：Duffing 方程与势函数推导、RK4 代码、相图与阈值曲线、$\lambda_c$ 与 SNR 的具体数值、参数估计公式、FPGA 资源评估。这些属于阶段 2–5。</p>
+<blockquote><p>✅ <strong>五件产物已全部交付（2026-11-19）</strong>：<a href="阶段1-现状综述草稿.html">① 现状综述草稿</a>（约 1100 字，四段结构，8 条引文）· <a href="阶段1-信号与噪声模型假设.html">② 信号与噪声模型假设</a>（$s(t)$、两档噪声、参数表、SNR 主口径、$H_0/H_1$）· <a href="阶段1-文献卡片.html">③ 文献卡片</a>（5 张，含「不能用它干什么」）· <a href="阶段1-E1E3获取记录.html">④ E1/E3 获取记录</a>（来源登记 + 四类异常 + 引用纪律）· <a href="阶段1-问题清单.html">⑤ 问题清单</a>（12 条，其中 5 条是「论文没回答的」）。<strong>下表即这五件的验收基准，逐条打勾见各文件末尾的自查表。</strong></p></blockquote>
+<p><strong>与后续阶段的衔接边界</strong></p>
+<ul><li>交给阶段 2 的是：<strong>一套信号/噪声模型 + 一套 SNR 口径 + 一份「别人做到哪」的基线表</strong>。阶段 2 一旦开始建方程，就不再回头补文献综述。</li><li>交给阶段 4 的是：<strong>对照组名单</strong>（OBF / EMD / CEEMDAN / SR 类）与<strong>它们的报告方式缺陷</strong>（无 $P_{fa}$、口径不一），这决定了本课题的指标要怎么写才站得住。</li><li>交给开题报告的是：产物 1（现状）+ 产物 2（模型假设）+ 第 0 步的<a href="../00-总览/第0步-技术路线方框图.html">技术路线方框图</a>。</li></ul>
+<hr>
+<h2>四、一页速记</h2>
+<ul><li><strong>D1</strong>：地图与选型规则。两派看「能否预设波形」；四条硬限制；<strong>没有混沌、没有 AI</strong>，别硬塞。</li><li><strong>D5</strong>：器件噪声底。SQUID fT 但冷、OPM 数 fT 但屏蔽、磁通门 1 pT/√Hz 覆盖 1–100 Hz、NV 亚 pT 室温；<strong>灵敏度 = 噪声底 + 带宽 + 屏蔽</strong>。</li><li><strong>A5</strong>：SR 三要素与最优噪声；<strong>SNR 在 $D\to0$ 发散</strong>，故 SNR 增益不等于 SR；非周期 SR 与混沌驱动的 SR 都成立。</li><li><strong>★[3]</strong>：指数势 SR + 三轴合成，−15 dB 下 $P_d$=72%，比 OBF/EMD/CEEMDAN 高约 7.6–7.9 dB；<strong>只有检出概率，没有虚警率</strong>——这就是本课题的空位。</li><li><strong>E1/E3</strong>：本组工程底牌。E1 管「单个磁通门怎么准」——多项式拟合磁化曲线、只留偶次谐波得 $V_2=b_0+b_1H_0+b_2H_0^2+b_3H_0^3$，±0.5 gauss 内非线性误差 100 → 20 nT；E3 管「多个器件怎么宽」——FPGA 互补滤波 + 残差判据拼接磁通门与 TMR，10 kHz / 0.113 mV/nT / 峰峰 0.5 nT。<strong>两篇全文均已入库，可直接引用细节。</strong></li></ul>
+<hr>
+<p><em>核实依据：五篇均逐段核对本地 PDF 全文（<code>文献/</code> 下对应文件）；E1、E3 的全文于 2026-11-15 入库，此前依据的维普 / NSTL / 知网 / NAPSTIC 题录页仅作来源记录留档。相关文档：<a href="../00-总览/阅读路线.html">阅读路线</a> · <a href="../00-总览/参考资料-极低频磁场混沌振子微弱信号检测.html">参考资料主清单</a> · <a href="../文献/00-下载索引.html">下载索引</a> · <a href="../00-总览/第0步-技术路线方框图.html">第 0 步方框图</a> · <a href="../04-论文精读/论文精读-D1_磁异常检测综述_MST2021.html">D1 精读</a>。</em></p></main></body></html>

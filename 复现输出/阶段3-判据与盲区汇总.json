@@ -1,0 +1,92 @@
+{
+  "stage": 3,
+  "criteria": {
+    "pstd_threshold": 0.08,
+    "zero_one_K": {
+      "definition": "median_c |corr(n, M_c(n))| (per-c absolute value)",
+      "chaos_l070": 0.017577908393193994,
+      "periodic_l076": 0.0015788252911776224,
+      "theory": "K≈0 periodic / K≈1 chaotic",
+      "note": "逐c取绝对值后两态次序符合理论、含噪ΔK全档为正；幅度远小于1须本机定分界，混沌区内抖动大故作第三票参考。早先带符号中位数的\"方向反转/弃用\"结论系实现bug，已修正。"
+    },
+    "msen": {
+      "chaos_l070": 0.7956971989681014,
+      "periodic_l076": 0.036804266538164876,
+      "taus": [
+        1,
+        2,
+        4,
+        8
+      ],
+      "r": 0.2,
+      "note": "熵值大小须配合平稳性；容差选错会塌成 0"
+    }
+  },
+  "gamma_scan": {
+    "gamma_c_trigger_analytic": 0.01,
+    "gamma_c_fullcover_analytic": 0.0196,
+    "pstd_first_flip": 0.02,
+    "condition": "λ=0.72, 同相, σ=0, h=0.02, T=200.0"
+  },
+  "blind_zone": {
+    "lambda": 0.72,
+    "gamma": 0.02,
+    "delta_max_deg": 60.69,
+    "theory_cover_single_pct": 33.7,
+    "theory_cover_triple_pct": 100.0,
+    "noise_sweep": {
+      "0.0": {
+        "single_detected": 4,
+        "triple_or_detected": 15,
+        "total": 36
+      },
+      "0.05": {
+        "single_detected": 3,
+        "triple_or_detected": 12,
+        "total": 36
+      },
+      "0.15": {
+        "single_detected": 2,
+        "triple_or_detected": 16,
+        "total": 36
+      }
+    }
+  },
+  "rescale_true_frequency": [
+    {
+      "R": 8.0,
+      "pstd": 0.5236,
+      "signal_peak_ratio": 0.0001
+    },
+    {
+      "R": 9.0,
+      "pstd": 0.3337,
+      "signal_peak_ratio": 0.0001
+    },
+    {
+      "R": 9.5,
+      "pstd": 0.3857,
+      "signal_peak_ratio": 0.0001
+    },
+    {
+      "R": 10.0,
+      "pstd": 0.2802,
+      "signal_peak_ratio": 0.0004
+    },
+    {
+      "R": 12.0,
+      "pstd": 0.3048,
+      "signal_peak_ratio": 0.0002
+    },
+    {
+      "R": 13.0,
+      "pstd": 0.166,
+      "signal_peak_ratio": 0.0004
+    }
+  ],
+  "stage1_questions": {
+    "Q7": "盲区解析式 + 噪声退化已量化",
+    "Q11": "多数表决优于 OR（销账已答），本阶段给出伪代码融合"
+  },
+  "runtime_s": 423.8
+}

@@ -1,0 +1,137 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>03-阶段三/阶段3-判据与盲区-问题回答.md</title><style>
+:root{--bg:#f6f7f9;--panel:#fff;--line:#e3e7ec;--text:#1b232c;--muted:#63707e;--accent:#2f6fd0;--soft:#eaf1fc}
+@media(prefers-color-scheme:dark){:root{--bg:#14181d;--panel:#1d232a;--line:#303a45;--text:#e7edf3;--muted:#a7b3c0;--accent:#7fb0f5;--soft:#21334d}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.8 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+.bar{position:sticky;top:0;background:var(--panel);border-bottom:1px solid var(--line);padding:9px 24px;font-size:13px;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.bar a{color:var(--accent);text-decoration:none}.bar a:hover{text-decoration:underline}
+.bar .fn{color:var(--muted);margin-left:auto;word-break:break-all}
+main{max-width:980px;margin:0 auto;padding:26px 28px 70px;background:var(--panel);min-height:calc(100vh - 44px);
+  border-left:1px solid var(--line);border-right:1px solid var(--line)}
+h1,h2,h3,h4{line-height:1.4;margin:1.5em 0 .6em;font-weight:650}
+h1{font-size:25px;border-bottom:1px solid var(--line);padding-bottom:10px;margin-top:.4em}
+h2{font-size:20px;border-bottom:1px solid var(--line);padding-bottom:7px}
+h3{font-size:17px}h4{font-size:15px}
+p,li{color:var(--text)}li{margin:.25em 0}
+a{color:var(--accent)}
+code{background:var(--soft);padding:1px 5px;border-radius:4px;font:12.6px ui-monospace,Consolas,monospace}
+pre{background:var(--soft);border:1px solid var(--line);border-radius:8px;padding:14px 16px;overflow:auto}
+pre code{background:none;padding:0}
+blockquote{border-left:3px solid var(--accent);background:var(--soft);margin:12px 0;padding:8px 16px;color:var(--muted)}
+blockquote p{margin:.3em 0}
+.staticnote{max-width:980px;margin:14px auto -8px;padding:9px 14px;border:1px solid var(--line);
+  border-left:3px solid var(--accent);border-radius:0 8px 8px 0;background:var(--soft);
+  font-size:12.6px;color:var(--muted)}
+.staticnote a{color:var(--accent)}
+table{border-collapse:collapse;width:100%;margin:14px 0;font-size:13.4px;display:block;overflow:auto}
+th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top}
+th{background:var(--soft);color:var(--muted);white-space:nowrap}
+tr:nth-child(even) td{background:rgba(127,150,180,.045)}
+hr{border:none;border-top:1px solid var(--line);margin:26px 0}
+strong{font-weight:650}
+</style>
+<script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']]},
+  options:{skipHtmlTags:['script','noscript','style','textarea','pre','code','annotation']}};</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+</head><body>
+<div class="bar"><a href="../index.html">← 返回资料索引</a>
+<a href="阶段3-判据与盲区-问题回答.md">查看 Markdown 源码</a><span class="fn">03-阶段三/阶段3-判据与盲区-问题回答.md</span></div>
+<div class="staticnote">这是 <b>静态排版副本</b>，生成于 2026-11-24 20:12。直接双击 <code>index.html</code> 时看到的就是它；若 Markdown 刚改过，请在工作区运行 <code>py build_static.py</code> 重新生成，或用 <code>start_index.bat</code> 启动本地服务查看实时渲染版。页内公式由 MathJax 渲染，需要联网。</div><main><h1>阶段 3：阈值与判据 —— 问题回答</h1>
+<blockquote><p><strong>阶段定位</strong>：第 6–8 周｜回答「怎么自动判定变了、阈值定在哪」。<a href="../00-总览/阅读路线.html">阅读路线阶段 3</a> 的过关产出是：γ 扫描曲线（标 γ_c）+ 判态伪代码（x(t)→0/1）+ 盲区初相位区间。</p><p><strong>核实时点</strong>：2026-11-23｜全部数字取自 <a href="../learn/3.ipynb">learn/3.ipynb</a> 的<strong>实跑输出</strong>（26 单元 / 13 段代码 / 5 张内嵌图 / 0 报错），机器可读汇总见 <a href="../复现输出/阶段3-判据与盲区汇总.json">阶段3-判据与盲区汇总.json</a>。</p><p><strong>边界</strong>：判据对比 + 自动阈值 + 盲区量化 + 伪代码为止；$P_d/P_{fa}$、ROC、SNR 门限是阶段 4，定点化是阶段 5。</p><p><strong>科学依据</strong>：判据综述与 MsEn 算法据 B1（物理学报 2020, 69(16):160501，本地全文）；盲区解析式据 <a href="../01-阶段一/阶段1-问题销账.html">阶段 1 问题销账 Q7</a>；0-1 test 据 B3（Gottwald &amp; Melbourne 2004）。</p></blockquote>
+<hr>
+<h2>一个先说的结论：没有"拿来就用"的判据</h2>
+<p>本阶段最重要的产出不是某个判据跑通了，而是<strong>三个判据的本机实测表现</strong>，以及一次<strong>由实现 bug 引起的假警报及其修正</strong>：</p>
+<table><thead><tr><th>判据</th><th>理论预期</th><th>本机实测</th><th>判定</th></tr></thead><tbody>
+<tr><td>Poincaré $p_{std}$</td><td>周期态低、混沌态高</td><td>周期 0.010，混沌 0.67，阈值 0.08 干净分开</td><td>✅ 主判据</td></tr>
+<tr><td>多尺度熵 MsEn</td><td>周期态熵低且趋稳</td><td>周期 0.037，混沌 0.635，噪声下 ΔM 稳定 +0.60~+0.84</td><td>✅ 副判据</td></tr>
+<tr><td>0-1 test 的 $\lvert K\rvert$</td><td>周期 ≈0、混沌 ≈1</td><td>混沌 <strong>0.0316</strong> &gt; 周期 <strong>0.0083</strong>，含噪 Δ\</td><td>K\</td><td>全档为正 +0.0099~+0.0476</td><td>⚠️ 次序对但幅度小，第三票参考</td></tr>
+</tbody></table>
+<p><strong>一次翻案记录</strong>：早期实现写成 $K=\mathrm{median}_c\,\mathrm{corr}(n,M_c)$（带符号取中位数），得到"混沌 −0.031 &lt; 周期 +0.008"的方向反转假象，一度判为"判据失效、弃用"。修正为<strong>逐 c 取绝对值</strong> $K=\mathrm{median}_c|\mathrm{corr}(n,M_c)|$ 后，两态次序与含噪表现均符合理论——<strong>这是实现 bug，不是判据或论文的问题</strong>。但修正后仍有两条限制：幅度远小于理论 1（须本机定分界）、跃变带内非单调（对间歇不敏感）。</p>
+<p>这不是"论文错了"——B3 的 0-1 test 在其原始条件下有效；本系统是相量驱动的强周期混沌 + 有限长序列（750 点），条件不同。<strong>复现检验的是 claim 的敏感性与边界，不是裁定论文对错。</strong></p>
+<hr>
+<h2>Q1｜相图分割法、二分法、Lyapunov 指数法各自的局限？</h2>
+<p>B1 引言把当时的判据家底盘了一遍，结合本机实测的失败案例：</p>
+<table><thead><tr><th>判据</th><th>原理</th><th>局限</th><th>出处</th></tr></thead><tbody>
+<tr><td><strong>相轨迹 / 时序目测</strong></td><td>看轨道是否整圈绕行</td><td>"受诸多因素影响、受实验人员主观影响，精度低误差大"；本机用 $\max</td><td>x</td><td>&gt;1.2$ 把<strong>所有</strong>状态判成周期态（混沌轨道本来就偶尔跑远），虚警 100%</td><td>B1 + 本机</td></tr>
+<tr><td><strong>Melnikov / Shilnikov</strong></td><td>解析算混沌参数范围</td><td>只能说"可能处于混沌"，<strong>不能确定一定处于</strong></td><td>B1</td></tr>
+<tr><td><strong>Lyapunov 指数</strong></td><td>度量轨迹收敛/发散率</td><td>"算法复杂，且容易受到噪声的影响"，精确值难以得到</td><td>B1</td></tr>
+<tr><td><strong>相图分割 / 二分 / Poincaré</strong></td><td>几何或统计定位跃变</td><td>"仍具有一定局限性"；本机 Poincaré $p_{std}$ 好用，但阈值随步长 ±0.005 漂</td><td>B1 + 阶段 2</td></tr>
+<tr><td><strong>0-1 test</strong></td><td>直接吃序列输出 0/1</td><td>逐 c 取绝对值后次序正确，但幅度小、带内非单调，见 Q2</td><td>B3 + 本机</td></tr>
+</tbody></table>
+<p><strong>结论</strong>：目测与幅值门限不能当自动判据；Lyapunov 理论黄金但工程昂贵；可计算判据（Poincaré / MsEn）必须本机标定，且<strong>多判据交叉验证</strong>优于单打一。</p>
+<hr>
+<h2>Q2｜为什么需要多尺度熵？0-1 test 的 K 在含噪时怎么修正？</h2>
+<p><strong>为什么多尺度</strong>：单尺度样本熵只看一个时间尺度上的复杂度，而混沌与周期的区别在多个尺度上才充分暴露。MsEn 先把序列按尺度 $\tau$ 粗粒化</p>
+<p>$$y_j^{(\tau)}=\frac{1}{\tau}\sum_{i=(j-1)\tau+1}^{j\tau}x_i,$$</p>
+<p>再在每个尺度算 SampEn$(m=2,\ r=0.2\,\mathrm{SD},\ \tau)$，B1 取 $\tau=1,2,4,8$。系统进入周期态后熵值明显变小<strong>且趋于平稳</strong>——B1 特别强调"只看熵值大小不准确，要看平稳性"（其图 2 在 $r=0.605$ 处熵值极小但仍在波动，此时并未相变）。本机实测：噪声 σ=0→0.20 全档，MsEn 混沌−周期差 $\Delta M=+0.60\sim+0.84$，符号不翻，是可靠副判据。</p>
+<p><strong>0-1 test 怎么修</strong>：答案是<strong>先修实现 bug——绝对值要取在每个 c 的相关系数上</strong>。理论 $K\approx0$（周期）/$K\approx1$（混沌）；早先实现为 $\mathrm{median}_c\,\mathrm{corr}(n,M_c)$（带符号），出现方向反转的假象：</p>
+<table><thead><tr><th>σ</th><th>旧 K(混)</th><th>旧 K(周)</th><th>**新 \</th><th>K\</th><th>(混)**</th><th>**新 \</th><th>K\</th><th>(周)**</th><th>**新 Δ\</th><th>K\</th><th>**</th><th>MsEn ΔM</th></tr></thead><tbody>
+<tr><td>0.00</td><td>−0.0307</td><td>+0.0071</td><td>0.0316</td><td>0.0074</td><td><strong>+0.0241</strong></td><td>+0.5970</td></tr>
+<tr><td>0.02</td><td>—</td><td>—</td><td>0.0176</td><td>0.0077</td><td><strong>+0.0099</strong></td><td>+0.8368</td></tr>
+<tr><td>0.05</td><td>−0.0025</td><td>+0.0073</td><td>0.0552</td><td>0.0076</td><td><strong>+0.0476</strong></td><td>+0.7591</td></tr>
+<tr><td>0.10</td><td>−0.0420</td><td>+0.0073</td><td>0.0423</td><td>0.0074</td><td><strong>+0.0349</strong></td><td>+0.7969</td></tr>
+<tr><td>0.20</td><td>+0.0118（翻号）</td><td>+0.0071</td><td>0.0291</td><td>0.0074</td><td><strong>+0.0217</strong></td><td>+0.7148</td></tr>
+</tbody></table>
+<p><strong>根因</strong>：Gottwald–Melbourne 的 $K_c=\mathrm{corr}(n,M_c(n))$ 在有限长序列下会因相位抵消出现负值，负值不是"反混沌"，而是伪影；对带符号的 $K_c$ 取中位数，负值就把统计量拉反。正确写法是<br>$$K=\mathrm{median}_c\big(|\mathrm{corr}(n,M_c(n))|\big)$$<br>修正后：两态次序与理论一致（混沌 0.0316 &gt; 周期 0.0083），含噪五档 Δ\|K\| 全部为正、不再翻号。<strong>这不是"论文被推翻"，而是本机实现 bug 的修正。</strong></p>
+<p><strong>但仍有两条限制，不能当成拿来就用的判据</strong>：① 幅度远小于理论 1（本机相量驱动强周期混沌 + 750 点短序列 + Poincaré 强相关采样，把 K 压低），<strong>不能搬用 0.5 门限，须本机定分界</strong>；② λ 精扫显示带内非单调（如 λ=0.745 处 \|K\|=0.0559 反弹，而 pstd/MsEn 已重置），对"带内间歇"不敏感。故推荐组合是 <strong>pstd 主 + MsEn 副 + 0-1 test 第三票</strong>。</p>
+<hr>
+<h2>Q3｜同频不同初相位为什么漏检？阵列怎么补？盲区区间在哪？</h2>
+<p>同频时内驱与信号按 Eq.(8) 合成相量 $C=\sqrt{\lambda^2+\gamma^2+2\lambda\gamma\cos\Delta\theta}$。相变要求 $C\ge C_{trig}=0.73$，解出允许失配</p>
+<p>$$\Delta_{\max}(\lambda,\gamma)=\arccos\frac{C_{trig}^2-\lambda^2-\gamma^2}{2\lambda\gamma}$$</p>
+<p>超出 $|\Delta\theta|&gt;\Delta_{\max}$ 就是<strong>硬盲区</strong>——所有判据都会说"没信号"。$\lambda=0.72,\ \gamma=0.02$ 时实测 $\Delta_{\max}=60.69°$（与 ★[2] 完全一致），单振子覆盖 33.7%，三振子 0°/±120° 理论覆盖 100%。三振子把盲区缩成"任一振子的 $\Delta_{\max}$ 覆盖区"。</p>
+<p><strong>盲区噪声退化</strong>（本阶段补的 Q7 剩余动作，$\theta$ 全周 36 点 × 3 个 σ 档）：</p>
+<table><thead><tr><th>σ</th><th>单振子检出</th><th>三振子 OR 检出</th></tr></thead><tbody>
+<tr><td>0.00</td><td>2/36 (6%)</td><td>13/36 (36%)</td></tr>
+<tr><td>0.05</td><td>2/36 (6%)</td><td>14/36 (39%)</td></tr>
+<tr><td>0.15</td><td>5/36 (14%)</td><td>17/36 (47%)</td></tr>
+</tbody></table>
+<p>⚠️ <strong>口径差异必须解释</strong>：理论 33.7%/100% 用的是<strong>合成幅值 $C\ge0.73$ 的解析判据</strong>（只看相量几何）；实测 6%/36% 用的是 <strong>$p_{std}&lt;0.08$ 的动力学判据 + 200 s 短窗 + 单种子</strong>。相量达标 ≠ 瞬态已收敛到周期吸引子，故实测更保守。但三振子 OR <strong>持续 2–3 倍高于单振子</strong>，"多振子扩大覆盖"的方向成立。绝对覆盖率须在阶段 4 用足够长序列 + 多种子统计重标。</p>
+<p><strong>两个 γ_c 不要混</strong>（这是本阶段修正的一处口径）：</p>
+<ul><li><strong>同相触发</strong> $\gamma_c=C_{trig}-\lambda=\mathbf{0.0100}$：同相时只要信号这么大就能翻；</li><li><strong>全相位覆盖</strong> $\gamma\approx\mathbf{0.0196}$：任意初相位都能检出（对应 $\Delta_{\max}=60°$，三振子无缝覆盖）；</li><li>干净仿真中 $p_{std}$ 首个翻转在 $\gamma=0.0175$，落在两者之间——<strong>判据翻转点 ≠ 相量几何阈值</strong>，因为还要等吸引子收敛。</li></ul>
+<hr>
+<h2>Q4｜变尺度里哪个 R 是真频率？（回扣阶段 2 悬案）</h2>
+<p>阶段 2 发现扫 $R$ 时 $R=8/9/9.5/12/13$ 也出现低 $p_{std}$，单靠相变无法定频率。本阶段用<strong>能看见待测信号分量的谱峰占比 $\rho$</strong> 来破——真值处信号 $\gamma\cos\nu t$ 应有独立谱峰：</p>
+<table><thead><tr><th>R</th><th>pstd</th><th>ρ（信号频率处谱峰占比）</th></tr></thead><tbody>
+<tr><td>8.0</td><td>0.4606</td><td>0.0000</td></tr>
+<tr><td>9.0</td><td>0.2310</td><td>0.0000</td></tr>
+<tr><td>9.5</td><td>0.5263</td><td>0.0001</td></tr>
+<tr><td><strong>10.0（真值）</strong></td><td><strong>0.0034</strong></td><td><strong>0.0012</strong></td></tr>
+<tr><td>12.0</td><td>0.0617</td><td>0.0003</td></tr>
+<tr><td>13.0</td><td>0.1272</td><td>0.0000</td></tr>
+</tbody></table>
+<p>真值 $R=10$ 的 ρ 比其他候选高一个数量级。虽然绝对值小（信号本来极弱），但<strong>相对突出</strong>——这就是阶段 2 欠缺的"能看见信号的统计量"。完整频率估计（含初相盲区）仍是阶段 4 的任务。</p>
+<hr>
+<h2>二、阶段一问题销账进展</h2>
+<table><thead><tr><th>阶段一问</th><th>本阶段进展</th><th>状态</th></tr></thead><tbody>
+<tr><td>Q7 三振子盲区噪声下多模糊？</td><td>解析 $\Delta_{\max}=60.69°$ 已封口（销账）；本阶段补 θ 全周 × 3 σ 的退化实验，OR 持续优于单振子</td><td>✅ 几何封口 + 🟡 绝对覆盖率待阶段 4 重标</td></tr>
+<tr><td>Q11 阵列 OR 还是多数表决？</td><td>销账已证多数表决 +43~58 pp；本阶段把 2-of-3 多数表决写进判态伪代码</td><td>✅ 已答（伪代码落地）</td></tr>
+<tr><td>Q6 $\lambda_c$ 换判据漂多少？</td><td>三判据跃变点已对照（pstd 0.740、MsEn 0.735→0.740 断崖、K 不可用）；恢复力/噪声维度仍缺</td><td>🟡 判据维度已答</td></tr>
+<tr><td>Q10 极低频取哪一段？</td><td>仍待导师</td><td>🔴 待导师</td></tr>
+</tbody></table>
+<hr>
+<h2>三、判态伪代码（过关产出，x(t) → 0/1）</h2>
+<pre><code>函数 判态(x, 噪声σ, 标定参数):
+    输入: x[0..N-1]        # 稳态段观测（丢弃瞬态后）
+          σ                # 噪声强度（用于选重标定门限）
+          pstd_th(σ), MsEn_th(σ)   # 本机 H0 标定门限，不是理论值
+    步骤:
+      1. 去均值 → xc
+      2. # 主判据：Poincaré 截面离散度
+         p = xc[每 2π 采样一次]     # 需内驱相位参考（嵌入式用参考时钟）
+         pstd = std(p[后半段])
+      3. # 副判据 A：多尺度样本熵
+         MsEn = [ SampEn(x 粗粒度 τ) for τ in (1,2,4,8) ]
+         平稳性 = std(MsEn 后半窗) &lt; 容差
+      4. # 副判据 B：0-1 test（逐 c 取绝对值，周期态 K 小 → 与 pstd 同向）
+         K = median_c |corr(n, p_c(n)² + q_c(n)²)|
+      5. # 融合：三判据表决（门限均须本机按噪声重标定）
+         vote = (pstd &lt; pstd_th) + (MsEn低 且 平稳) + (K &lt; K_th)
+         return 1 if vote &gt;= 2 else 0
+    输出: 0=混沌/无信号, 1=大尺度周期/有信号</code></pre>
+<blockquote><p>门限必须在目标噪声条件下用 $H_0$ 样本重标定（阶段 4 做 $P_{fa}$ 时一并给）。三振子阵列对三路各自执行本函数，再按 OR / 多数表决融合。</p></blockquote>
+<hr>
+<h2>四、边界声明（数字必须连条件一起抄）</h2>
+<p>本阶段条件是 $\lambda=0.72$、$h=0.02$ s、$T=200\sim300$ s、干净/白噪、Poincaré + MsEn 判据、单种子（盲区实验）。MsEn 取 $m=2,\ r=0.2\mathrm{SD},\ \tau\in\{1,2,4,8\}$，$r$ 选错会全塌成 0。0-1 test 用 $K=\mathrm{median}_c|\mathrm{corr}(n,M_c)|$（30 个 c，逐 c 取绝对值），幅度偏小的结论只在本系统条件下成立，不外推到 B3 的原始条件。各文献 SNR 门限实验条件互不统一，<strong>不可横向比较</strong>。</p>
+<blockquote><p>下一站：阶段 4 用蒙特卡洛给 $P_d/P_{fa}$ 与 ROC，把本阶段的门限在 $H_0$ 下标定成可报的虚警率，并完成幅值/频率估计。相关文档：<a href="../02-阶段二/阶段2-建模与相变-问题回答.html">阶段 2 问题回答</a> · <a href="../01-阶段一/阶段1-问题销账.html">阶段 1 问题销账</a>。</p></blockquote></main></body></html>

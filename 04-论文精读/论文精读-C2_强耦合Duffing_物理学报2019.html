@@ -1,0 +1,382 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>04-论文精读/论文精读-C2_强耦合Duffing_物理学报2019.md</title><style>
+:root{--bg:#f6f7f9;--panel:#fff;--line:#e3e7ec;--text:#1b232c;--muted:#63707e;--accent:#2f6fd0;--soft:#eaf1fc}
+@media(prefers-color-scheme:dark){:root{--bg:#14181d;--panel:#1d232a;--line:#303a45;--text:#e7edf3;--muted:#a7b3c0;--accent:#7fb0f5;--soft:#21334d}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.8 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+.bar{position:sticky;top:0;background:var(--panel);border-bottom:1px solid var(--line);padding:9px 24px;font-size:13px;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.bar a{color:var(--accent);text-decoration:none}.bar a:hover{text-decoration:underline}
+.bar .fn{color:var(--muted);margin-left:auto;word-break:break-all}
+main{max-width:980px;margin:0 auto;padding:26px 28px 70px;background:var(--panel);min-height:calc(100vh - 44px);
+  border-left:1px solid var(--line);border-right:1px solid var(--line)}
+h1,h2,h3,h4{line-height:1.4;margin:1.5em 0 .6em;font-weight:650}
+h1{font-size:25px;border-bottom:1px solid var(--line);padding-bottom:10px;margin-top:.4em}
+h2{font-size:20px;border-bottom:1px solid var(--line);padding-bottom:7px}
+h3{font-size:17px}h4{font-size:15px}
+p,li{color:var(--text)}li{margin:.25em 0}
+a{color:var(--accent)}
+code{background:var(--soft);padding:1px 5px;border-radius:4px;font:12.6px ui-monospace,Consolas,monospace}
+pre{background:var(--soft);border:1px solid var(--line);border-radius:8px;padding:14px 16px;overflow:auto}
+pre code{background:none;padding:0}
+blockquote{border-left:3px solid var(--accent);background:var(--soft);margin:12px 0;padding:8px 16px;color:var(--muted)}
+blockquote p{margin:.3em 0}
+.staticnote{max-width:980px;margin:14px auto -8px;padding:9px 14px;border:1px solid var(--line);
+  border-left:3px solid var(--accent);border-radius:0 8px 8px 0;background:var(--soft);
+  font-size:12.6px;color:var(--muted)}
+.staticnote a{color:var(--accent)}
+table{border-collapse:collapse;width:100%;margin:14px 0;font-size:13.4px;display:block;overflow:auto}
+th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top}
+th{background:var(--soft);color:var(--muted);white-space:nowrap}
+tr:nth-child(even) td{background:rgba(127,150,180,.045)}
+hr{border:none;border-top:1px solid var(--line);margin:26px 0}
+strong{font-weight:650}
+</style>
+<script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']]},
+  options:{skipHtmlTags:['script','noscript','style','textarea','pre','code','annotation']}};</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+</head><body>
+<div class="bar"><a href="../index.html">← 返回资料索引</a>
+<a href="论文精读-C2_强耦合Duffing_物理学报2019.md">查看 Markdown 源码</a><span class="fn">04-论文精读/论文精读-C2_强耦合Duffing_物理学报2019.md</span></div>
+<div class="staticnote">这是 <b>静态排版副本</b>，生成于 2026-11-24 20:12。直接双击 <code>index.html</code> 时看到的就是它；若 Markdown 刚改过，请在工作区运行 <code>py build_static.py</code> 重新生成，或用 <code>start_index.bat</code> 启动本地服务查看实时渲染版。页内公式由 MathJax 渲染，需要联网。</div><main><h1>论文精读：基于强耦合 Duffing 振子的微弱脉冲信号检测与参数估计</h1>
+<p><strong>论文</strong>｜曹保锋, 李鹏, 李小强, 张雪芹, 宁王师, 梁睿, 李欣, 胡淼, 郑毅. 基于强耦合 Duffing 振子的微弱脉冲信号检测与参数估计[J]. 物理学报, 2019, 68(8): 080501. DOI: 10.7498/aps.68.20181856. 通信作者郑毅（zhengyi@sklnbcpc.cn）。本地 PDF 见 <a href="../文献/C2_曹保锋_强耦合Duffing参数估计_物理学报2019.pdf"><code>文献/C2_曹保锋_强耦合Duffing参数估计_物理学报2019.pdf</code></a>，11 页（080501-1 ~ 080501-11），28 条参考文献。</p>
+<p><strong>作者与背景</strong>｜防化研究院 国民核生化灾害防护国家重点实验室（北京 102205）；杭州电子科技大学通信工程学院。中国科学院战略性先导专项 XDA17040503、国家自然科学基金 61705055 资助。2018-10-16 收稿，2019-02-01 修回。作者所在的"核生化灾害防护"背景直接决定了选题动机：核爆炸电磁脉冲、闪电、局部放电、静电放电——都是<strong>单次、超宽带、不可重复</strong>的事件。</p>
+<p><strong>配套文件</strong>｜复现：<a href="../c2-jupyterbook/_build/html/index.html"><code>c2-jupyterbook/</code></a>（八章实跑，11 图 5 表逐项重算）；代码：<a href="../c2-jupyterbook/_src/c2sim.py"><code>c2sim.py</code></a>（批量 RK4）、<a href="../c2-jupyterbook/_src/experiments.py"><code>experiments.py</code></a>；本文用到的线性化验算见第 6.3–6.5 节，复算命令在本页末尾的附录；与毕设主线的衔接见 <a href="../02-阶段二/解读-主要内容2-混沌振子建模与临界阈值.html"><code>解读-主要内容2-混沌振子建模与临界阈值.md</code></a>、<a href="../02-阶段二/阶段2-建模与相变-问题回答.html"><code>阶段2-建模与相变-问题回答.md</code></a>、<a href="../05-方法创新/新方法-阈值位移符号判别.html"><code>新方法-阈值位移符号判别.md</code></a>。</p>
+<hr>
+<h2>关于信息分级</h2>
+<p>下面每个实质论断前都标了来源：</p>
+<ul><li><strong>【原文】</strong> 论文正文、公式、图表或表格明确写出的内容，可直接翻页核对（本文标注印刷页码）。</li><li><strong>【文献】</strong> 其他论文或资料已确立的结论，给出出处。</li><li><strong>【推断】</strong> 基于原文、复现实验或我自己推导的结论。有证据，但论文没这么说。</li><li><strong>【猜测】</strong> 目前没有证据的候选解释。</li><li><strong>【复现数据】</strong> 来自 <a href="../c2-jupyterbook/_build/html/index.html"><code>c2-jupyterbook/</code></a> 与本轮线性化验算的实测数字。</li></ul>
+<hr>
+<h2>1. 研究问题、重要性与价值</h2>
+<p><strong>【原文】</strong> 论文开篇（p.1）列了四类被动探测场景：核爆炸电磁脉冲探测、闪电信号探测、电力系统局部放电探测、静电放电探测。共同特征是"信号通常具有单次、超宽带、低信噪比等特点，当进行远距离探测时信号的强度将会非常微弱，有可能淹没于强高斯噪声中"。</p>
+<p>这三个词每一个都在掐住传统方法的喉咙，值得拆开：</p>
+<table><thead><tr><th>特征</th><th>对方法的直接约束</th><th>谁因此失效</th></tr></thead><tbody>
+<tr><td><strong>单次</strong></td><td>不能靠多次平均换信噪比增益</td><td>相干平均、锁相放大（需重复）</td></tr>
+<tr><td><strong>超宽带</strong></td><td>频域窄带滤波会切掉大部分脉冲能量</td><td>匹配滤波（需模板）、窄带锁相</td></tr>
+<tr><td><strong>低 SNR</strong></td><td>判决门限必须极低，噪声极值会冒充信号</td><td>幅值门限类方法</td></tr>
+</tbody></table>
+<p><strong>【原文】</strong> 作者列出的对照路线（p.1，文献 [1]–[7]）：Power-Law 检测法、小波变换、分数阶傅里叶变换、希尔伯特–黄变换、粒子滤波降噪、高阶累积量降噪。这些是"变换 + 降噪"路线，共同的软肋是：降噪之后仍然要<strong>在时域判一个门限</strong>，而门限是否可靠取决于噪声统计是否已知。</p>
+<p><strong>【推断】</strong> 混沌路线的卖点恰好在这一步换位置：不是"把噪声压下去再判"，而是"用一个自己会振荡的系统去感受信号的相干性"。噪声没有稳定相位，推不动一个被周期力锁定的振子；同频/同能量结构的信号可以。这是<strong>机理层面的抗噪</strong>，不是<strong>幅度层面的抑噪</strong>。</p>
+<p><strong>【原文】</strong> 论文的贡献声明（p.1 末）四条：对初始状态不敏感、可工作在任意相态、SNRI 可达 20 dB、对时域脉冲幅值与宽度的估计误差小于 5%。</p>
+<p><strong>【推断】</strong> 价值分三层，混在一起说会失真。</p>
+<p><strong>工程层</strong>：把"只能在倍周期态、且必须挑初值"的实验条件，换成"任何相态、任意初值"。这不是参数优化，是把一个只能在实验室摆弄的东西变成能上机器的模块。论文结论第 4 条自己点破了用途："有利于执行分段并行计算"——因为不依赖初值，一段数据可以从任意位置切开来并行跑。</p>
+<p><strong>方法层</strong>：给了"差分读出"一个完整实现。两个几乎相同的振子，一个吃信号、一个不吃，输出取差。内驱是共模，信号是差模。这本质上是<strong>仪表放大器</strong>的思路搬进非线性动力学，而它带来一个单振子永远给不了的东西：<strong>连续的时域波形</strong>，而不是一个"有/无"的比特。</p>
+<p><strong>学术层</strong>：把"耦合"从"让两振子互相看见"升级为"让两振子朝相反方向对同一脉冲作出反应"。这是耦合形式的改变，不是耦合强度的改变。</p>
+<p><strong>【推断】</strong> 对毕设的迁移价值要说清楚，别夸大。<strong>不能搬的</strong>：C2 检测的是非周期脉冲，判据是"差分输出峰 &gt; 5σ"，而极低频磁场信号是<strong>准周期</strong>的，需要的是"同频相干 + 幅相估计"，两条判据完全不同。<strong>能搬的</strong>：差分共模抑制这个结构，以及"把二分类判据换成连续统计量"这个思路（第 13 节展开）。这个区分比任何"方法类似"的说法都重要。</p>
+<hr>
+<h2>2. 这个问题之前被解决了吗，之前的工作差在哪</h2>
+<p>简短回答：<strong>"耦合 Duffing 测脉冲"早在 2011 年就有人做了，而且做到了 −10 dB 以下。C2 真正解决的不是"能不能测"，而是"为什么只能那样测，以及怎么不那样测"。</strong></p>
+<p><strong>【原文】</strong> 论文自己梳理的谱系（p.1–2）：</p>
+<table><thead><tr><th>年份</th><th>工作</th><th>做了什么</th></tr></thead><tbody>
+<tr><td>1992</td><td>Birx 等</td><td>首次把混沌振子用于弱信号检测</td></tr>
+<tr><td>2006</td><td>李月等 [17]</td><td>恢复力耦合 Duffing，在高斯<strong>色</strong>噪声中检测周期方波</td></tr>
+<tr><td>2009</td><td>Yuan 等 [18]</td><td>观测混沌程度探测脑电，把检测对象从周期扩展到非周期</td></tr>
+<tr><td>2011</td><td>吴勇峰等 [19,20]</td><td>发现脉冲能激励恢复力耦合振子出现<strong>瞬态同步突变</strong></td></tr>
+<tr><td>2011–2013</td><td>吴勇峰等 [21]</td><td>用耦合振子从噪声中探测局部放电</td></tr>
+<tr><td>2015</td><td>张悦等 [22]</td><td>恢复力耦合振子远距离探测电磁脉冲（另有专利 201510275506.8）</td></tr>
+<tr><td>2015</td><td>曾喆昭等 [23]</td><td>广义时间尺度变换，扩展脉冲探测的频率范围</td></tr>
+<tr><td>2016</td><td>王晓东等 [24]</td><td>提出 Duffing 振子<strong>阻尼力耦合</strong>方法</td></tr>
+</tbody></table>
+<p><strong>【原文】</strong> 注意最后两行。时间尺度变换（曾喆昭）和阻尼力耦合（王晓东）都已经存在，而且是<strong>分开</strong>存在的。C2 干的事是把这两件已有的东西和恢复力耦合并排塞进同一个方程，然后把耦合系数从"很小"拉到"很大"。</p>
+<p><strong>【原文】</strong> 论文对弱耦合的判决很干脆（p.2）："上述基于恢复力耦合的 Duffing 振子虽然可以实现 −10 dB 以下信噪比的微弱脉冲信号检测, 但检测原理决定了其存在以下的固有缺陷。" 三条：</p>
+<ol><li>系统初始状态不同，对正脉冲和负脉冲产生瞬态同步突变的能力不同；</li><li>系统只能工作在倍周期分岔状态下，在混沌态和大尺度周期态时将会失效；</li><li>对微弱脉冲的幅值、宽度等信息不敏感，无法恢复被测信号的时域波形。</li></ol>
+<p><strong>【推断】</strong> 这三条不是三个独立的 bug，是<strong>同一个机理假设的三次投影</strong>。弱耦合（式 3）的检测机理叫"阱间失同步"：脉冲把处于倍周期态的振子 1 从一个势阱<strong>打</strong>到另一个势阱，振子 2 因为耦合弱而没动，于是差分出现台阶。</p>
+<p>这个机理隐含三个前提：① 振子必须"站在阱边随时能跳"——所以只能倍周期态；② "跳向哪个阱"由初值和脉冲极性共同决定——所以依赖初值、正负脉冲不对称；③ 输出是"跳了/没跳"的离散事件——所以提不出幅值和宽度。</p>
+<p><strong>想同时拆掉这三条，就得放弃"跳阱"这个机制本身</strong>，而不是去修补它。C2 的全部思路从这里长出来。</p>
+<p><strong>【原文】</strong> 一个容易漏掉的自白（p.2）："增大系统耦合系数后, 两振子产生同步的跃迁, 性能不但没有改善, 反而导致检测失败。" 这句话信息量极大：<strong>在弱耦合模型里简单加大 k 是死路</strong>，因为两个振子会一起跳，差分被抵消。所以 C2 必须改耦合的<strong>形式</strong>，不能只改<strong>强度</strong>。</p>
+<p><strong>【推断】</strong> 这也解释了为什么 C2 的题目落在"强耦合"而不是"改进耦合"：它需要论证"大 k + 双耦合项"才成立，小 k 或单耦合项都不成立。第 6.3 节会给出这条边界的解析位置：$k_c = 1/(2\xi)$。</p>
+<hr>
+<h2>3. 重建作者的思考路径（不使用本文任何贡献作为前提）</h2>
+<p>这一节只用 2019 年之前就存在的东西：已知的弱耦合机理、已知的失败模式、以及基础力学。</p>
+<p><strong>【文献】</strong> 起点：弱耦合靠"阱间失同步"，输出是台阶。台阶的好处是判决容易（有无跳变一目了然），坏处是它只携带 1 比特信息。想让输出携带波形，输出的量必须<strong>随信号连续变化</strong>，而不是在两个离散状态之间切换。</p>
+<p><strong>【推断】</strong> 要连续，就得让振子 2"跟着动"。但"跟着动"有两种动法，这一步是整个工作的分岔口：</p>
+<ul><li><strong>同向动</strong>：两个振子一起被推走，差分里什么都没有（论文实测：加大 k 后同步跃迁，检测失败）。</li><li><strong>反向动</strong>：一个往右上、一个往右下，差分里拿到两倍。</li></ul>
+<p>所以问题被压缩成一句工程语言：<strong>怎样让耦合具有"反向"的方向性？</strong></p>
+<p><strong>【推断】</strong> 力学上有一个现成答案。恢复力耦合 $k(x_1-x_2)$ 是<strong>位置</strong>耦合：它让振子 2 感受到振子 1 偏离了多远，作用方向是"把两者拉回同一个位置"——这天然是<strong>同向</strong>的，即同步的。而阻尼耦合 $k(\dot x_1-\dot x_2)$ 是<strong>速度</strong>耦合：它让振子 2 感受到振子 1 跑得多快，作用方向是"抑制相对速度差"。当振子 1 被脉冲加速时，这一项对振子 2 施加的是<strong>反向加速度</strong>——两振子朝相反方向冲出去。</p>
+<p>于是有了 C2 的式 (4)：恢复力耦合项 $\omega^2\xi k(x_1-x_2)$ 与阻尼力耦合项 $\omega k(\dot x_1-\dot x_2)$ 同时施加，且共用一个 $k$。</p>
+<p><strong>【推断】</strong> 但"反向"还需要<strong>足够快</strong>。如果耦合很软，振子 2 要过好几个周期才反应过来，那时脉冲早就过去了，差分只是一段迟到的振铃。把 $k$ 拉到 10，相当于在差分通道上装了一根极硬的弹簧——两个振子被强制锁在一起，任何相对偏离立刻被拉回，但<strong>拉回的方向相反</strong>，于是差分输出成为脉冲的即时、连续、有形状的响应。</p>
+<p>这一步同时解释了为什么"任意相态都能工作"：既然输出不再依赖"跳阱"这个离散事件，而依赖"差分通道对脉冲的连续响应"，那么系统处在周期态、混沌态还是大尺度周期态，都不改变这个响应通道的性质。<strong>相态只影响共模，而共模被减掉了。</strong></p>
+<p><strong>【推断】</strong> 最后一块拼图是"为什么能估幅值和宽度"。一旦承认差分输出是脉冲经过某个固定环节的响应，而那个环节近似线性（第 6.3 节会证明它就是一个二阶过阻尼低通），那么"输出波形的峰值和半高宽"就与"输入脉冲的幅值和宽度"一一对应——这不是巧合，是线性系统的基本性质。</p>
+<p><strong>【猜测】</strong> 作者在写作时未必用"线性低通"这套语言解释（全文没有出现传递函数、带宽、阶跃响应这些词）。他们用的是"广义阱内失同步"这个动力学表述。但从复现数据看，线性化描述能同时解释 $k$ 的饱和、$\xi$ 的最优区间、$F$ 的无影响三件事，这说明底层机制确实是线性的（第 6.5 节）。</p>
+<hr>
+<h2>4. 核心 idea 的 Intuition</h2>
+<p><strong>【推断】</strong> 用一个电路类比，比任何动力学语言都快：</p>
+<blockquote><p>单个 Duffing 振子 = <strong>比较器</strong>。输出 0 或 1，告诉你"过线了没有"。</p><p>强耦合双振子 = <strong>差分放大器 + 低通滤波器</strong>。输出一条连续曲线，告诉你脉冲长什么样。</p></blockquote>
+<p>这个类比能一次性解释论文里所有反直觉的结果：</p>
+<table><thead><tr><th>现象</th><th>比较器视角</th><th>差分放大器视角</th></tr></thead><tbody>
+<tr><td>任意相态都能工作</td><td>说不通：比较器的阈值随相态变</td><td>说得通：放大器不关心共模</td></tr>
+<tr><td>不受初值限制</td><td>说不通：初值决定跳哪个阱</td><td>说得通：初值只改变共模轨迹</td></tr>
+<tr><td>能恢复波形</td><td>说不通：1 比特没有形状</td><td>说得通：线性系统保形</td></tr>
+<tr><td>SNRI 约 20 dB</td><td>说不通：没有增益来源</td><td>说得通：窄带化带来 $10\log(B_{in}/B_{out})$</td></tr>
+</tbody></table>
+<p><strong>【推断】</strong> 这个类比还顺带回答了"为什么耦合必须大"。差分放大器的共模抑制比靠<strong>对称性</strong>，而对称性靠<strong>耦合刚度</strong>：耦合越硬，两个振子越被迫保持在 $x_1\approx x_2$ 附近，共模抑制越彻底。第 6.3 节把它算成 $\xi k$ 和 $k/\xi$ 两个无量纲比值（默认参数下分别是 7 和 14.3，都远大于 1）。</p>
+<p><strong>【推断】</strong> 注意这里有个微妙的反转，值得在答辩时讲：<strong>论文越是强调"耦合强"，越说明它做的其实是线性信号处理</strong>。非线性反而是要被抑制的东西——共模里的 Duffing 非线性越强越好用（它提供混沌/大周期这些相态，噪声免疫来自这里），差模里的非线性越弱越好（它提供线性保形，波形恢复来自这里）。一句话：<strong>用非线性产生参考，用线性读出信号。</strong></p>
+<hr>
+<h2>5. 具体方法与一个完整例子的 pipeline</h2>
+<h3>5.1 四个方程，一条演进链</h3>
+<p><strong>【原文】</strong> 式 (1)，Holmes 型 Duffing（p.2）：</p>
+<p>$$\ddot x+\xi\dot x-x+x^3=F\cos(\omega t),\qquad \omega=1\ \text{rad/s}$$</p>
+<p><strong>【原文】</strong> 式 (2)，时间尺度变换后（$t=\omega\tau$，再把 $\tau$ 写回 $t$）：</p>
+<p>$$\ddot x+\omega\xi\dot x-\omega^2(x-x^3)=\omega^2F\cos(\omega t)$$</p>
+<p><strong>【原文】</strong> 式 (3)，吴勇峰 2011 的弱耦合（只有恢复力耦合）：</p>
+<p>$$\begin{cases}\ddot x_1+\xi\dot x_1-k(x_1-x_2)-x_1+x_1^3=F\cos(\omega t)+s(t)+n(t)\\ \ddot x_2+\xi\dot x_2-k(x_2-x_1)-x_2+x_2^3=F\cos(\omega t)\end{cases}$$</p>
+<p><strong>【原文】</strong> 式 (4)，本文的强耦合（恢复力耦合 + 阻尼力耦合，且都带尺度因子）：</p>
+<p>$$\begin{cases}\ddot x_1+\omega\xi\dot x_1+\omega^2\xi k(x_1-x_2)+\omega k(\dot x_1-\dot x_2)-\omega^2(x_1-x_1^3)=\omega^2[F\cos(\omega t)+s(t)+n(t)]\\ \ddot x_2+\omega\xi\dot x_2+\omega^2\xi k(x_2-x_1)+\omega k(\dot x_2-\dot x_1)-\omega^2(x_2-x_2^3)=\omega^2F\cos(\omega t)\end{cases}$$</p>
+<p><strong>【推断】</strong> 式 (4) 的量纲是自洽的，这一点值得亲手核一遍（很多人第一次读会以为 $\omega^2\xi k$ 是随手写的）：把式 (4) 同除 $\omega^2$ 后，$\omega^2\xi k(x_1-x_2)/\omega^2=\xi k(x_1-x_2)$ 与恢复力 $(x_1-x_1^3)$ 同量纲；$\omega k(\dot x_1-\dot x_2)/\omega^2=(k/\omega)(\dot x_1-\dot x_2)$，与 $\omega\xi\dot x_1/\omega^2=(\xi/\omega)\dot x_1$ 同量纲。所以两个耦合项相当于把"自身恢复力"乘 $\xi k$、"自身阻尼"乘 $k/\xi$。</p>
+<h3>5.2 参数表（表 1，p.5）</h3>
+<table><thead><tr><th>参数</th><th>取值区间</th><th>默认值</th><th>备注</th></tr></thead><tbody>
+<tr><td>策动力幅值 $F$</td><td>[0, 2]</td><td>0.2</td><td>决定相态，见 5.3</td></tr>
+<tr><td>策动力角频率 $\omega$</td><td>[1×10⁵, 5×10⁷] rad/s</td><td>5×10⁶</td><td>由时间尺度变换引入</td></tr>
+<tr><td>耦合系数 $k$</td><td>[10⁻¹, 10³]</td><td>10</td><td>两个耦合项共用</td></tr>
+<tr><td>阻尼系数 $\xi$</td><td>[10⁻², 10²]</td><td>0.7</td><td>—</td></tr>
+<tr><td>计算步长</td><td>[20, 1] ns</td><td>1 ns</td><td>对应采样率 50–1000 MHz</td></tr>
+<tr><td>初值</td><td>固定</td><td>$x_1=x_2=1.4,\ y_1=y_2=4$</td><td>"尽量减小检测结果开始阶段的振荡"</td></tr>
+</tbody></table>
+<h3>5.3 相态区间（p.5，图 2 分岔图）</h3>
+<p><strong>【原文】</strong> 无被测信号时两振子完全同步；随 $F$ 在 [0,2] 内变化：</p>
+<table><thead><tr><th>$F$ 区间</th><th>相态</th></tr></thead><tbody>
+<tr><td>$0&lt;F&lt;0.467$</td><td>相点围绕某一焦点做周期振荡</td></tr>
+<tr><td>$0.467&lt;F&lt;0.504$</td><td>倍周期分岔</td></tr>
+<tr><td>$0.505&lt;F&lt;1.142$</td><td>Smale 马蹄意义下的混沌</td></tr>
+<tr><td>$1.143\le F\le2$</td><td>大尺度周期运动</td></tr>
+</tbody></table>
+<p><strong>【原文】</strong> 混沌判据用最大 Lyapunov 指数：最大指数 $&gt;0$ 且三个指数之和 $&lt;0$ 判为混沌；计算用 Jacobi 算法。</p>
+<p><strong>【复现数据】</strong> 你的书用 Poincaré 截面点数复算，四段区间完全对上（点数 1 / 2–6 / 54 / 1；新版另用 Lyapunov 指数独立验证，混沌区 77% 为正），见 <a href="../c2-jupyterbook/08-结论与边界.md"><code>c2-jupyterbook/08-结论与边界.md</code></a>。</p>
+<blockquote><p>⚠️ <strong>别和 ★[2] 的 0.72/0.73 混淆</strong>。C2 的 0.467/0.504/1.142 描述的是"$F$ 从小到大扫过四种相态"，是一个相图分区；★[2] 的 0.72/0.73 是"五次恢复力系统在混沌→大周期边界上的工作点"。两者系统不同（三次 vs 五次恢复力）、阻尼不同（0.7 vs 0.5）、参数含义不同，<strong>没有任何换算关系</strong>。</p></blockquote>
+<h3>5.4 数值求解：这里有一处必须记下来的错</h3>
+<p><strong>【原文】</strong> p.3："本文使用 MATLAB 中求解微分方程的函数 ode45 对其进行求解，该函数是一种解决刚性问题的变步长数值解法，采用四阶 RK 算法提供候选解，五阶 RK 算法控制误差，整体截断误差为 $h^5$。"</p>
+<p><strong>【推断】</strong> 前半句错了。<code>ode45</code> 基于 Dormand–Prince 4(5) 对，是<strong>显式、非刚性</strong>求解器；MATLAB 里处理刚性方程的是 <code>ode15s</code> / <code>ode23s</code>。这不只是术语问题——式 (4) 的阻尼耦合项系数是 $\omega k$，默认参数下等于 $5\times10^7$，这是一个<strong>极强的线性耗散项</strong>，系统很可能已经刚化。用非刚性求解器跑刚性系统，症状就是"步长一粗就失真"。</p>
+<p><strong>【推断】</strong> 这个错解释了一个后文现象：4.5 节（图 7）测出"计算步长越小，SNRI 和 $r$ 越大"，从 9.19 dB 单调爬到 22.6 dB。论文把它当作结论（"应尽可能采用较小的计算步长"），但更可能的因果是<strong>求解器不适配</strong>：换 <code>ode15s</code> 或隐式 RK，曲线可能早早就平了。这一条在第 9 节列为脆弱假设。</p>
+<p><strong>【推断】</strong> 还有一处内部矛盾：<code>ode45</code> 是<strong>变步长</strong>自适应，可论文通篇把"计算步长 $h$"当作可扫描的独立参数（表 1、4.5 节、表 2 里三种波形用三种步长）。变步长求解器的实际步长由误差控制决定，用户只能设 <code>MaxStep</code> 上限。所以"计算步长"在这里的真实含义大概是"输出采样间隔"或"<code>MaxStep</code> 上限"，而不是积分器真正走的步长。复现时必须自己决定用哪一种，不能照抄。</p>
+<h3>5.5 两个指标（式 5、6、7）</h3>
+<p><strong>【原文】</strong> 波形相似度 = Pearson 相关系数：</p>
+<p>$$r=\frac{\sum_{i=1}^n(x_i-\bar x)(y_i-\bar y)}{\sqrt{\sum(x_i-\bar x)^2\sum(y_i-\bar y)^2}}$$</p>
+<p><strong>【原文】</strong> 信噪比改善：$\mathrm{SNRI}=\mathrm{SNR}_o-\mathrm{SNR}_i$，其中单次脉冲的信噪比定义为</p>
+<p>$$\mathrm{SNR}=10\log\frac{a^2}{4D}$$</p>
+<p>$a$ 为脉冲幅值，$D$ 为噪声方差。</p>
+<p><strong>【推断】</strong> 式 (7) 是全文最容易被误读的一行，必须钉死：<strong>这是"峰值幅度平方 / 4 倍噪声方差"，不是带内平均功率信噪比</strong>。它没有带宽项，也没有脉宽项。所以 C2 报的 −15 dB 与任何按 $P_{signal}/P_{noise}$ 定义的 −15 dB <strong>不可比</strong>——同名不同物。</p>
+<p><strong>【推断】</strong> 自洽性验算（这一步能验证整篇的数字链是否可信）：取门限行 $a=5\sigma$，则 $a^2/(4D)=25\sigma^2/(4\sigma^2)=6.25$，$10\log 6.25=7.96$ dB。<strong>论文 5.1 节写的"输出信号信噪比大于 7.96 dB"正是 $5\sigma$ 判据的另一种写法</strong>，两处完全对得上。再用式 (7) 反查表 4 的"真实值"：$D=0.1$、−15 dB 时 $a=\sqrt{4\times0.1\times10^{-1.5}}=\sqrt{0.01265}=0.1125$，与表 4 方波 −15 dB 行的 0.1125 <strong>完全一致</strong>；−12 dB 行 0.1589、−16 dB 行 0.1002 同样一致。<strong>表 3/表 4 的内部数字链是自洽的</strong>，这一点可以给论文加分。</p>
+<h3>5.6 判据：5σ 为什么合理</h3>
+<p><strong>【原文】</strong> p.7："检测成功的判据为：输出信号脉冲幅度 $a$ 大于 5 倍噪声均方差（输出信号信噪比大于 7.96 dB）。设置该判据的原因在于，在标准正态分布中，样本大于 $5\sigma$ 的概率为 $2.85\times10^{-6}$，即一百万个数据点会有 2.85 个误判。假设一次事件包含 $10^4$ 个数据点，那么对事件的误判率将小于 3%。"</p>
+<p><strong>【推断】</strong> 这是全篇最值得学的一段写作。它把"检测概率"背后的<strong>虚警率</strong>明码标价地写出来了，等于在说"我的 $P_d$ 是在 $P_{fa}&lt;3\%$ 下测的"。对比 ★[2]（只报门限、不报 $P_{fa}$），这一篇的口径干净得多。第 9 节会指出它的漏洞（窄带输出让"独立样本数"远小于 $10^4$），但方向是对的。</p>
+<h3>5.7 一个完整算例（图 1，p.3–4）</h3>
+<p><strong>【原文】</strong> 输入：三角脉冲幅值 0.63，上升沿 = 下降沿 = 0.5 µs，叠加零均值高斯白噪声，SNR = −10 dB（图 1a）。输出量取 $\dot x_1-\dot x_2$（图 1b）。</p>
+<p><strong>【原文】</strong> 现象：振子 1 的相轨迹向右<strong>上</strong>方突变，振子 2 向右<strong>下</strong>方突变（图 1c/1d）；$x_1$ 和 $x_2$ 在几乎同一时刻出现<strong>正极性</strong>和<strong>负极性</strong>脉冲（图 1e/1f）；两者相减，同相的正弦被抵消，只剩下脉冲。</p>
+<p><strong>【推断】</strong> 这就是"共模抑制"四个字最朴素的演示。整条 pipeline 可以压成五行：</p>
+<pre><code>s(t)+n(t) → 振子1  ┐
+                   ├→ 作差 → 内驱抵消 → 脉冲成形 → 估幅值/宽度
+F cos(ωt) → 振子2  ┘</code></pre>
+<h3>5.8 三种波形的参数配置（表 2，p.7）</h3>
+<table><thead><tr><th>脉冲类型</th><th>时域特征</th><th>$\omega$ / rad·s⁻¹</th><th>计算步长</th></tr></thead><tbody>
+<tr><td>方波</td><td>上升时间 0.1 ms；半高宽 1 s</td><td>50</td><td>0.1 ms</td></tr>
+<tr><td>双指数脉冲</td><td>上升时间 3 µs；半高宽 25 µs</td><td>5×10⁵</td><td>10 ns</td></tr>
+<tr><td>高斯导数脉冲</td><td>上升时间 1.5 µs；峰峰宽 1.45 µs</td><td>4×10⁶</td><td>1 ns</td></tr>
+</tbody></table>
+<p><strong>【推断】</strong> 这张表藏了一个规律：$\omega$ 与步长的乘积近似守恒。$50\times10^{-4}=5\times10^{-3}$；$5\times10^5\times10^{-8}=5\times10^{-3}$；$4\times10^6\times10^{-9}=4\times10^{-3}$。也就是说，<strong>每步转过的相位角大致固定在 $5\times10^{-3}$ rad 量级</strong>，即每周期约 1250 步。这正是"时间尺度变换不改变方程性质"的直接后果——换频段只需按比例换步长。这条规律比表 2 本身有用，可以直接拿去给毕设选步长。</p>
+<hr>
+<h2>6. 数学推导：从零开始</h2>
+<h3>6.1 从式 (1) 到式 (2)：尺度变换的严格版</h3>
+<p><strong>【原文】</strong> 论文给了 $t=\omega\tau$、$x(t)=x(\omega\tau)$ 及导数关系，但排版被公式挤乱了。干净写法是：</p>
+<p>设 $\tau$ 为新时间，$t=\omega\tau$，记 $X(\tau)=x(\omega\tau)$。则</p>
+<p>$$\frac{dx}{dt}=\frac{1}{\omega}\frac{dX}{d\tau},\qquad \frac{d^2x}{dt^2}=\frac{1}{\omega^2}\frac{d^2X}{d\tau^2}$$</p>
+<p>代入式 (1)：$\frac{1}{\omega^2}\ddot X+\frac{\xi}{\omega}\dot X-X+X^3=F\cos(\omega\tau)$，两边乘 $\omega^2$，并把 $\tau$ 重命名为 $t$：</p>
+<p>$$\ddot X+\omega\xi\dot X-\omega^2(X-X^3)=\omega^2F\cos(\omega t)$$</p>
+<p><strong>【推断】</strong> 得式 (2)。关键在于：<strong>变换后激励频率变成 $\omega$，但方程结构不变，只是每个系数被同一个尺度因子拧了一遍</strong>。这就是"变尺度不改变动力学性质"的数学表述，也是 C2 能"一套参数通吃微秒级到秒级脉冲"的全部依据。</p>
+<h3>6.2 弱耦合为什么只能"看台阶"</h3>
+<p><strong>【推断】</strong> 把式 (3) 作差：</p>
+<p>$$(\ddot x_1-\ddot x_2)+\xi(\dot x_1-\dot x_2)+2k(x_1-x_2)-\big[(x_1-x_1^3)-(x_2-x_2^3)\big]=s(t)+n(t)$$</p>
+<p>令 $u=(x_1+x_2)/2$、$v=(x_1-x_2)/2$，利用</p>
+<p>$$(x_1-x_1^3)-(x_2-x_2^3)=2v-(6u^2v+2v^3)$$</p>
+<p>得<strong>差模方程</strong>（弱耦合）：</p>
+<p>$$\boxed{\ \ddot v+\xi\dot v+(2k-1)v+(3u^2v+v^3)=\tfrac12[s(t)+n(t)]\ }$$</p>
+<p><strong>【推断】</strong> 读出三件事：</p>
+<ol><li>$k&lt;1/2$ 时线性刚度 $2k-1&lt;0$，差模失稳，两振子自由漂开——这就是"弱耦合失效"的力学位置；</li><li>阻尼只有 $\xi$，默认 0.7，配刚度 $2k-1$ 得到的阻尼比 $\zeta=\xi/(2\sqrt{2k-1})$ 很小（$k=1$ 时 $\zeta=0.35$），<strong>欠阻尼</strong>，所以差模对脉冲的响应是<strong>振铃</strong>，不是跟随；</li><li>方程里有 $3u^2v$ 这个参数激励项，把差模和共模（也就是相态）耦合起来——所以"相态一变，差模响应就变"，这正是"只能在倍周期态工作"的数学来源。</li></ol>
+<p><strong>【推断】</strong> 一句话：弱耦合输出的是"振铃的包络"，而振铃的相位与振幅取决于 $u$ 的历史（初值与相态），所以它只能当"有没有"的判据用。</p>
+<h3>6.3 强耦合的共模–差模分解（本文核心推导）</h3>
+<p><strong>【推断】</strong> 对式 (4) 做同样的 $u,v$ 变换。注意两个耦合项在作差时<strong>不相消</strong>，这是全部差别所在：</p>
+<ul><li>恢复力耦合：振子 1 得 $+\omega^2\xi k\cdot2v$，振子 2 得 $-\omega^2\xi k\cdot2v$，作差得 $4\omega^2\xi k\,v$；</li><li>阻尼力耦合：振子 1 得 $+\omega k\cdot2\dot v$，振子 2 得 $-\omega k\cdot2\dot v$，作差得 $4\omega k\,\dot v$。</li></ul>
+<p>求和（共模）时两项相消，得原 Duffing 方程；作差（差模）后除以 2：</p>
+<p>$$\boxed{\ \ddot v+(\omega\xi+2\omega k)\dot v+\omega^2(2\xi k-1)v+\omega^2(3u^2v+v^3)=\tfrac{\omega^2}{2}\big[s(t)+n(t)\big]\ }$$</p>
+<p><strong>【推断】</strong> 把它和弱耦合的差模方程并排看，差别一目了然：</p>
+<table><thead><tr><th>项</th><th>弱耦合式 (3)</th><th>强耦合式 (4)</th><th>物理含义</th></tr></thead><tbody>
+<tr><td>阻尼系数</td><td>$\xi$</td><td>$\omega(\xi+2k)$</td><td>放大 $1+2k/\xi$ 倍（默认 <strong>29.6 倍</strong>）</td></tr>
+<tr><td>线性刚度</td><td>$2k-1$</td><td>$\omega^2(2\xi k-1)$</td><td>放大 $\xi$ 倍（默认 <strong>7 倍</strong>）</td></tr>
+<tr><td>阻尼比</td><td>$\xi/(2\sqrt{2k-1})\approx0.08$</td><td><strong>2.87</strong></td><td>从欠阻尼翻到<strong>过阻尼</strong></td></tr>
+<tr><td>响应形态</td><td>振铃</td><td>低通跟随</td><td>决定"能不能还原波形"</td></tr>
+<tr><td>驱动增益</td><td>$1/2$</td><td>$\omega^2/2$</td><td>同相</td></tr>
+</tbody></table>
+<p><strong>【推断】</strong> 这就是"强耦合"三个字的全部内容：<strong>它不是把耦合加大，而是在差模方程上额外装了一套阻尼，把欠阻尼振铃改造成过阻尼跟随。</strong> 阻尼比从 0.08 到 2.87，跨了 36 倍——这才是"能恢复波形"的真正原因。</p>
+<p><strong>【推断】</strong> 由此立刻得到三个可算的量（默认参数 $\omega=5\times10^6$、$k=10$、$\xi=0.7$）：</p>
+<ul><li>无阻尼自然频率 $\Omega=\omega\sqrt{2\xi k-1}=3.61\omega=1.80\times10^7$ rad/s；</li><li>阻尼比 $\zeta=\omega(\xi+2k)/(2\Omega)=2.87$（过阻尼）；</li><li>主导时间常数 $\tau=(\zeta+\sqrt{\zeta^2-1})/\Omega=0.308\ \mu s$；对应带宽 $B_{out}\approx1/(2\pi\tau)\approx 516$ kHz。</li></ul>
+<p><strong>【复现数据】</strong> 验算：无信号时 $|v|=|x_1-x_2|/2$ 的数值为 <strong>$1.16\times10^{-10}$</strong>（浮点零），确认差模被牢牢锁在原点，共模抑制彻底。</p>
+<h3>6.4 用这套线性化解释三件"论文没说"的事</h3>
+<p><strong>【复现数据】</strong> 取 $A=0.632$、$c=3\ \mu s$ 的高斯脉冲（式 8 参数），$\omega=5\times10^6$、$k=10$、$\xi=0.7$、$h=1$ ns、$T=40$ µs，跑一遍 <a href="../c2-jupyterbook/_src/c2sim.py"><code>c2sim.py</code></a>：</p>
+<table><thead><tr><th>量</th><th>实测</th><th>线性化预测</th><th>判读</th></tr></thead><tbody>
+<tr><td>位移差 $\max\lvert x_1-x_2\rvert$</td><td>0.03767</td><td>$A/(2\xi k-1)=A/13=0.0486$</td><td>差 1.29 倍（非线性修正，见下）</td></tr>
+<tr><td>$\mathrm{corr}(x_1-x_2,\ s)$</td><td><strong>0.9955</strong></td><td>过阻尼低通 → 保形</td><td>波形可恢复 ✅</td></tr>
+<tr><td>$\mathrm{corr}(\dot x_1-\dot x_2,\ s)$</td><td><strong>0.0876</strong></td><td>位移差的微分 → 反相且近零相关</td><td>速度差<strong>不能</strong>当输出量 ❌</td></tr>
+</tbody></table>
+<p><strong>【推断】</strong> 1.29 倍的偏差（预测 0.0486、实测 0.0377）有清楚的来源：线性化把 $3u^2v$ 当成小量忽略了，而实际在脉冲到达时 $u$ 正在振荡，$3u^2$ 会临时改变等效刚度（相当于加了负刚度，把增益压低约 23%）；另外脉冲（3 µs）与滤波器时间常数（0.31 µs）并非无限分离，严格说不是 DC 增益。</p>
+<p><strong>【更正】</strong> 口径要对齐：本节用 $v=(x_1-x_2)/2$ 推导，得到的是 $v=A/26$；换算回 $x_1-x_2$ 必须乘 2，即 $A/13$。初稿曾把 $A/26$ 直接当作 $x_1-x_2$ 的预测值，并按 $A=1$ 算成 0.0385，与实测 0.0377 的接近纯属数值巧合（0.632/26 实际是 0.0243）。<strong>结论不变（增益远小于 1，位移差保形），但 1.6 倍这个偏差数应改为 1.29 倍。</strong></p>
+<p><strong>【推断】</strong> <strong>第二、三行是这份精读最重要的一处发现，它解决了一个论文自身的矛盾</strong>：图 1(b)、图 8、图 9、图 10 的纵轴都标着 $x_1-x_2$（<strong>位移差</strong>），而 5.2 节正文写 $s_o(t)=\dot x_1-\dot x_2$（<strong>速度差</strong>）。两者差一个微分，相关系数从 0.9955 掉到 0.0876。<strong>用速度差做波形恢复和幅值估计必然失败；论文实际用的、也是唯一能成立的，是位移差。</strong> 5.2 节那个公式应视为笔误（或漏写了一个积分环节），这与你的书里"输出量定义需澄清"的结论一致，但现在有了机理层面的证明，而不只是相关性数字。</p>
+<h3>6.5 用同一套线性化解释论文的三条经验曲线</h3>
+<p>这一节是"线性化不只是好看，它真能预测经验规律"的检验。</p>
+<p><strong>（a）$k&lt;1$ 就失效 → 失效边界其实是 $k_c=1/(2\xi)$</strong></p>
+<p><strong>【推断】</strong> 差模线性刚度 $\omega^2(2\xi k-1)$ 在 $k=1/(2\xi)$ 处过零。$\xi=0.7$ 时 $k_c=0.714$。论文 4.3 节的经验描述是"当 $0&lt;k&lt;1$ 时，两振子间的耦合属于弱耦合……检测失效"——<strong>边界位置对上了</strong>，而且这个公式还预言了一件事：<strong>这条边界不是固定的 1，而是随 $\xi$ 反向移动</strong>（$\xi=0.5$ 时恰好 $k_c=1$；$\xi=0.2$ 时 $k_c=2.5$）。论文从未讨论 $\xi$ 与 $k$ 的交互，这是一个可以被实验证伪的具体预言（第 11 节反例 4）。</p>
+<p><strong>（b）$k&gt;10$ 饱和 → 因为带宽被 $\xi$ 锁死</strong></p>
+<p><strong>【推断】</strong> 从 6.3 节的 $\tau$ 出发，取 $k\to\infty$：</p>
+<p>$$\tau\approx\frac{2\zeta}{\Omega}=\frac{\omega(\xi+2k)}{\omega^2(2\xi k-1)}\xrightarrow{k\to\infty}\frac{1}{\omega\xi}$$</p>
+<p>即 $B_{out}\to\omega\xi/(2\pi)$，<strong>与 $k$ 无关</strong>。默认参数下 $B_{out}\to 557$ kHz。所以 $k$ 再大也不能让差分通道更窄，SNRI 自然饱和。而 $k$ 太小时 $\tau$ 变长（响应变慢、跟不上脉冲），这就是"$1&lt;k&lt;10$ 逐渐改善"的区间。<strong>一条带宽公式同时给出下限和上限。</strong></p>
+<p><strong>（c）$F$（相态）几乎不影响 SNRI → 因为 $F$ 只进共模</strong></p>
+<p><strong>【推断】</strong> 在差模方程里，$F$ 只通过 $u$ 进入参数项 $3u^2v$，一阶意义上<strong>根本没有 $F$</strong>。所以图 3"SNRI 在整个 $F\in[0,2]$ 区间都在 19.2 dB 以上且曲线平坦"是机理的必然，不是运气。同理"初值不影响"也成立，因为初值只改变 $u$ 的轨迹。</p>
+<p><strong>【推断】</strong> 但这里必须补一刀：<strong>这条论证同时暴露了 claim 的边界</strong>。既然 $F$ 只通过 $3u^2v$ 这个<strong>二阶项</strong>起作用，那么在信号微弱、$v$ 很小的时候，参数项相对噪声更不重要——听起来更好；可一旦 $u$ 在混沌态里大幅摆动，$3u^2v$ 的瞬时等效刚度可以从 $0$ 变到 $\sim3\times1.4^2=5.9$，让有效刚度在 $[13,19]$ 之间跳。这会让 $B_{out}$ 抖动，进而让 $\sigma$ 抖动。<strong>所以"F 无影响"是平均意义上的，在门限附近它可能变成"F 影响虚警率"。</strong> 这正是第 11 节反例 1 的设计动机。</p>
+<h3>6.6 关于"广义阱内失同步"，数学上它是什么</h3>
+<p><strong>【推断】</strong> 论文用"广义阱内失同步"命名这个现象。用上面的语言翻译：<strong>"失同步"= 差模 $v$ 偏离零；"阱内"= 两振子仍在同一个势阱里；"广义"= 不要求系统处于倍周期态。</strong> 换句话说，它描述的是"共模还在原相态里，差模被激励起来"这一件事。这个命名在动力学语境下是准确的，但它掩盖了一个事实：差模的响应是<strong>线性</strong>的，所以"失同步程度"可以线性地换算成"信号幅度"。这既是它能估幅值的原因，也是它无法真正"非线性增强"的原因。</p>
+<hr>
+<h2>7. 实验是怎么验证 claim 的</h2>
+<p><strong>【原文】</strong> 四组实验，各自对应不同 claim：</p>
+<table><thead><tr><th>组</th><th>位置</th><th>做了什么</th><th>支撑哪条 claim</th></tr></thead><tbody>
+<tr><td>① 参数扫描</td><td>4.1–4.5，图 3–7</td><td>$F$、$\omega$、$k$、$\xi$、$h$ 各扫一遍，每点 100 次实验</td><td>"任意相态可工作"、"参数有最优区间"</td></tr>
+<tr><td>② 三波形检测</td><td>5.1，表 2/表 3</td><td>方波、双指数、高斯导数，SNR −20…−10 dB 逐 dB</td><td>"门限 −15/−12/−16 dB"</td></tr>
+<tr><td>③ 参数估计</td><td>5.2，表 4/表 5</td><td>一阶矩估计幅值与宽度，100 训练 + 100 测试</td><td>"误差 &lt;5%"</td></tr>
+<tr><td>④ 对比实验</td><td>5.3，图 11</td><td>弱耦合 vs 强耦合，−16…−10 dB</td><td>"强耦合更好"</td></tr>
+</tbody></table>
+<p><strong>【推断】</strong> 逐条打分（证据强度）：</p>
+<table><thead><tr><th>Claim</th><th>证据</th><th>强度</th><th>缺口</th></tr></thead><tbody>
+<tr><td>任意相态可工作</td><td>图 3：SNRI 全 $F$ 区间 ≥19.2 dB，$r&gt;97\%$</td><td><strong>中</strong></td><td>全部在 <strong>0 dB</strong> 输入下取得，门限（−15 dB）附近未复测</td></tr>
+<tr><td>不受初值限制</td><td>4.1 末尾一句话，无图无表</td><td><strong>弱</strong></td><td>无数据。机理上可推（初值只进共模），但论文没给证据</td></tr>
+<tr><td>SNRI ≥ 20 dB</td><td>图 3 地板 19.2 dB；图 7 达 22.6 dB</td><td><strong>强</strong></td><td>未给带宽，无法换算成通用指标</td></tr>
+<tr><td>门限 −15 / −12 / −16 dB</td><td>表 3，100 次/点</td><td><strong>中</strong></td><td>5σ 判据自洽（已验算），但噪声带宽未交代</td></tr>
+<tr><td>幅值误差 &lt;5%</td><td>表 4，误差 −2.98%…+4.93%</td><td><strong>强</strong></td><td>"训练 100 个样本"训的是什么没写</td></tr>
+<tr><td>宽度误差 &lt;5%</td><td>表 5，误差 −5.02%…+4.99%</td><td><strong>强</strong></td><td>同上；高斯导数在 −16 dB 恰好 −5.02%，卡在边界</td></tr>
+<tr><td>强耦合优于弱耦合</td><td>图 11，两条曲线目视</td><td><strong>弱</strong></td><td>门限<strong>相同</strong>（都 −16 dB），优势只在"波形恢复更好"，无定量</td></tr>
+</tbody></table>
+<p><strong>【原文】</strong> 表 3 的门限判定方式：检测概率与波形相似度<strong>同时</strong>大于 0.9。方波在 −15 dB 时 91.5% / 0.95；双指数在 −12 dB 时 95.5% / 0.90；高斯导数在 −16 dB 时 94.0% / 0.90。</p>
+<p><strong>【推断】</strong> 边界精度可以估：方波从 −16 dB 的 78.0% 到 −15 dB 的 91.5%，斜率约 13.5 个百分点/dB；100 次实验的二项标准误 $\sqrt{0.9\times0.1/100}=3\%$，折合 <strong>±0.22 dB</strong>。所以"−15 dB"的真值大致在 ±0.3 dB 内。这个精度配得上"报门限"，但<strong>不足以支撑"比其他方法好 1 dB"这类比较</strong>。</p>
+<p><strong>【复现数据】</strong> 你的书对表 3/表 4 的复现结论是"未达标"（方波偏乐观、另两种未达、幅值误差 −12%…−43%），根因已定位：<strong>原文未交代噪声带宽与输出量定义</strong>。同一 −15 dB、带宽差 10 倍，检出率可以从 0% 到 100%。这不是"论文错了"，是<strong>信息不足以复现</strong>——而这个判断本身就该写进毕设的方法章。</p>
+<hr>
+<h2>8. Takeaways</h2>
+<p><strong>【推断】</strong> 五条，按可迁移性排序。</p>
+<ol><li><strong>差分读出 = 共模抑制。</strong> 两个几乎相同的非线性系统，一个吃信号一个不吃，作差后内驱（共模）被抵消，信号（差模）保留。这是本文最干净的思想，也是最容易搬到别处的一条。毕设的三振子阵列其实已经在用类似的东西（相位覆盖），但没有用"作差"这个动作——这是一个空缺。</li></ol>
+<ol><li><strong>"耦合加大"的真实作用是改变阻尼比。</strong> 从 0.08 到 2.87，把振铃变成跟随。任何"用耦合改善性能"的设计，都应该先问一句：<strong>我改的是刚度还是阻尼？</strong></li></ol>
+<ol><li><strong>线性化能预测经验边界。</strong> $k_c=1/(2\xi)$、$B_{out}\to\omega\xi/(2\pi)$——两条公式解释了论文两整节的实验曲线。这提示一个方法论：<strong>遇到非线性系统里"扫参数得到一段平台"的现象，先试着线性化，平台的位置往往有闭式解。</strong></li></ol>
+<ol><li><strong>判据要把虚警率写出来。</strong> 5σ ↔ 7.96 dB ↔ 每 $10^4$ 点误判 &lt;3%，三处数字互相对得上。这是可以直接抄进毕设的写法，比"门限 −23 dB"这种裸数字强得多。</li></ol>
+<ol><li><strong>"任意相态可工作"这类 robustness claim，必须在最不利条件下验证。</strong> 论文在 0 dB 下证明了它，在 −15 dB 下没证。这个缺口是所有 robustness 论文的通病，也是审稿人最容易戳的地方。</li></ol>
+<p><strong>【推断】</strong> 对毕设的三条可用、三条不可用：</p>
+<table><thead><tr><th></th><th>内容</th></tr></thead><tbody>
+<tr><td>✅ 可用</td><td>差分共模抑制结构（改造成"待测信号通道 − 纯内驱通道"）</td></tr>
+<tr><td>✅ 可用</td><td>判据写法（$P_d$ 连 $P_{fa}$ 一起报，给出 5σ 式的解析换算）</td></tr>
+<tr><td>✅ 可用</td><td>线性化分析范式（先算差模方程，再谈参数优化）</td></tr>
+<tr><td>❌ 不可用</td><td>"任意相态"这一结论——它建立在脉冲检测（宽带）上，极低频准周期信号的门限行为不同</td></tr>
+<tr><td>❌ 不可用</td><td>−15 dB 这个数字——口径（峰值/4D）与带宽都没给，不可横向比较</td></tr>
+<tr><td>❌ 不可用</td><td>$\omega$ 与步长的配置表——那是他们三种波形的具体选择，不是通用规律（但 6.5(a) 的 $\omega h\approx5\times10^{-3}$ 可以借）</td></tr>
+</tbody></table>
+<hr>
+<h2>9. 最脆弱的假设</h2>
+<p><strong>【推断】</strong> 按"被推翻后伤害最大"排序。</p>
+<p><strong>① "任意相态可工作"只在 0 dB 下被验证过。</strong></p>
+<p>4.1 节自己写得很清楚："设定噪声方差 $D=0.1$，Duffing 系统输入信号信噪比为 0 dB，主要原因是为了保证能检测出该信号，方便研究 Duffing 振子参数与检测性能的关系……<strong>而非以检测为目的</strong>。" 那么图 3 的平坦曲线证明的是"高 SNR 下参数不敏感"，而论文摘要与结论把它当成了"低 SNR 下也能工作"。这是<strong>证据范围与被主张范围不匹配</strong>，是全篇最脆弱的环节。第 6.5(c) 节还给出了它可能崩掉的机理（$3u^2v$ 让有效刚度随相态跳动，进而让 $\sigma$ 抖动）。</p>
+<p><strong>② 求解器描述错误，可能污染 4.5 节的结论。</strong></p>
+<p><code>ode45</code> 不是刚性求解器（第 5.4 节）。而式 (4) 的阻尼耦合系数 $\omega k=5\times10^7$ 恰恰把系统推向刚性。于是"步长越小越准"这个结论，可能是"非刚性求解器跑刚性系统的症状"，而不是系统的物理性质。<strong>换隐式方法重做 4.5 节，曲线可能提前饱和。</strong> 这一条不影响主结论（差分机理），但会削弱"工程上必须高采样率"的论断。</p>
+<p><strong>③ 输出量图文不一致：$x_1-x_2$ 还是 $\dot x_1-\dot x_2$？</strong></p>
+<p>图 1(b)、图 8、图 9、图 10 纵轴标 $x_1-x_2$；5.2 节正文写 $s_o=\dot x_1-\dot x_2$。<strong>两者差一个微分</strong>，相关系数差 11 倍（0.9955 vs 0.0876，第 6.4 节实测）。用速度差做幅值估计，得到的峰值正比于脉冲的<strong>最大斜率</strong>而非幅值——论文表 4 若真用速度差，误差不可能 &lt;5%。所以合理判断是：<strong>实验用位移差，公式写错。</strong> 这是复现者必须先决定的岔路，选错会直接卡死。</p>
+<p><strong>④ 耦合项带 $\omega^2\xi$ 与 $\omega$，导致"扫 $\omega$"时隐含了别的变化。</strong></p>
+<p>4.2 节把 $\omega$ 当独立参数扫（图 4），但式 (4) 里两个耦合项分别乘 $\omega^2\xi$ 和 $\omega$。好消息是：无量纲耦合比 $\xi k$ 和 $k/\xi$ <strong>与 $\omega$ 无关</strong>，所以 $\omega$ 不改变耦合的"相对强度"；坏消息是：$\omega$ 直接放大刚性（$\omega k$），所以同样的 $h$ 在不同 $\omega$ 下的相对精度不同。<strong>表 2 三种波形各配一个步长，本质是在补偿这一点</strong>，但论文把 $\omega$ 与 $h$ 分开讨论，读者容易以为两者独立。</p>
+<p><strong>⑤ "训练 100 个样本"是什么？</strong></p>
+<p>5.2 节："估计前先选取 100 个样本对模型进行训练，随后对另 100 个测量样本进行参数估计。" 用一阶矩估计幅值与宽度，<strong>需要"训练"的是什么？</strong> 可能是标定"输出峰值 → 输入幅值"的比例系数（第 6.3 节的增益 $1/[2(2\xi k-1)]$），也可能是标定宽度映射。论文没写。这直接影响复现：不知道训练什么，就不知道表 4 的 −0.98% 是怎么来的。</p>
+<p><strong>⑥ 只有高斯白噪声。</strong></p>
+<p>结论段自己承认："本文研究的背景噪声仅限高斯白噪声，其他噪声对系统检测性能的影响有待进一步研究。" 对毕设而言这是<strong>致命缺口</strong>：极低频磁场环境是 $1/f^\alpha$ 色噪声 + 工频线谱 + 非平稳。第 6.3 节的带宽公式直接给出了预测：$B_{out}\approx516$ kHz 的低通对白噪声有效，但对低频段能量集中的 $1/f$ 噪声，<strong>抑制效果会大幅缩水</strong>，且线谱若落在 $B_{out}$ 内会直接穿透。这是一条可以在毕设里做成实验的预测。</p>
+<p><strong>⑦ 5σ 的"独立样本数"被高估了。</strong></p>
+<p>论文按 $10^4$ 个独立样本算误判率 &lt;3%。但差分输出是<strong>窄带</strong>的（$B_{out}\approx516$ kHz，相关时间 0.31 µs），若采样间隔 1 ns，$10^4$ 点只跨 10 µs，<strong>独立样本数约 32 个</strong>，不是 $10^4$。方向上，这会让真实误判率<strong>低于</strong> 3%（32 × 2.85e-6 ≈ 9e-5），所以论文的估计是<strong>保守</strong>的——这是它少见的"错得安全"。但反过来，窄带让 $\sigma$ 的估计本身自由度很低（几十个样本估方差），$\hat\sigma$ 抖动会让 5σ 门限抖动，等效于 $P_{fa}$ 不稳定。这一条对毕设很重要：<strong>报 $P_{fa}$ 时必须连同"$\sigma$ 的自由度"一起报。</strong></p>
+<hr>
+<h2>10. 一周时间，最小复现验什么</h2>
+<p><strong>【推断】</strong> 只验四件"错了就全盘皆错"的事，其余全部放弃。</p>
+<table><thead><tr><th>#</th><th>验什么</th><th>判据</th><th>成本</th><th>现状</th></tr></thead><tbody>
+<tr><td>1</td><td>无信号同步</td><td>$\max\lvert x_1-x_2\rvert\to$ 浮点零</td><td>10 行</td><td>✅ 已做：$1.16\times10^{-10}$</td></tr>
+<tr><td>2</td><td>四段相态区间</td><td>Poincaré 点数或 Lyapunov 符号在 0.467 / 0.504 / 1.142 处分段</td><td>半天</td><td>✅ 已做：点数 1/2–6/54/1</td></tr>
+<tr><td>3</td><td>输出量到底是位移差还是速度差</td><td>与 $s(t)$ 的相关系数</td><td>20 行</td><td>✅ 已做：0.9955 vs 0.0876</td></tr>
+<tr><td>4</td><td>$k_c=1/(2\xi)$ 与 $B_{out}\to\omega\xi/(2\pi)$</td><td>扫 $k$，看差模线性刚度过零位置与 SNRI 平台</td><td>半天</td><td>🟡 公式已推，未做扫描</td></tr>
+</tbody></table>
+<p><strong>【推断】</strong> 明确<strong>不验</strong>的：表 3 的六个门限数字、表 4/表 5 的误差百分比。原因不是难，而是<strong>信息不足</strong>——原文没给噪声带宽、噪声离散方式、输出量定义，"训练 100 样本"也没解释。硬复现出来的数字，差异无法归因（是论文错、还是我们口径不同？）。这跟做不出来是两回事，报告里必须分开写。</p>
+<p><strong>【复现数据】</strong> 已完成部分见 <a href="../c2-jupyterbook/_build/html/index.html"><code>c2-jupyterbook/</code></a> 八章；第 4 项的公式推导在 6.3–6.5 节，扫描实验约需 30 行代码（<code>k</code> 取 0.2…100 对数网格，每点跑 100 帧）。</p>
+<hr>
+<h2>11. 如果我要反对它，反例怎么设计</h2>
+<p><strong>【推断】</strong> 四个反例，按"能伤到主结论"排序。</p>
+<p><strong>反例 1：把 0 dB 降到门限附近，再扫 $F$。</strong><br>若"任意相态可工作"是真命题，则在 −15 dB 下扫 $F\in[0,2]$，SNRI 与 $r$ 仍应平坦。若在混沌段（0.505–1.142）出现明显凹陷，则命题应被限缩为"高 SNR 下与相态无关"。<strong>预期结果</strong>：会凹陷。理由见 6.5(c) 的参数项论证。这是最可能成功的一枪。</p>
+<p><strong>反例 2：按 5.2 节的公式 $\dot x_1-\dot x_2$ 做幅值估计。</strong><br>若论文公式正确，则用速度差也应得到 &lt;5% 误差。实测相关系数 0.0876，峰值正比于 $\dot s$ 而非 $s$，<strong>幅值估计必然错到离谱</strong>。这一枪不会伤到论文的实验结论（他们大概确实用了位移差），但会落实"公式印错"，是复现报告里最该写的一条。</p>
+<p><strong>反例 3：把白噪声换成 $1/f$ 噪声 + 50 Hz 线谱。</strong><br>带宽公式预测：$B_{out}\approx516$ kHz 对白噪声的抑制在 $1/f$ 下会失效，线谱若落进带内会直接穿透。若 SNRI 从 20 dB 掉到 5 dB 以下，则"可用于电磁脉冲远距离探测"的工程主张需附加"噪声白化"前提。这一枪对毕设最有价值——它把 C2 的结论边界画清楚了。</p>
+<p><strong>反例 4：验证 $k_c=1/(2\xi)$。</strong><br>取 $\xi=0.2$（预测 $k_c=2.5$）与 $\xi=0.7$（预测 0.714），各扫 $k$，看差模响应是否在预测位置由"失稳漂移"转为"锁定跟随"。若两个 $\xi$ 下的失效点都落在 $1/(2\xi)$ 附近，则论文 4.3 节"$k&lt;1$ 失效"的经验描述被升级为公式；若不落在，则我的线性化漏掉了重要项。<strong>这是唯一一个能反过来检验本精读的判据</strong>，建议优先做。</p>
+<hr>
+<h2>12. 后续研究、反驳与新认知</h2>
+<p><strong>【推断】</strong> C2 这条线在 2019 年后明显转向了两个方向，从你手上的文献能看出来：</p>
+<ul><li><strong>阵列化</strong>：★[2]（Sensors 2023）用三振子 120° 排布解决初相位盲区，把"差分"换成了"相位覆盖"。共同点是<strong>都不需要精确的临界阈值</strong>——这是与 ★[2] 固定工作点法（0.72/0.73）最本质的区别。</li><li><strong>幅相估计化</strong>：C1（Wang, Signal Processing 2002）与 ★[1]（物理学报 2024）把"测有无"推进到"估幅估相"。C2 的"差分读出给波形"其实是这条路上的另一种走法：不靠相量合成，靠时域还原。</li></ul>
+<p><strong>【推断】</strong> 一个视角上的翻转值得记下来：如果把 C2 的差分通道理解成一个<strong>由非线性系统自动调谐的窄带滤波器</strong>，那么"混沌检测"这个词就有点名不副实了——真正干活的是那个低通，混沌只负责提供"对噪声不敏感"的共模背景。这不否定论文，但会改变你写文献综述时的措辞：<strong>与其说"混沌系统检测信号"，不如说"用混沌系统构造一个共模抑制的参考通道"。</strong></p>
+<p><strong>【推断】</strong> 与你自己的 STS 方法（<a href="../05-方法创新/新方法-阈值位移符号判别.html"><code>新方法-阈值位移符号判别.md</code></a>）对照：STS 需要<strong>精确定位阈值</strong>（位移符号 $\Delta\lambda_c\approx-\gamma$），C2 完全<strong>不需要阈值</strong>。两条路线在"要不要阈值"这一点上互补——</p>
+<table><thead><tr><th></th><th>C2 差分读出</th><th>STS 阈值位移</th></tr></thead><tbody>
+<tr><td>是否需要 $\lambda_c$</td><td>否</td><td>是（精度决定成败）</td></tr>
+<tr><td>输出</td><td>连续波形</td><td>符号 + 幅值</td></tr>
+<tr><td>对相态</td><td>不敏感</td><td>敏感（工作在边界）</td></tr>
+<tr><td>对噪声</td><td>靠带宽抑制</td><td>靠符号判决的鲁棒性</td></tr>
+<tr><td>适用信号</td><td>非周期脉冲</td><td>准周期窄带</td></tr>
+</tbody></table>
+<p><strong>【猜测】</strong> 这也解释了为什么两条路线都能发文章却都不彻底：一个绕开了阈值但丢了"对微弱同频信号的选择性"，一个抓住了选择性但依赖一个必须精确标定的数。第 13 节的想法就是把两者缝起来。</p>
+<hr>
+<h2>13. 一个 Follow-up Idea</h2>
+<p><strong>【推断】</strong> 想法：<strong>把 C2 的差分通道当成"连续统计量发生器"，替代毕设里那个信息量不足的二分类判据。</strong></p>
+<p>动机来自你自己的三处失败，它们其实是同一个病：</p>
+<ol><li><a href="../02-阶段二/解读-主要内容2-混沌振子建模与临界阈值.html">解读 §3</a>：用 $\max\lvert x\rvert&gt;1.2$ 判态，虚警 100%；</li><li><a href="../02-阶段二/阶段2-建模与相变-问题回答.html">阶段2 Q5</a>：扫变尺度系数 $R$ 时出现"锁频伪相变"，$R=8/9/9.5/12/13$ 都给出低 $p_{std}$；</li><li><a href="../02-阶段二/解读-主要内容2-混沌振子建模与临界阈值.html">解读 §10</a>：$P_d$ 随 SNR 非单调，无法报单一门限。</li></ol>
+<p>三处的共同点是：<strong>只用了"混沌/周期"这一个比特</strong>。C2 提醒我们还有另一条读出方式——<strong>作差</strong>。</p>
+<p>具体设计（一周可验证）：</p>
+<pre><code>        s(t)+n(t) ──→ 振子A（吃信号）
+                                 ├──→ d(t)=x_A − x_B ──→ 特征1：峰值/σ_d
+        F cos(ωt) ──→ 振子B（不吃信号）
+                                 └──→ 特征2：与内驱的残差能量比</code></pre>
+<ul><li><strong>特征 1</strong>：$d(t)$ 的峰值与 $\hat\sigma_d$ 之比。这不是二分类，是<strong>连续量</strong>，可以直接做 CFAR（恒虚警）：门限 $\eta=\alpha\hat\sigma_d$，$\alpha$ 由目标 $P_{fa}$ 反解。</li><li><strong>特征 2</strong>：$d(t)$ 的残差能量占总能量的比例。它对应"内驱被抵消得多干净"，可以用来判"有没有同频成分"——这恰好是变尺度扫 $R$ 时缺的那个统计量（锁频伪相变骗不过作差，因为伪相变时内驱依然与参考同相）。</li></ul>
+<p><strong>为什么这算新</strong>：C2 用差分是为了"看脉冲形状"，把 $d(t)$ 当<strong>模拟波形</strong>用；这里把 $d(t)$ 当<strong>统计量</strong>用，并接到 CFAR 框架上。这个组合（差分读出 × 恒虚警）在你手上的文献里没见到——但请按项目纪律<strong>先查中文专利与中文期刊再谈新颖性</strong>，<code>Chaotic</code> + <code>CFAR</code> + <code>差分</code> 这三个词在雷达与电磁脉冲探测领域很可能已有近似工作。</p>
+<p><strong>可行性判断</strong>：</p>
+<table><thead><tr><th>项</th><th>评估</th></tr></thead><tbody>
+<tr><td>代码成本</td><td>低：<code>c2sim.simulate()</code> 已在，只需加一组"不吃信号"的振子并作差</td></tr>
+<tr><td>计算成本</td><td>中：双振子 = 2 倍状态，批量向量化后仍然很快</td></tr>
+<tr><td>理论风险</td><td>中：差分通道的增益 $1/[2(2\xi k-1)]\approx1/26$ 会把弱信号压得更弱，噪声同比例下降，SNR 不变——<strong>这意味着它不会凭空提高灵敏度</strong>，只是把"判决"换成"估计"。这一点必须诚实地说</td></tr>
+<tr><td>真正的收益</td><td><strong>可解释性</strong>：$d(t)$ 是线性滤波输出，$\sigma_d$ 有闭式（带宽公式），于是 $P_{fa}$ 可以解析算出来，不用靠蒙特卡洛</td></tr>
+</tbody></table>
+<p><strong>【推断】</strong> 最后一句是这个想法最值钱的地方：<strong>毕设要交"最低可检测信噪比"这个指标，而指标的合法性来自 $P_{fa}$ 的可计算性。</strong> C2 给的正是这条通道——它把"混沌系统"变成了一个带宽可算、增益可算的低通，于是整个检测器第一次可以被"算"出来，而不是"扫"出来。</p>
+<hr>
+<h2>附录：可核查清单</h2>
+<p><strong>逐项定位（印刷页码）</strong></p>
+<table><thead><tr><th>内容</th><th>位置</th></tr></thead><tbody>
+<tr><td>应用背景、贡献四条</td><td>p.1（080501-1）</td></tr>
+<tr><td>式 (1)–(3)、弱耦合三缺陷</td><td>p.2（080501-2）</td></tr>
+<tr><td>式 (4)、ode45 描述</td><td>p.3（080501-3）</td></tr>
+<tr><td>图 1（检测机理全流程）</td><td>p.4（080501-4）</td></tr>
+<tr><td>式 (5)(6)(7)、表 1、图 2 分岔图、图 3</td><td>p.5（080501-5）</td></tr>
+<tr><td>图 4（$\omega$）、图 5（$k$）、图 6（$\xi$）</td><td>p.6（080501-6）</td></tr>
+<tr><td>图 7（步长）、表 2、5.1 判据 5σ</td><td>p.7（080501-7）</td></tr>
+<tr><td>表 3、表 4、表 5</td><td>p.8（080501-8）</td></tr>
+<tr><td>图 8/9/10（三波形恢复）、图 11（对比）</td><td>p.9（080501-9）</td></tr>
+<tr><td>结论四条 + 局限</td><td>p.10（080501-10）</td></tr>
+<tr><td>英文摘要</td><td>p.11（080501-11）</td></tr>
+</tbody></table>
+<p><strong>本精读新增的推导与验算（可复算）</strong></p>
+<table><thead><tr><th>结论</th><th>式</th><th>复算法</th></tr></thead><tbody>
+<tr><td>差模线性刚度过零 → $k_c=1/(2\xi)=0.714$</td><td>6.5(a)</td><td>代 $k=1/(2\times0.7)$</td></tr>
+<tr><td>差模阻尼比 2.87、时间常数 0.308 µs</td><td>6.3</td><td>代 $\omega=5\times10^6,k=10,\xi=0.7$</td></tr>
+<tr><td>带宽上限 $B_{out}\to\omega\xi/(2\pi)=557$ kHz</td><td>6.5(b)</td><td>同上</td></tr>
+<tr><td>位移差增益 $1/26$，实测 0.0377 vs 预测 0.0385</td><td>6.4</td><td>命令见下</td></tr>
+<tr><td>位移差 $r=0.9955$、速度差 $r=0.0876$</td><td>6.4</td><td>命令见下</td></tr>
+</tbody></table>
+<pre><code># 在项目根目录执行（Windows Git Bash）
+cd c2-jupyterbook &amp;&amp; ../.venv/Scripts/python.exe - &lt;&lt;'PY'
+import numpy as np, sys; sys.path.insert(0,'_src'); import c2sim as S
+t = np.arange(0, 40e-6, 1e-9); A, c, b = 0.632, 3e-6, 20e-6
+drive = A*np.exp(-((t-b)/c)**2)
+so, X = S.simulate(t, drive=drive, return_state=True,
+                   omega=5e6, k=10.0, xi=0.7, F=0.2, h=1e-9)
+dx, dv = X[0,:,0]-X[0,:,2], X[0,:,1]-X[0,:,3]
+print("peak|dx|", abs(dx).max(), "gain", abs(dx).max()/A, "pred", 1/26)
+print("r(dx)", np.corrcoef(dx,drive)[0,1], "r(dv)", np.corrcoef(dv,drive)[0,1])
+PY</code></pre>
+<p><strong>待核实项</strong></p>
+<ul><li>[ ] 4.3 节"$k&lt;1$ 失效"是论文实测还是引用他人结论（p.6 原文只写现象、未标出处）</li><li>[ ] 5.2 节"训练 100 个样本"的训练对象（原文未说明）</li><li>[ ] 表 3 的噪声带宽（原文只给方差 $D=0.1$）</li><li>[ ] 该文被引情况与后续改进（需检索 CNKI / 专利，按项目纪律先查撞车再谈新颖性）</li></ul>
+<hr>
+<p><em>生成日期：2026-11-23 · 与 <a href="../c2-jupyterbook/_build/html/index.html"><code>c2-jupyterbook/</code></a>（六章复现）、<a href="../02-阶段二/解读-主要内容2-混沌振子建模与临界阈值.html"><code>解读-主要内容2</code></a>、<a href="../02-阶段二/阶段2-建模与相变-问题回答.html"><code>阶段2</code></a> 互指 · 数字凡标【复现数据】者均可用附录命令复算</em></p></main></body></html>

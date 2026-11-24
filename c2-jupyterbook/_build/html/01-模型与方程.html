@@ -1,0 +1,705 @@
+
+<!DOCTYPE html>
+
+
+<html lang="zh-CN" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>1. 模型与方程 &#8212; C2 完整复现：强耦合 Duffing 振子</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=3c74b3bc" />
+    <link rel="stylesheet" type="text/css" href="_static/togglebutton.css?v=9c3e77be" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=6a604523" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
+
+    <script src="_static/documentation_options.js?v=946197a6"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="_static/togglebutton.js?v=b8b12719"></script>
+    <script src="_static/translations.js?v=beaddf03"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="_static/design-tabs.js?v=fcb327ea"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]]}, "options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '01-模型与方程';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="index" title="索引" href="genindex.html" />
+    <link rel="search" title="搜索" href="search.html" />
+    <link rel="next" title="2. 分岔与相态：两种判据互相校验" href="02-%E5%88%86%E5%B2%94%E4%B8%8E%E7%9B%B8%E6%80%81.html" />
+    <link rel="prev" title="C2 完整复现：强耦合 Duffing 振子的微弱脉冲检测" href="00-%E5%A4%8D%E7%8E%B0%E6%80%BB%E8%A7%88.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="zh-CN"/>
+  <meta name="docsearch:version" content="" />
+  
+    
+    <script src="_static/searchtools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script src="searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">跳转至主要内容</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>回到顶部</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="版本警告"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="网页导航">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="搜索" aria-label="搜索" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">搜索</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="搜索" aria-label="搜索" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">搜索</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="当前页面">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="00-%E5%A4%8D%E7%8E%B0%E6%80%BB%E8%A7%88.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">C2 完整复现：强耦合 Duffing 振子</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="搜索" aria-label="搜索" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">搜索</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="00-%E5%A4%8D%E7%8E%B0%E6%80%BB%E8%A7%88.html">
+                    C2 完整复现：强耦合 Duffing 振子的微弱脉冲检测
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">模型</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">1. 模型与方程</a></li>
+<li class="toctree-l1"><a class="reference internal" href="02-%E5%88%86%E5%B2%94%E4%B8%8E%E7%9B%B8%E6%80%81.html">2. 分岔与相态：两种判据互相校验</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">机理</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="03-%E6%A3%80%E6%B5%8B%E5%8E%9F%E7%90%86.html">3. 检测原理：六个子图，一个被写错的公式</a></li>
+<li class="toctree-l1"><a class="reference internal" href="04-%E4%BF%A1%E5%8F%B7%E9%93%BE%E4%B8%8E%E9%99%90%E5%B8%A6.html">4. 信号链：20 dB 增益从哪来</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">结果</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="05-%E5%8F%82%E6%95%B0%E5%BD%B1%E5%93%8D.html">5. 参数影响：图 3–7 五张图</a></li>
+<li class="toctree-l1"><a class="reference internal" href="06-%E6%A3%80%E6%B5%8B%E9%97%A8%E9%99%90.html">6. 检测门限：表 3 与图 8–10</a></li>
+<li class="toctree-l1"><a class="reference internal" href="07-%E5%8F%82%E6%95%B0%E4%BC%B0%E8%AE%A1.html">7. 参数估计：表 4 幅值、表 5 宽度</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">收尾</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="08-%E7%BB%93%E8%AE%BA%E4%B8%8E%E8%BE%B9%E7%95%8C.html">8. 结论与边界</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="下载此页面">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="_sources/01-模型与方程.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="下载源文件"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="列印成 PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button pst-navbar-icon"
+  title="全屏模式"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="亮色"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="暗色"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button>
+
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="搜索" aria-label="搜索" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+<button class="sidebar-toggle secondary-toggle btn btn-sm pst-navbar-icon" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>1. 模型与方程</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> 目录 </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#holmes-duffing">1.1 从 Holmes 型 Duffing 振子到强耦合</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">1.2 差模方程：强耦合到底做了什么</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="id1">
+<h1>1. 模型与方程<a class="headerlink" href="#id1" title="Link to this heading">#</a></h1>
+<section id="holmes-duffing">
+<h2>1.1 从 Holmes 型 Duffing 振子到强耦合<a class="headerlink" href="#holmes-duffing" title="Link to this heading">#</a></h2>
+<p>原文式 (1) 是标准 Holmes 型：</p>
+<div class="math notranslate nohighlight">
+\[
+\ddot{x} + \xi\dot{x} - x + x^3 = F\cos t
+\]</div>
+<p>做时间尺度变换 <span class="math notranslate nohighlight">\(t=\omega\tau\)</span>（原文式 2），把固定频率 1 rad/s 换成可调的 <span class="math notranslate nohighlight">\(\omega\)</span>：</p>
+<div class="math notranslate nohighlight">
+\[
+\ddot{x} + \omega\xi\dot{x} - \omega^2(x-x^3) = \omega^2 F\cos(\omega t)
+\]</div>
+<p>这一步决定了后面所有参数的量纲：<span class="math notranslate nohighlight">\(\omega\)</span> 越大，同一个 <span class="math notranslate nohighlight">\(F\)</span> 作用越猛，步长必须跟着缩。</p>
+<p>强耦合结构（原文式 4）是两个振子<strong>同时耦合恢复力与阻尼力</strong>：</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\begin{aligned}
+\ddot{x}_1 + \omega\xi\dot{x}_1 + \omega^2\xi k(x_1-x_2) + \omega k(\dot{x}_1-\dot{x}_2) - \omega^2(x_1-x_1^3) &amp;= \omega^2\big[F\cos(\omega t)+s(t)+n(t)\big]\\
+\ddot{x}_2 + \omega\xi\dot{x}_2 + \omega^2\xi k(x_2-x_1) + \omega k(\dot{x}_2-\dot{x}_1) - \omega^2(x_2-x_2^3) &amp;= \omega^2 F\cos(\omega t)
+\end{aligned}
+\end{split}\]</div>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>符号</p></th>
+<th class="head"><p>含义</p></th>
+<th class="head"><p>表 1 默认值</p></th>
+<th class="head"><p>取值区间</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(F\)</span></p></td>
+<td><p>策动力幅值</p></td>
+<td><p>0.2</p></td>
+<td><p>[0, 2]</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\omega\)</span></p></td>
+<td><p>时间尺度因子 (rad/s)</p></td>
+<td><p><span class="math notranslate nohighlight">\(5\times10^6\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(10^5 \sim 5\times10^7\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(k\)</span></p></td>
+<td><p>耦合系数</p></td>
+<td><p>10</p></td>
+<td><p><span class="math notranslate nohighlight">\(10^{-1} \sim 10^3\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\xi\)</span></p></td>
+<td><p>阻尼系数</p></td>
+<td><p>0.7</p></td>
+<td><p><span class="math notranslate nohighlight">\(10^{-2} \sim 10^2\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(h\)</span></p></td>
+<td><p>计算步长</p></td>
+<td><p>1 ns</p></td>
+<td><p>20 ~ 1 ns</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>初始值 <span class="math notranslate nohighlight">\(x_1=x_2=1.4\)</span>、<span class="math notranslate nohighlight">\(\dot x_1=\dot x_2=4\)</span>（原文 5.2 节）。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">sys</span><span class="o">,</span><span class="w"> </span><span class="nn">json</span><span class="o">,</span><span class="w"> </span><span class="nn">pathlib</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s2">"_src"</span><span class="p">)</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">c2sim</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">S</span>
+
+<span class="n">DATA</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="s2">"_data"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+    <span class="s2">"figure.dpi"</span><span class="p">:</span> <span class="mi">110</span><span class="p">,</span> <span class="s2">"font.size"</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+    <span class="s2">"font.sans-serif"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"Microsoft YaHei"</span><span class="p">,</span> <span class="s2">"SimHei"</span><span class="p">,</span> <span class="s2">"DejaVu Sans"</span><span class="p">],</span>
+    <span class="s2">"axes.unicode_minus"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">})</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">load</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">((</span><span class="n">DATA</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">.json"</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">))</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">dual_plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">snri</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">xlabel</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">""</span><span class="p">,</span> <span class="n">logx</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">invert</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+              <span class="n">marks</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ymax</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="n">fig</span><span class="p">,</span> <span class="n">ax1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">7.4</span><span class="p">,</span> <span class="mf">3.5</span><span class="p">))</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">snri</span><span class="p">,</span> <span class="s2">"o-"</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"#1f4e79"</span><span class="p">,</span> <span class="n">ms</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">1.2</span><span class="p">)</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">xlabel</span><span class="p">);</span> <span class="n">ax1</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"SNRI / dB"</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"#1f4e79"</span><span class="p">)</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">"y"</span><span class="p">,</span> <span class="n">colors</span><span class="o">=</span><span class="s2">"#1f4e79"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ymax</span><span class="p">:</span> <span class="n">ax1</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">top</span><span class="o">=</span><span class="n">ymax</span><span class="p">)</span>
+    <span class="n">ax2</span> <span class="o">=</span> <span class="n">ax1</span><span class="o">.</span><span class="n">twinx</span><span class="p">()</span>
+    <span class="n">ax2</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="s2">"s--"</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"#8a3b2e"</span><span class="p">,</span> <span class="n">ms</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">1.2</span><span class="p">)</span>
+    <span class="n">ax2</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"波形相似度 r"</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"#8a3b2e"</span><span class="p">)</span>
+    <span class="n">ax2</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">"y"</span><span class="p">,</span> <span class="n">colors</span><span class="o">=</span><span class="s2">"#8a3b2e"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">logx</span><span class="p">:</span> <span class="n">ax1</span><span class="o">.</span><span class="n">set_xscale</span><span class="p">(</span><span class="s2">"log"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">invert</span><span class="p">:</span> <span class="n">ax1</span><span class="o">.</span><span class="n">invert_xaxis</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">marks</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">xv</span><span class="p">,</span> <span class="n">lab</span> <span class="ow">in</span> <span class="n">marks</span><span class="p">:</span>
+            <span class="n">ax1</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">xv</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"gray"</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">":"</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">ax1</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">xv</span><span class="p">,</span> <span class="n">ax1</span><span class="o">.</span><span class="n">get_ylim</span><span class="p">()[</span><span class="mi">1</span><span class="p">],</span> <span class="n">lab</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="s2">"top"</span><span class="p">,</span>
+                     <span class="n">ha</span><span class="o">=</span><span class="s2">"center"</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"#7a2e12"</span><span class="p">)</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mf">.2</span><span class="p">);</span> <span class="n">ax1</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">();</span> <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="id2">
+<h2>1.2 差模方程：强耦合到底做了什么<a class="headerlink" href="#id2" title="Link to this heading">#</a></h2>
+<p>两个方程相减（令 <span class="math notranslate nohighlight">\(\Delta=x_1-x_2\)</span>，注意<strong>不除以 2</strong>）：</p>
+<div class="math notranslate nohighlight">
+\[
+\ddot\Delta+(\omega\xi+2\omega k)\dot\Delta+\omega^2(2\xi k-1)\Delta+\omega^2(x_1^3-x_2^3)=\omega^2\big[s(t)+n(t)\big]
+\]</div>
+<p>这一个式子就能解释原文第 4 节的两整节经验曲线：</p>
+<ul class="simple">
+<li><p><strong>刚度项的符号</strong>由 <span class="math notranslate nohighlight">\(2\xi k-1\)</span> 决定。<span class="math notranslate nohighlight">\(k&lt;k_c=1/(2\xi)=0.714\)</span> 时它是<strong>负</strong>的，
+差模仍是双阱——脉冲激励下两振子各奔一个阱，”差分”就等于把信号扔掉。
+这正是原文「<span class="math notranslate nohighlight">\(0&lt;k&lt;1\)</span> 时检测失效」的数学原因。</p></li>
+<li><p><strong>阻尼项</strong>多了 <span class="math notranslate nohighlight">\(2\omega k\)</span>。等效阻尼比
+<span class="math notranslate nohighlight">\(\zeta=(\xi+2k)/\big(2\sqrt{2\xi k-1}\big)\)</span>，<span class="math notranslate nohighlight">\(k=10\)</span> 时等于 <strong>2.87</strong>，<strong>过阻尼</strong>。
+弱耦合（<span class="math notranslate nohighlight">\(k\to0\)</span>）时差模是欠阻尼双阱，会振铃；强耦合把它改成过阻尼单阱跟随。
+这才是”能恢复波形”的真正原因——<strong>不是耦合变大，是差模换了一套阻尼</strong>。</p></li>
+</ul>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">xi</span> <span class="o">=</span> <span class="mf">0.7</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"k_c = 1/(2*xi) = </span><span class="si">{</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">xi</span><span class="p">)</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">   ← 差模由双阱变单阱的门限</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">'k'</span><span class="si">:</span><span class="s2">&gt;7</span><span class="si">}{</span><span class="s1">'2ξk−1'</span><span class="si">:</span><span class="s2">&gt;9</span><span class="si">}{</span><span class="s1">'ζ'</span><span class="si">:</span><span class="s2">&gt;8</span><span class="si">}{</span><span class="s1">'准静态增益'</span><span class="si">:</span><span class="s2">&gt;12</span><span class="si">}</span><span class="s2">  判定"</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">(</span><span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">,</span> <span class="mf">0.714</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">100</span><span class="p">):</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">xi</span><span class="o">*</span><span class="n">k</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="n">d</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">k</span><span class="si">:</span><span class="s2">&gt;7.3f</span><span class="si">}{</span><span class="n">d</span><span class="si">:</span><span class="s2">&gt;9.3f</span><span class="si">}{</span><span class="s1">'—'</span><span class="si">:</span><span class="s2">&gt;8</span><span class="si">}{</span><span class="s1">'—'</span><span class="si">:</span><span class="s2">&gt;12</span><span class="si">}</span><span class="s2">  负刚度：差模仍是双阱"</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="p">(</span><span class="n">xi</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">k</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">d</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">k</span><span class="si">:</span><span class="s2">&gt;7.3f</span><span class="si">}{</span><span class="n">d</span><span class="si">:</span><span class="s2">&gt;9.3f</span><span class="si">}{</span><span class="n">z</span><span class="si">:</span><span class="s2">&gt;8.2f</span><span class="si">}{</span><span class="mi">1</span><span class="o">/</span><span class="n">d</span><span class="si">:</span><span class="s2">&gt;12.4f</span><span class="si">}</span><span class="s2">  </span><span class="si">{</span><span class="s1">'过阻尼'</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">z</span><span class="o">&gt;</span><span class="mi">1</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">'欠阻尼'</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>k_c = 1/(2*xi) = 0.7143   ← 差模由双阱变单阱的门限
+
+      k    2ξk−1       ζ       准静态增益  判定
+  0.300   -0.580       —           —  负刚度：差模仍是双阱
+  0.500   -0.300       —           —  负刚度：差模仍是双阱
+  0.700   -0.020       —           —  负刚度：差模仍是双阱
+  0.714   -0.000       —           —  负刚度：差模仍是双阱
+  1.000    0.400    2.13      2.5000  过阻尼
+  3.000    3.200    1.87      0.3125  过阻尼
+ 10.000   13.000    2.87      0.0769  过阻尼
+100.000  139.000    8.51      0.0072  过阻尼
+</pre></div>
+</div>
+</div>
+</div>
+<p>准静态下忽略非线性项，<span class="math notranslate nohighlight">\(\Delta \approx s/(2\xi k-1)\)</span>。<span class="math notranslate nohighlight">\(k=10\)</span> 时增益 <span class="math notranslate nohighlight">\(1/13\)</span>。
+<strong>这个增益小于 1</strong>，所以差分通道不会凭空提高灵敏度——信号和噪声被同比例压低，SNR 不变。
+第 4 章会看到，这正是”必须靠限带来换信噪比”的原因。</p>
+<p>实测增益比 <span class="math notranslate nohighlight">\(1/13\)</span> 还低一些，因为 <span class="math notranslate nohighlight">\(x_1^3-x_2^3\approx3x^2\Delta\)</span> 提供了一部分负刚度修正。
+下面验证无信号时两振子是否严格同步。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">T</span><span class="p">,</span> <span class="n">h</span> <span class="o">=</span> <span class="mf">40e-6</span><span class="p">,</span> <span class="mf">1e-9</span>
+<span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">T</span><span class="o">/</span><span class="n">h</span><span class="p">))</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">h</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"时长 </span><span class="si">{</span><span class="n">T</span><span class="o">*</span><span class="mf">1e6</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2"> us，步长 </span><span class="si">{</span><span class="n">h</span><span class="o">*</span><span class="mf">1e9</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2"> ns，共 </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">t</span><span class="p">)</span><span class="si">}</span><span class="s2"> 点，"</span>
+      <span class="sa">f</span><span class="s2">"约 </span><span class="si">{</span><span class="n">T</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mf">5e6</span><span class="p">)</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> 个激励周期"</span><span class="p">)</span>
+
+<span class="n">so0</span> <span class="o">=</span> <span class="n">S</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">batch</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"无信号时 max|ẋ1−ẋ2| = </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">so0</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">:</span><span class="s2">.2e</span><span class="si">}</span><span class="s2">   ← 浮点零，不是「很小」"</span><span class="p">)</span>
+<span class="n">so1</span> <span class="o">=</span> <span class="n">S</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">drive</span><span class="o">=</span><span class="k">lambda</span> <span class="n">tt</span><span class="p">:</span> <span class="mf">0.0</span><span class="o">*</span><span class="n">tt</span><span class="p">,</span> <span class="n">batch</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"零驱动同解：max|ẋ1−ẋ2| = </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">so1</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">:</span><span class="s2">.2e</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>时长 40 us，步长 1 ns，共 40001 点，约 31.8 个激励周期
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>无信号时 max|ẋ1−ẋ2| = 1.16e-10   ← 浮点零，不是「很小」
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>零驱动同解：max|ẋ1−ẋ2| = 1.16e-10
+</pre></div>
+</div>
+</div>
+</div>
+<p>结果是机器精度 0。这意味着<strong>任何非零的 <span class="math notranslate nohighlight">\(\dot x_1-\dot x_2\)</span> 都由 <span class="math notranslate nohighlight">\(s(t)\)</span> 或 <span class="math notranslate nohighlight">\(n(t)\)</span> 直接引起</strong>，
+没有基线偏置要标定——原文说它”不受初始状态限制”即指此。第 4 章会看到，这个性质让
+<span class="math notranslate nohighlight">\(P_{fa}\)</span> 可以解析算出。</p>
+<p>下一章看没有信号时系统自身的相态地图。</p>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./."
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="00-%E5%A4%8D%E7%8E%B0%E6%80%BB%E8%A7%88.html"
+       title="上一页">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">上一页</p>
+        <p class="prev-next-title">C2 完整复现：强耦合 Duffing 振子的微弱脉冲检测</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="02-%E5%88%86%E5%B2%94%E4%B8%8E%E7%9B%B8%E6%80%81.html"
+       title="下一页">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">下一页</p>
+        <p class="prev-next-title">2. 分岔与相态：两种判据互相校验</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item"><div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> 目录
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#holmes-duffing">1.1 从 Holmes 型 Duffing 振子到强耦合</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">1.2 差模方程：强耦合到底做了什么</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+作者： 李俊 · 原文：曹保锋 等，《物理学报》2019, 68(8): 080501
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+<div class="extra_footer">
+  复现口径、对不上的数字及其原因，见第 8 章「结论与边界」。
+</div>
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

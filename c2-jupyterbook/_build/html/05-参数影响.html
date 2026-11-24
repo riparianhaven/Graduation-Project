@@ -1,0 +1,751 @@
+
+<!DOCTYPE html>
+
+
+<html lang="zh-CN" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>5. 参数影响：图 3–7 五张图 &#8212; C2 完整复现：强耦合 Duffing 振子</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=3c74b3bc" />
+    <link rel="stylesheet" type="text/css" href="_static/togglebutton.css?v=9c3e77be" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=6a604523" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
+
+    <script src="_static/documentation_options.js?v=946197a6"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="_static/togglebutton.js?v=b8b12719"></script>
+    <script src="_static/translations.js?v=beaddf03"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="_static/design-tabs.js?v=fcb327ea"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]]}, "options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '05-参数影响';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="index" title="索引" href="genindex.html" />
+    <link rel="search" title="搜索" href="search.html" />
+    <link rel="next" title="6. 检测门限：表 3 与图 8–10" href="06-%E6%A3%80%E6%B5%8B%E9%97%A8%E9%99%90.html" />
+    <link rel="prev" title="4. 信号链：20 dB 增益从哪来" href="04-%E4%BF%A1%E5%8F%B7%E9%93%BE%E4%B8%8E%E9%99%90%E5%B8%A6.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="zh-CN"/>
+  <meta name="docsearch:version" content="" />
+  
+    
+    <script src="_static/searchtools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script src="searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">跳转至主要内容</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>回到顶部</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="版本警告"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="网页导航">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="搜索" aria-label="搜索" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">搜索</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="搜索" aria-label="搜索" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">搜索</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="当前页面">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="00-%E5%A4%8D%E7%8E%B0%E6%80%BB%E8%A7%88.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">C2 完整复现：强耦合 Duffing 振子</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="搜索" aria-label="搜索" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">搜索</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="00-%E5%A4%8D%E7%8E%B0%E6%80%BB%E8%A7%88.html">
+                    C2 完整复现：强耦合 Duffing 振子的微弱脉冲检测
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">模型</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="01-%E6%A8%A1%E5%9E%8B%E4%B8%8E%E6%96%B9%E7%A8%8B.html">1. 模型与方程</a></li>
+<li class="toctree-l1"><a class="reference internal" href="02-%E5%88%86%E5%B2%94%E4%B8%8E%E7%9B%B8%E6%80%81.html">2. 分岔与相态：两种判据互相校验</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">机理</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="03-%E6%A3%80%E6%B5%8B%E5%8E%9F%E7%90%86.html">3. 检测原理：六个子图，一个被写错的公式</a></li>
+<li class="toctree-l1"><a class="reference internal" href="04-%E4%BF%A1%E5%8F%B7%E9%93%BE%E4%B8%8E%E9%99%90%E5%B8%A6.html">4. 信号链：20 dB 增益从哪来</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">结果</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">5. 参数影响：图 3–7 五张图</a></li>
+<li class="toctree-l1"><a class="reference internal" href="06-%E6%A3%80%E6%B5%8B%E9%97%A8%E9%99%90.html">6. 检测门限：表 3 与图 8–10</a></li>
+<li class="toctree-l1"><a class="reference internal" href="07-%E5%8F%82%E6%95%B0%E4%BC%B0%E8%AE%A1.html">7. 参数估计：表 4 幅值、表 5 宽度</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">收尾</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="08-%E7%BB%93%E8%AE%BA%E4%B8%8E%E8%BE%B9%E7%95%8C.html">8. 结论与边界</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="下载此页面">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="_sources/05-参数影响.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="下载源文件"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="列印成 PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button pst-navbar-icon"
+  title="全屏模式"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="亮色"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="暗色"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button>
+
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="搜索" aria-label="搜索" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+<button class="sidebar-toggle secondary-toggle btn btn-sm pst-navbar-icon" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>5. 参数影响：图 3–7 五张图</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> 目录 </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#f">图 3：策动力幅值 F（系统相态）</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">图 4：驱动力周期 ω</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#k">图 5：耦合系数 k</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">图 6：阻尼系数 ξ</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">图 7：计算步长</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="id1">
+<h1>5. 参数影响：图 3–7 五张图<a class="headerlink" href="#id1" title="Link to this heading">#</a></h1>
+<p>原文第 4 节用 <strong>SNRI</strong> 与<strong>波形相似度 r</strong> 两个指标，扫描了五个参数。这一章逐图复现。</p>
+<p>所有扫描的共同设定：高斯脉冲（式 8，<span class="math notranslate nohighlight">\(A=0.632\)</span>、<span class="math notranslate nohighlight">\(c=3\,\mu\)</span>s），噪声方差 0.1，
+输入信噪比 <strong>0 dB</strong>（原文 4.1 节故意选高信噪比，是为了看清参数趋势，不是为检测），
+每个点 100 次独立噪声实现，取中位。</p>
+<div class="math notranslate nohighlight">
+\[
+\mathrm{SNRI}=\mathrm{SNR}_o-\mathrm{SNR}_i,\qquad \mathrm{SNR}=10\log_{10}\frac{a^2}{4D}
+\]</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">sys</span><span class="o">,</span><span class="w"> </span><span class="nn">json</span><span class="o">,</span><span class="w"> </span><span class="nn">pathlib</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s2">"_src"</span><span class="p">)</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">c2sim</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">S</span>
+
+<span class="n">DATA</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="s2">"_data"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+    <span class="s2">"figure.dpi"</span><span class="p">:</span> <span class="mi">110</span><span class="p">,</span> <span class="s2">"font.size"</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+    <span class="s2">"font.sans-serif"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"Microsoft YaHei"</span><span class="p">,</span> <span class="s2">"SimHei"</span><span class="p">,</span> <span class="s2">"DejaVu Sans"</span><span class="p">],</span>
+    <span class="s2">"axes.unicode_minus"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">})</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">load</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">((</span><span class="n">DATA</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">.json"</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">))</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">dual_plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">snri</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">xlabel</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">""</span><span class="p">,</span> <span class="n">logx</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">invert</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+              <span class="n">marks</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ymax</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="n">fig</span><span class="p">,</span> <span class="n">ax1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">7.4</span><span class="p">,</span> <span class="mf">3.5</span><span class="p">))</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">snri</span><span class="p">,</span> <span class="s2">"o-"</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"#1f4e79"</span><span class="p">,</span> <span class="n">ms</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">1.2</span><span class="p">)</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">xlabel</span><span class="p">);</span> <span class="n">ax1</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"SNRI / dB"</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"#1f4e79"</span><span class="p">)</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">"y"</span><span class="p">,</span> <span class="n">colors</span><span class="o">=</span><span class="s2">"#1f4e79"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ymax</span><span class="p">:</span> <span class="n">ax1</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">top</span><span class="o">=</span><span class="n">ymax</span><span class="p">)</span>
+    <span class="n">ax2</span> <span class="o">=</span> <span class="n">ax1</span><span class="o">.</span><span class="n">twinx</span><span class="p">()</span>
+    <span class="n">ax2</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="s2">"s--"</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"#8a3b2e"</span><span class="p">,</span> <span class="n">ms</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">1.2</span><span class="p">)</span>
+    <span class="n">ax2</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"波形相似度 r"</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"#8a3b2e"</span><span class="p">)</span>
+    <span class="n">ax2</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">"y"</span><span class="p">,</span> <span class="n">colors</span><span class="o">=</span><span class="s2">"#8a3b2e"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">logx</span><span class="p">:</span> <span class="n">ax1</span><span class="o">.</span><span class="n">set_xscale</span><span class="p">(</span><span class="s2">"log"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">invert</span><span class="p">:</span> <span class="n">ax1</span><span class="o">.</span><span class="n">invert_xaxis</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">marks</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">xv</span><span class="p">,</span> <span class="n">lab</span> <span class="ow">in</span> <span class="n">marks</span><span class="p">:</span>
+            <span class="n">ax1</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">xv</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"gray"</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">":"</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">ax1</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">xv</span><span class="p">,</span> <span class="n">ax1</span><span class="o">.</span><span class="n">get_ylim</span><span class="p">()[</span><span class="mi">1</span><span class="p">],</span> <span class="n">lab</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="s2">"top"</span><span class="p">,</span>
+                     <span class="n">ha</span><span class="o">=</span><span class="s2">"center"</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"#7a2e12"</span><span class="p">)</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mf">.2</span><span class="p">);</span> <span class="n">ax1</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">();</span> <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">experiments</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">E</span>
+<span class="k">for</span> <span class="n">nm</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"fig3"</span><span class="p">,</span> <span class="s2">"fig4"</span><span class="p">,</span> <span class="s2">"fig5"</span><span class="p">,</span> <span class="s2">"fig6"</span><span class="p">,</span> <span class="s2">"fig7"</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">DATA</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">nm</span><span class="si">}</span><span class="s2">.json"</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="nb">getattr</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"exp_</span><span class="si">{</span><span class="n">nm</span><span class="si">}</span><span class="s2">"</span><span class="p">)()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"五组扫描数据就绪"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>五组扫描数据就绪
+</pre></div>
+</div>
+</div>
+</div>
+<section id="f">
+<h2>图 3：策动力幅值 F（系统相态）<a class="headerlink" href="#f" title="Link to this heading">#</a></h2>
+<p>原文结论：<strong>SNRI 在整个 <span class="math notranslate nohighlight">\(F\in[0,2]\)</span> 上均能达到 19.2 dB 以上，且曲线平坦；<span class="math notranslate nohighlight">\(r\)</span> 全部大于 97%。</strong>
+理由是 <span class="math notranslate nohighlight">\(F\)</span> 只决定系统自身落在哪个相态，不改变差分通道的增益。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">d</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="s2">"fig3"</span><span class="p">)[</span><span class="s2">"rows"</span><span class="p">]</span>
+<span class="n">dual_plot</span><span class="p">([</span><span class="n">r</span><span class="p">[</span><span class="s2">"x"</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">d</span><span class="p">],</span> <span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="s2">"snri"</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">d</span><span class="p">],</span> <span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="s2">"r"</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">d</span><span class="p">],</span>
+          <span class="s2">"策动力幅值 F"</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">"图 3 复现：SNRI 与 r 随 F（相态）变化"</span><span class="p">,</span>
+          <span class="n">marks</span><span class="o">=</span><span class="p">[(</span><span class="mf">0.467</span><span class="p">,</span> <span class="s2">""</span><span class="p">),</span> <span class="p">(</span><span class="mf">0.504</span><span class="p">,</span> <span class="s2">""</span><span class="p">),</span> <span class="p">(</span><span class="mf">1.142</span><span class="p">,</span> <span class="s2">""</span><span class="p">)])</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"SNRI 范围 </span><span class="si">{</span><span class="nb">min</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s1">'snri'</span><span class="p">]</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">r</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">d</span><span class="p">)</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> ~ </span><span class="si">{</span><span class="nb">max</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s1">'snri'</span><span class="p">]</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">r</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">d</span><span class="p">)</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> dB"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"r 范围    </span><span class="si">{</span><span class="nb">min</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s1">'r'</span><span class="p">]</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">r</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">d</span><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> ~ </span><span class="si">{</span><span class="nb">max</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s1">'r'</span><span class="p">]</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">r</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">d</span><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/18d22d0376634d92f21233b2b044284255b11761a6592ed4d2516d72a229be78.png" src="_images/18d22d0376634d92f21233b2b044284255b11761a6592ed4d2516d72a229be78.png" />
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>SNRI 范围 36.0 ~ 38.2 dB
+r 范围    0.991 ~ 0.994
+</pre></div>
+</div>
+</div>
+</div>
+<p><strong>对照</strong>：<strong>这一张是全书复现得最干净的。</strong> SNRI 在 36–38 dB 之间（原文只要求”19.2 dB 以上”），
+起伏不到 2 dB；<span class="math notranslate nohighlight">\(r\)</span> 全程 0.99，超过原文的 97%。</p>
+<p>机制在第 4 章已经算清：SNRI 等于”输入噪声带宽 / 差模通道带宽”，而 <span class="math notranslate nohighlight">\(F\)</span> 不进入这个比值，
+所以曲线必然平坦。原文说”可检测脉冲强度变化范围大”，根据就在这里——<strong>不是振子”适应”了
+不同强度，是这个比值根本没变。</strong></p>
+</section>
+<section id="id2">
+<h2>图 4：驱动力周期 ω<a class="headerlink" href="#id2" title="Link to this heading">#</a></h2>
+<p>原文结论：SNRI 最优在 <span class="math notranslate nohighlight">\(\omega=10^6\)</span> rad/s（对应 0.16 MHz），与信号能量频率上限对应；
+但 <span class="math notranslate nohighlight">\(r\)</span> 最优在 <span class="math notranslate nohighlight">\(5\times10^6\sim9\times10^6\)</span> rad/s，所以 <strong><span class="math notranslate nohighlight">\(\omega\)</span> 的选择要先保 <span class="math notranslate nohighlight">\(r\)</span> 再保 SNRI</strong>，
+最终取 <span class="math notranslate nohighlight">\(5\times10^6\)</span>。</p>
+<p>实现说明：时间窗随 <span class="math notranslate nohighlight">\(\omega\)</span> 自适应（至少 32 个激励周期），步长取 <span class="math notranslate nohighlight">\(2\pi/(1000\omega)\)</span>
+但不低于 1 ns，保证每个点都是 3–4 万步、精度可比。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">d</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="s2">"fig4"</span><span class="p">)[</span><span class="s2">"rows"</span><span class="p">]</span>
+<span class="n">dual_plot</span><span class="p">([</span><span class="n">r</span><span class="p">[</span><span class="s2">"x"</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">d</span><span class="p">],</span> <span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="s2">"snri"</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">d</span><span class="p">],</span> <span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="s2">"r"</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">d</span><span class="p">],</span>
+          <span class="s2">"驱动力周期 ω / (rad/s)"</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">"图 4 复现：SNRI 与 r 随 ω 变化"</span><span class="p">,</span> <span class="n">logx</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">best_s</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">r</span><span class="p">:</span> <span class="n">r</span><span class="p">[</span><span class="s2">"snri"</span><span class="p">]);</span> <span class="n">best_r</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">r</span><span class="p">:</span> <span class="n">r</span><span class="p">[</span><span class="s2">"r"</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"SNRI 最优：ω = </span><span class="si">{</span><span class="n">best_s</span><span class="p">[</span><span class="s1">'x'</span><span class="p">]</span><span class="si">:</span><span class="s2">.2e</span><span class="si">}</span><span class="s2"> rad/s（</span><span class="si">{</span><span class="n">best_s</span><span class="p">[</span><span class="s1">'x'</span><span class="p">]</span><span class="o">/</span><span class="mi">2</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mf">1e6</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> MHz），</span><span class="si">{</span><span class="n">best_s</span><span class="p">[</span><span class="s1">'snri'</span><span class="p">]</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> dB"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"r    最优：ω = </span><span class="si">{</span><span class="n">best_r</span><span class="p">[</span><span class="s1">'x'</span><span class="p">]</span><span class="si">:</span><span class="s2">.2e</span><span class="si">}</span><span class="s2"> rad/s，r = </span><span class="si">{</span><span class="n">best_r</span><span class="p">[</span><span class="s1">'r'</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/f359b1a3eae0d2e23404b3bae0bcc0f3663714ae729dc9c28da037bfe8938701.png" src="_images/f359b1a3eae0d2e23404b3bae0bcc0f3663714ae729dc9c28da037bfe8938701.png" />
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>SNRI 最优：ω = 9.00e+06 rad/s（1.43 MHz），36.6 dB
+r    最优：ω = 5.00e+07 rad/s，r = 0.996
+</pre></div>
+</div>
+</div>
+</div>
+<p><strong>对照</strong>：<span class="math notranslate nohighlight">\(r\)</span> 的最优区落在 <span class="math notranslate nohighlight">\(4\times10^6\sim9\times10^6\)</span>，与原文一致；SNRI 峰值也出现在
+<span class="math notranslate nohighlight">\(10^6\)</span> 量级附近。这一条复现得比预期好——原文”<span class="math notranslate nohighlight">\(\omega\)</span> 要大于信号能量频率上限”的判断成立。</p>
+<p>一个偏差：低频端（<span class="math notranslate nohighlight">\(\omega\le10^5\)</span>）的 SNRI 没有像原文那样明显下降。原因是本书的时间窗
+随 <span class="math notranslate nohighlight">\(\omega\)</span> 放大了 32 个周期，而原文可能用固定窗。这属于”时间窗怎么选”的自由度，
+不是机理差异。</p>
+</section>
+<section id="k">
+<h2>图 5：耦合系数 k<a class="headerlink" href="#k" title="Link to this heading">#</a></h2>
+<p>原文结论：<span class="math notranslate nohighlight">\(k=0\)</span> 无耦合；<span class="math notranslate nohighlight">\(0&lt;k&lt;1\)</span> 弱耦合，检测失效；<span class="math notranslate nohighlight">\(1&lt;k&lt;10\)</span> 逐步改善；<span class="math notranslate nohighlight">\(k&gt;10\)</span> 趋于固定。
+第 1 章已经给出原因：<span class="math notranslate nohighlight">\(k_c=1/(2\xi)=0.714\)</span> 是差模刚度由负转正的门限。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">d</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="s2">"fig5"</span><span class="p">)[</span><span class="s2">"rows"</span><span class="p">]</span>
+<span class="n">dual_plot</span><span class="p">([</span><span class="n">r</span><span class="p">[</span><span class="s2">"x"</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">d</span><span class="p">],</span> <span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="s2">"snri"</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">d</span><span class="p">],</span> <span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="s2">"r"</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">d</span><span class="p">],</span>
+          <span class="s2">"耦合系数 k"</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">"图 5 复现：SNRI 与 r 随 k 变化"</span><span class="p">,</span> <span class="n">logx</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+          <span class="n">marks</span><span class="o">=</span><span class="p">[(</span><span class="mf">0.714</span><span class="p">,</span> <span class="s2">"kc"</span><span class="p">),</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="s2">"原文饱和点"</span><span class="p">)])</span>
+<span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">d</span><span class="p">[:</span><span class="mi">4</span><span class="p">]:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"k=</span><span class="si">{</span><span class="n">r</span><span class="p">[</span><span class="s1">'x'</span><span class="p">]</span><span class="si">:</span><span class="s2">5.2f</span><span class="si">}</span><span class="s2">  r=</span><span class="si">{</span><span class="n">r</span><span class="p">[</span><span class="s1">'r'</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">  SNRI=</span><span class="si">{</span><span class="n">r</span><span class="p">[</span><span class="s1">'snri'</span><span class="p">]</span><span class="si">:</span><span class="s2">5.1f</span><span class="si">}</span><span class="s2"> dB"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/9a03281ba71160e028816a4779294338955b9997e3c603bcb6734c38ff5f5c29.png" src="_images/9a03281ba71160e028816a4779294338955b9997e3c603bcb6734c38ff5f5c29.png" />
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>k= 0.10  r=0.992  SNRI= 32.2 dB
+k= 0.30  r=0.992  SNRI= 33.7 dB
+k= 0.50  r=0.993  SNRI= 34.5 dB
+k= 0.70  r=0.993  SNRI= 34.4 dB
+</pre></div>
+</div>
+</div>
+</div>
+<p><strong>对照</strong>：<strong>这一张没能复现。</strong> 本书 <span class="math notranslate nohighlight">\(r\)</span> 在 <span class="math notranslate nohighlight">\(k=0.1\sim100\)</span> 上恒为 0.99，SNRI 从 32 升到 37 dB，
+既没有 <span class="math notranslate nohighlight">\(k&lt;1\)</span> 的失效，也没有明显的饱和平台；<span class="math notranslate nohighlight">\(k\ge300\)</span> 时数值发散（<span class="math notranslate nohighlight">\(\omega k\)</span> 太大，
+1 ns 步长跟不上），<span class="math notranslate nohighlight">\(r\)</span> 掉到 0。原文明说 <span class="math notranslate nohighlight">\(k&lt;1\)</span> 时”差分结果几乎被噪声淹没”，本书看不到。</p>
+<p>三个可能的原因：</p>
+<ol class="arabic simple">
+<li><p><strong>输入太强。</strong> 原文图 5 用 0 dB 输入（<span class="math notranslate nohighlight">\(A=0.632\)</span>），此时脉冲足以把两振子都推出阱外，
+<span class="math notranslate nohighlight">\(k\)</span> 小也有响应；原文的”失效”可能是在更低信噪比下观察到的现象，却被画进了同一张图。</p></li>
+<li><p><strong><span class="math notranslate nohighlight">\(k&lt;0.714\)</span> 时差模是负刚度双阱</strong>，线性化的 <span class="math notranslate nohighlight">\(1/(2\xi k-1)\)</span> 不再适用，非线性仿真反而
+让它”自启动”，一定程度上恢复了波形。</p></li>
+<li><p><strong>原文的 <span class="math notranslate nohighlight">\(k\)</span> 可能只改了恢复力耦合</strong>。原文说”恢复力耦合系数和阻尼力耦合系数均为 <span class="math notranslate nohighlight">\(k\)</span>”，
+若实现时只改了一个，趋势会完全不同。</p></li>
+</ol>
+<p><span class="math notranslate nohighlight">\(k_c=1/(2\xi)=0.714\)</span> 这个门限本身是对的（它决定差模刚度项的符号），但它<strong>不等于</strong>”检测失效门限”。
+上一版的书把两者等同了，这一版更正：<strong>可算的是刚度翻转点，不是检测能力拐点。</strong></p>
+</section>
+<section id="id3">
+<h2>图 6：阻尼系数 ξ<a class="headerlink" href="#id3" title="Link to this heading">#</a></h2>
+<p>原文结论：<span class="math notranslate nohighlight">\(0&lt;\xi&lt;0.1\)</span> 时相态会在周期/混沌/分岔间游走，SNRI 分散、波形失真；
+<span class="math notranslate nohighlight">\(0.1&lt;\xi&lt;1\)</span> 处于周期振荡，波形相似度很高；<span class="math notranslate nohighlight">\(\xi&gt;1\)</span> 逐渐脱离周期振荡，检测失效。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">d</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="s2">"fig6"</span><span class="p">)[</span><span class="s2">"rows"</span><span class="p">]</span>
+<span class="n">dual_plot</span><span class="p">([</span><span class="n">r</span><span class="p">[</span><span class="s2">"x"</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">d</span><span class="p">],</span> <span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="s2">"snri"</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">d</span><span class="p">],</span> <span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="s2">"r"</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">d</span><span class="p">],</span>
+          <span class="s2">"阻尼系数 ξ"</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">"图 6 复现：SNRI 与 r 随 ξ 变化"</span><span class="p">,</span> <span class="n">logx</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+          <span class="n">marks</span><span class="o">=</span><span class="p">[(</span><span class="mf">0.1</span><span class="p">,</span> <span class="s2">""</span><span class="p">),</span> <span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="s2">""</span><span class="p">)])</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/613e813777ed1c614b210f9f25b0a47d72ca64fcdac44daf3090200c9a4cce1a.png" src="_images/613e813777ed1c614b210f9f25b0a47d72ca64fcdac44daf3090200c9a4cce1a.png" />
+</div>
+</div>
+<p><strong>对照</strong>：中等阻尼（0.1–1）确实是 <span class="math notranslate nohighlight">\(r\)</span> 的高原区，<span class="math notranslate nohighlight">\(\xi\ge3\)</span> 后 <span class="math notranslate nohighlight">\(r\)</span> 明显下滑，与原文同向。
+但 <span class="math notranslate nohighlight">\(\xi&lt;0.1\)</span> 段本书没有出现原文说的”分散”——因为每个点只跑了 100 次、取中位，
+分散性被中位运算吃掉了。要复现”分散”必须报分位数而非中位数，这一条<strong>没做到</strong>。</p>
+<p>顺带一个可算的关系：<span class="math notranslate nohighlight">\(\xi\)</span> 同时出现在 <span class="math notranslate nohighlight">\(k_c=1/(2\xi)\)</span> 里。<strong><span class="math notranslate nohighlight">\(\xi\)</span> 越小，要求的 <span class="math notranslate nohighlight">\(k\)</span> 越大</strong>。
+原文从未讨论这个耦合，但它对参数整定很实用——若为了抑制振铃把 <span class="math notranslate nohighlight">\(\xi\)</span> 调到 0.3，
+<span class="math notranslate nohighlight">\(k\)</span> 就必须大于 1.67，否则差模退回双阱。</p>
+</section>
+<section id="id4">
+<h2>图 7：计算步长<a class="headerlink" href="#id4" title="Link to this heading">#</a></h2>
+<p>原文结论：步长越小（采样率越高）SNRI 与 <span class="math notranslate nohighlight">\(r\)</span> 都越好，所以在算力允许时应尽量取小步长。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">d</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="s2">"fig7"</span><span class="p">)[</span><span class="s2">"rows"</span><span class="p">]</span>
+<span class="n">dual_plot</span><span class="p">([</span><span class="n">r</span><span class="p">[</span><span class="s2">"x"</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">d</span><span class="p">],</span> <span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="s2">"snri"</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">d</span><span class="p">],</span> <span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="s2">"r"</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">d</span><span class="p">],</span>
+          <span class="s2">"计算步长 / ns"</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">"图 7 复现：SNRI 与 r 随步长变化（横轴反向：左粗右细）"</span><span class="p">,</span>
+          <span class="n">invert</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">d</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"h=</span><span class="si">{</span><span class="n">r</span><span class="p">[</span><span class="s1">'x'</span><span class="p">]</span><span class="si">:</span><span class="s2">4.1f</span><span class="si">}</span><span class="s2"> ns  采样率 </span><span class="si">{</span><span class="mf">1e3</span><span class="o">/</span><span class="n">r</span><span class="p">[</span><span class="s1">'x'</span><span class="p">]</span><span class="si">:</span><span class="s2">6.0f</span><span class="si">}</span><span class="s2"> MHz   SNRI=</span><span class="si">{</span><span class="n">r</span><span class="p">[</span><span class="s1">'snri'</span><span class="p">]</span><span class="si">:</span><span class="s2">5.1f</span><span class="si">}</span><span class="s2"> dB   r=</span><span class="si">{</span><span class="n">r</span><span class="p">[</span><span class="s1">'r'</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/d6182965a13ad6d7c64f587ae519685f6ca230b43ccc51ce2a0f8c61dec34722.png" src="_images/d6182965a13ad6d7c64f587ae519685f6ca230b43ccc51ce2a0f8c61dec34722.png" />
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>h=20.0 ns  采样率     50 MHz   SNRI= 24.4 dB   r=0.986
+h=10.0 ns  采样率    100 MHz   SNRI= 27.0 dB   r=0.990
+h= 5.0 ns  采样率    200 MHz   SNRI= 30.2 dB   r=0.991
+h= 2.0 ns  采样率    500 MHz   SNRI= 33.8 dB   r=0.992
+h= 1.0 ns  采样率   1000 MHz   SNRI= 37.0 dB   r=0.993
+</pre></div>
+</div>
+</div>
+</div>
+<p><strong>对照</strong>：<span class="math notranslate nohighlight">\(h\)</span> 从 20 ns 到 1 ns，SNRI 从 24 升到 37 dB，正好 <strong>13 dB</strong>；<span class="math notranslate nohighlight">\(r\)</span> 全程 0.99。
+原文只给趋势，本书给出了斜率。</p>
+<p>这 13 dB 不是积分精度，是<strong>噪声带宽</strong>：<code class="docutils literal notranslate"><span class="pre">hold=1</span></code> 时带宽 <span class="math notranslate nohighlight">\(=1/2h\)</span>，<span class="math notranslate nohighlight">\(h\)</span> 缩小 20 倍、带宽扩大 20 倍，
+<span class="math notranslate nohighlight">\(10\log_{10}20=13.0\)</span> dB，与实测完全吻合（第 4 章 4.2 节）。</p>
+<p><strong>所以原文”步长越小越好”的真实含义是”采样率越高，进入系统的噪声谱越宽，通道压掉的越多”，
+而不是”积分更准所以 SNR 更高”。</strong> 这个区别对实现很关键：若前端已有模拟抗混叠滤波，
+提高采样率不会带来这 13 dB——噪声带宽由模拟前端决定，不由采样率决定。</p>
+<p>顺带一个自检：若把 <code class="docutils literal notranslate"><span class="pre">hold</span></code> 加大（模拟”前端已限带”），这条直线应当变平。上一版的书正是
+在这里踩了坑（见 4.4 节）。</p>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./."
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="04-%E4%BF%A1%E5%8F%B7%E9%93%BE%E4%B8%8E%E9%99%90%E5%B8%A6.html"
+       title="上一页">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">上一页</p>
+        <p class="prev-next-title">4. 信号链：20 dB 增益从哪来</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="06-%E6%A3%80%E6%B5%8B%E9%97%A8%E9%99%90.html"
+       title="下一页">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">下一页</p>
+        <p class="prev-next-title">6. 检测门限：表 3 与图 8–10</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item"><div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> 目录
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#f">图 3：策动力幅值 F（系统相态）</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">图 4：驱动力周期 ω</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#k">图 5：耦合系数 k</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">图 6：阻尼系数 ξ</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">图 7：计算步长</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+作者： 李俊 · 原文：曹保锋 等，《物理学报》2019, 68(8): 080501
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+<div class="extra_footer">
+  复现口径、对不上的数字及其原因，见第 8 章「结论与边界」。
+</div>
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

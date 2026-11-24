@@ -1,0 +1,175 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>01-阶段一/阶段1-问题销账.md</title><style>
+:root{--bg:#f6f7f9;--panel:#fff;--line:#e3e7ec;--text:#1b232c;--muted:#63707e;--accent:#2f6fd0;--soft:#eaf1fc}
+@media(prefers-color-scheme:dark){:root{--bg:#14181d;--panel:#1d232a;--line:#303a45;--text:#e7edf3;--muted:#a7b3c0;--accent:#7fb0f5;--soft:#21334d}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.8 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+.bar{position:sticky;top:0;background:var(--panel);border-bottom:1px solid var(--line);padding:9px 24px;font-size:13px;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.bar a{color:var(--accent);text-decoration:none}.bar a:hover{text-decoration:underline}
+.bar .fn{color:var(--muted);margin-left:auto;word-break:break-all}
+main{max-width:980px;margin:0 auto;padding:26px 28px 70px;background:var(--panel);min-height:calc(100vh - 44px);
+  border-left:1px solid var(--line);border-right:1px solid var(--line)}
+h1,h2,h3,h4{line-height:1.4;margin:1.5em 0 .6em;font-weight:650}
+h1{font-size:25px;border-bottom:1px solid var(--line);padding-bottom:10px;margin-top:.4em}
+h2{font-size:20px;border-bottom:1px solid var(--line);padding-bottom:7px}
+h3{font-size:17px}h4{font-size:15px}
+p,li{color:var(--text)}li{margin:.25em 0}
+a{color:var(--accent)}
+code{background:var(--soft);padding:1px 5px;border-radius:4px;font:12.6px ui-monospace,Consolas,monospace}
+pre{background:var(--soft);border:1px solid var(--line);border-radius:8px;padding:14px 16px;overflow:auto}
+pre code{background:none;padding:0}
+blockquote{border-left:3px solid var(--accent);background:var(--soft);margin:12px 0;padding:8px 16px;color:var(--muted)}
+blockquote p{margin:.3em 0}
+.staticnote{max-width:980px;margin:14px auto -8px;padding:9px 14px;border:1px solid var(--line);
+  border-left:3px solid var(--accent);border-radius:0 8px 8px 0;background:var(--soft);
+  font-size:12.6px;color:var(--muted)}
+.staticnote a{color:var(--accent)}
+table{border-collapse:collapse;width:100%;margin:14px 0;font-size:13.4px;display:block;overflow:auto}
+th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top}
+th{background:var(--soft);color:var(--muted);white-space:nowrap}
+tr:nth-child(even) td{background:rgba(127,150,180,.045)}
+hr{border:none;border-top:1px solid var(--line);margin:26px 0}
+strong{font-weight:650}
+</style>
+<script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']]},
+  options:{skipHtmlTags:['script','noscript','style','textarea','pre','code','annotation']}};</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+</head><body>
+<div class="bar"><a href="../index.html">← 返回资料索引</a>
+<a href="阶段1-问题销账.md">查看 Markdown 源码</a><span class="fn">01-阶段一/阶段1-问题销账.md</span></div>
+<div class="staticnote">这是 <b>静态排版副本</b>，生成于 2026-11-24 20:12。直接双击 <code>index.html</code> 时看到的就是它；若 Markdown 刚改过，请在工作区运行 <code>py build_static.py</code> 重新生成，或用 <code>start_index.bat</code> 启动本地服务查看实时渲染版。页内公式由 MathJax 渲染，需要联网。</div><main><h1>阶段 1 问题清单·销账</h1>
+<blockquote><p><strong>用途</strong>：把 <a href="阶段1-问题清单.html">阶段 1 问题清单</a> 的 12 条逐条结清——能算的给出数值，能查的给出出处，需要外部输入的明确标"待谁给什么"。</p><p><strong>性质</strong>：<strong>结清记录</strong>，不是新问题清单。原清单保持原样（它记录的是"当时不知道什么"），本文件记录"现在知道了什么"。</p><p><strong>核实日期</strong>：2026-11-23</p><p><strong>纪律</strong>：本条引用的每个数字都注明来源（本机复算 / 文献原文 / 解析推导）。凡属推断，标【推断】；凡未核实，标【待核】。</p></blockquote>
+<hr>
+<h2>一、总表</h2>
+<p><strong>12 条：7 条已结清（✅）、3 条部分结清（🟡）、2 条必须外部输入（🔴）。</strong></p>
+<p>其中 <strong>2 条结论对开题表述不利</strong>（Q1、Q5），需要改口径而不是继续补数据——见第五节。</p>
+<table><thead><tr><th>#</th><th>问题</th><th>状态</th><th>一句话结论</th></tr></thead><tbody>
+<tr><td>Q1 ★</td><td>为什么只报 $P_d$ 不报 $P_{fa}$？</td><td>🟡</td><td>现象属实，但<strong>"补 $P_{fa}$"已不是空白</strong>：2011 年就有解析式，2016 年有人直接报 $P_d&gt;90\%$ / $P_{fa}&lt;1\%$</td></tr>
+<tr><td>Q2 ★</td><td>峰峰值怎么换成噪声密度？</td><td>✅</td><td>差一个 $\sqrt{B}$；E3 的 0.5 nT 按 0.5 Hz 观测带折 118 pT/√Hz，按 10 kHz 折 0.8 pT/√Hz——<strong>同一数字差 148 倍</strong>，故不换算、只报窗内峰峰值</td></tr>
+<tr><td>Q3 ★</td><td>非线性残差在温漂下剩多少？</td><td>🟡</td><td>外部量级已定：磁通门零偏 0.1–0.6 nT/℃，在轨实测是地面值的 <strong>6 倍</strong>；10 ℃ 变温即可吃掉 E1 的 20 nT 补偿收益</td></tr>
+<tr><td>Q4 ★</td><td>SNR 在 $D\to0$ 发散，报什么？</td><td>✅</td><td>C2 复现给出实证：所谓"20 dB 增益"= 带宽比 $10\lg(f_s/2B)$，理论 29.9 dB、实测 27.2 dB。主指标只能是 $P_d@$固定 $P_{fa}$</td></tr>
+<tr><td>Q5 ★</td><td>有没有人给过完整 ROC？</td><td>✅</td><td><strong>有</strong>。EUSIPCO 2024 直接给 ROC 与 +2/+3/+5 dB 增益；混沌振子线上 2011/2016 两篇都给过 $P_{fa}$</td></tr>
+<tr><td>Q6</td><td>$\lambda_c$ 换参数漂多少？</td><td>🟡</td><td>步长维度已答（0.730–0.740，±0.005）；另更正一处混淆：$k_c=1/(2\xi)$ 是<strong>刚度翻转点</strong>，不是检测门限</td></tr>
+<tr><td>Q7</td><td>三振子盲区边界多模糊？</td><td>✅</td><td>解析解：$\Delta_{\max}=\arccos\frac{C^2-\lambda^2-\gamma^2}{2\lambda\gamma}$。$\pm60.69°$ <strong>精确对应 $\gamma=0.02$ 与 $\lambda=0.72$</strong>，不是几何常数</td></tr>
+<tr><td>Q8</td><td>变尺度会缩放噪声带宽吗？</td><td>✅</td><td>会，但方向与原先担心相反：白噪抽取 $R$ 倍使带内功率 <strong>+10 lg R</strong>（R=10 → +9.9 dB）；$1/f$ 噪声只 +0.5 dB。<strong>故变尺度实验必须用有色噪声</strong></td></tr>
+<tr><td>Q9</td><td>两个 −15 dB 差多少才等价？</td><td>✅</td><td>差值 $=10\lg\frac{f_s}{2B}$，<strong>不是常数</strong>。$f_s$=1 kHz、$B$=10 Hz 时 17 dB；据此 ★[2] 的 −23 dB 折成整段能量比是 <strong>−40 dB</strong>，与 ★[3] 的 −15 dB 差 25 dB</td></tr>
+<tr><td>Q10</td><td>"极低频"取哪一段？</td><td>🔴</td><td>仍待导师给实测对象与频段；本文件只给"默认 0.1–10 Hz + 换段触发条件"</td></tr>
+<tr><td>Q11</td><td>阵列用 OR 还是多数表决？</td><td>✅</td><td>同 $P_{fa}=1\%$ 下多数表决大幅占优：$N=3$、单元 $d=2$ 时 66.9% vs OR 的 23.8%（<strong>+43 pp</strong>）；$N=5$ 时 +58 pp</td></tr>
+<tr><td>Q12</td><td>验收报 $P_d@P_{fa}$ 还是误差棒？</td><td>🔴</td><td>仍待导师确认；建议两个都给，且 $P_{fa}$ 固定为 1%</td></tr>
+</tbody></table>
+<hr>
+<h2>二、七条已结清</h2>
+<h3>Q2 ★｜峰峰值 → 噪声密度：差的是 $\sqrt{B}$，不是 6</h3>
+<p>换算式（高斯噪声）：</p>
+<p>$$\mathrm{PSD}=\frac{V_{pp}}{6\sqrt{B}}\quad[\mathrm{T}/\sqrt{\mathrm{Hz}}]$$</p>
+<p>E3 的"10 s 采 10 点取峰峰值 = 0.5 nT"，对应 $f_s=1$ Hz、奈奎斯特带宽 $B\approx0.5$ Hz：</p>
+<table><thead><tr><th>假设带宽</th><th>折算 PSD</th><th>与 1 pT/√Hz 的关系</th></tr></thead><tbody>
+<tr><td>$B=0.5$ Hz（10 s/10 点的实际观测带）</td><td><strong>118 pT/√Hz</strong></td><td>差 118 倍</td></tr>
+<tr><td>$B=10$ kHz（E3 传感器全带宽）</td><td><strong>0.8 pT/√Hz</strong></td><td>吻合</td></tr>
+</tbody></table>
+<p><strong>结论</strong>：同一个 0.5 nT，两种折算差 148 倍（$=\sqrt{10^4/0.5}$）。所以</p>
+<ol><li>E3 的 0.5 nT <strong>不是噪声底</strong>，而是"1 Hz 采样、10 s 窗内漂移 + 噪声的总量"——低频段 $1/f$ 占主导，PSD 不是常数，<strong>不能向宽带折算</strong>；</li><li>论文里只能写"屏蔽筒内、10 s 窗、峰峰值 0.5 nT"，不写等效密度；</li><li>若必须与 D5 的 pT/√Hz 并列，唯一合法做法是<strong>自己测一段 PSD</strong>，而不是拿 6 去除。</li></ol>
+<h3>Q4 ★｜SNR 发散的应对：C2 复现给了实证</h3>
+<p>C2（曹保锋等 2019）把"信噪比增益 20 dB 以上"当卖点。本机完整复现（<code>c2-jupyterbook/</code> 第 4 章）把这条增益算成了式子：</p>
+<ul><li>差模通道是二阶过阻尼低通，$\tau=0.308\,\mu s$，$\zeta=2.87$，等效噪声带宽 $B=1/(2\pi\tau)=516$ kHz；</li><li>输入是 1 GHz 采样下的逐点白噪声，带宽 500 MHz；</li><li>$10\lg(500\,\mathrm{MHz}/516\,\mathrm{kHz})=29.9$ dB，<strong>实测 SNRI 27.2 dB</strong>。</li></ul>
+<p><strong>这不是非线性增益，是带宽比。</strong> 所以 Q4 的答案不是"换个指标描述"，而是：<strong>任何 SNR 增益数字都必须同时给出两端带宽</strong>，否则它只是把带宽差记在了算法头上。主指标固定为 $P_d@P_{fa}$。</p>
+<h3>Q5 ★｜ROC 不是空白——这条最需要改口径</h3>
+<p>检索到三档证据：</p>
+<table><thead><tr><th>层次</th><th>工作</th><th>给了什么</th></tr></thead><tbody>
+<tr><td>混沌振子（最早）</td><td>Jin T, Zhang H. <em>Sci China Inf Sci</em>, 2011, 54: 2324-2337</td><td><strong>$P_{fa}$ 与 $P_d$ 的解析表达式</strong>、策动力阈值选取公式、幅值估计</td></tr>
+<tr><td>混沌振子（工程）</td><td>张悦, 刘尚合, 胡小锋, 等. 高电压技术, 2016, 42(6): 2009-2016</td><td>−20 dB 时 $P_d&gt;90\%$，低于 −20 dB 时 $P_{fa}&lt;1\%$——<strong>两个指标连在一起报</strong></td></tr>
+<tr><td>MAD 主流（最新）</td><td>Roignant T, 等. EUSIPCO 2024: 2382-2386</td><td>ROC 曲线，给出 +2 dB（噪声优化）/+3 dB（双传感器）/+5 dB（合计）</td></tr>
+</tbody></table>
+<p>另外 IEEE Sensors J 2023, 23(18) 有学习类 MAD 方法报 AUC 与 FAR【页码待核】。</p>
+<p><strong>结论</strong>：D1（2021 综述）说的"无统一 ROC 口径"在<strong>基准层面</strong>仍成立，但"没人给过 $P_{fa}$"已被推翻两次（2011、2016）。所以本课题不能写"首次补上虚警率"，只能写：</p>
+<blockquote><p>在<strong>极低频周期磁信号 + 变尺度 + 三振子阵列</strong>这一组合下给出 $P_d$–$P_{fa}$–SNR，并同时报阈值带与参数估计误差。</p></blockquote>
+<p>这是范围更窄、但站得住的表述。<strong>这两篇必须入库并读全文</strong>（尤其是 2011 那篇的 $P_{fa}$ 公式，可能直接决定本课题要不要自己推）。</p>
+<h3>Q7｜盲区边界：$60.69°$ 不是几何常数</h3>
+<p>由合成幅值判据 $C^2=\lambda^2+\gamma^2+2\lambda\gamma\cos\Delta\ge0.73^2$ 解出允许的相位失配：</p>
+<p>$$\Delta_{\max}(\lambda,\gamma)=\arccos\frac{0.73^2-\lambda^2-\gamma^2}{2\lambda\gamma}$$</p>
+<p>在 $\lambda=0.72$ 工作点上实测（3 振子 0°/±120°，36 万点全周扫描）：</p>
+<table><thead><tr><th>$\gamma$</th><th>单振子覆盖</th><th>三振子覆盖</th><th>$\Delta_{\max}$</th></tr></thead><tbody>
+<tr><td>0.010</td><td>0.0%</td><td><strong>0.0%</strong></td><td>0°</td></tr>
+<tr><td>0.015</td><td>27.0%</td><td>81.1%</td><td>48.63°</td></tr>
+<tr><td>0.019</td><td>32.7%</td><td>98.1%</td><td>58.88°</td></tr>
+<tr><td><strong>0.0196</strong></td><td>33.3%</td><td><strong>100%</strong></td><td>60.00°</td></tr>
+<tr><td><strong>0.020</strong></td><td>33.7%</td><td>100%</td><td><strong>60.69°</strong> ← 与 ★[2] 完全吻合</td></tr>
+<tr><td>0.050</td><td>44.7%</td><td>100%</td><td>80.41°</td></tr>
+</tbody></table>
+<p>三条直接可用的结论：</p>
+<ol><li><strong>$\pm60.69°$ 是 $\gamma=0.02$、$\lambda=0.72$ 时的取值</strong>，论文没写这个依赖。换幅值就换窗口；</li><li><strong>全相位覆盖有阈值</strong>：$\gamma_c=\frac{-\lambda+\sqrt{\lambda^2+4(0.73^2-\lambda^2)}}{2}$。$\lambda=0.72\to\gamma_c=0.0196$；$\lambda=0.70\to0.0567$；$\lambda=0.73\to0$（但此时纯噪声虚警已 10%，见复现记录）；</li><li>$\gamma&lt;\gamma_c$ 时盲区<strong>不是"模糊"，是硬漏检</strong>——最坏相位处三路都不达标。噪声只会让它更差，不会更好。</li></ol>
+<p>所以 Q7 的"待实验"部分只剩"噪声下边界退化多少"，几何部分已经封口。<strong>没有噪声时就已经有盲区</strong>，这一点比原问题设想的更严重。</p>
+<h3>Q8｜变尺度确实改口径，但方向反了</h3>
+<p>原担心："变尺度重采样会不会把噪声带宽一起缩放？"实测（$T=300$ s，$f_s=1$ kHz，按 $R$ 抽取，比较 0–10 Hz 带内功率）：</p>
+<table><thead><tr><th>噪声</th><th>$R=5$</th><th>$R=10$</th><th>$R=20$</th></tr></thead><tbody>
+<tr><td>白噪（$\alpha=0$）</td><td>+6.9 dB</td><td><strong>+9.9 dB</strong></td><td>+12.9 dB</td></tr>
+<tr><td>$1/f$（$\alpha=1$）</td><td>+0.20 dB</td><td>+0.53 dB</td><td>+0.75 dB</td></tr>
+<tr><td>$1/f^{1.5}$（$\alpha=1.5$）</td><td>−0.04 dB</td><td>+0.03 dB</td><td>+0.02 dB</td></tr>
+</tbody></table>
+<p>读法：白噪抽取 $R$ 倍，0–10 Hz 带内把 $0$–$10R$ Hz 的噪声全折进来，功率涨 $10\lg R$；而 $1/f$ 噪声的能量本来就压在低频，<strong>能折进来的高频分量很少</strong>，所以几乎不动。</p>
+<p><strong>这条改的是实验设计</strong>：用白噪做变尺度实验，会凭空造出 10 dB 的"性能下降"，然后被误归因于变尺度算法——实际上那是噪声模型不对。阶段 2/3 的变尺度实验<strong>必须用 B 档 $1/f$ 噪声</strong>，且 $\sigma$ 要按 $R$ 重标。</p>
+<h3>Q9｜两个 −15 dB 之间差 25 dB，且差值不是常数</h3>
+<p>主口径（整段能量比）与对照口径（带内功率比）在白噪下差：</p>
+<p>$$\mathrm{SNR_{band}}-\mathrm{SNR_E}=10\lg\frac{f_s}{2B}$$</p>
+<table><thead><tr><th>$f_s$</th><th>$B$</th><th>差值</th></tr></thead><tbody>
+<tr><td>1 kHz</td><td>10 Hz</td><td>17.0 dB</td></tr>
+<tr><td>5 kHz</td><td>10 Hz</td><td>24.0 dB</td></tr>
+<tr><td>10 kHz</td><td>10 Hz</td><td>27.0 dB</td></tr>
+</tbody></table>
+<p>按 $f_s=1$ kHz 折算：★[2] 的 −23 dB（0–10 Hz 带限）≈ <strong>−40 dB 整段能量比</strong>；★[3] 的 −15 dB 是整段能量比。<strong>两者差 25 dB，是口径差，不是性能差。</strong></p>
+<p><strong>纪律</strong>：差值随 $f_s$ 变，原文不给 $f_s$ 就<strong>无法换算</strong>——这时只能写"不可比"，不能硬折。</p>
+<h3>Q11｜多数表决明显优于 OR</h3>
+<p>高斯单元模型（$z\sim\mathcal N(0,1)$ vs $\mathcal N(d,1)$），固定总 $P_{fa}=1\%$，反解单元门限：</p>
+<table><thead><tr><th>$N$</th><th>OR 单元门限</th><th>表决单元门限</th><th>$d=2$ 时 OR $P_d$</th><th>表决 $P_d$</th><th>增益</th></tr></thead><tbody>
+<tr><td>1</td><td>τ=2.326</td><td>τ=2.326</td><td>37.2%</td><td>37.2%</td><td>—</td></tr>
+<tr><td>3</td><td>τ=2.712</td><td>τ=1.564</td><td>23.8%</td><td><strong>66.9%</strong></td><td>+43.1 pp</td></tr>
+<tr><td>5</td><td>τ=2.877</td><td>τ=1.250</td><td>19.0%</td><td><strong>77.3%</strong></td><td>+58.3 pp</td></tr>
+</tbody></table>
+<p>OR 为了压住 $N$ 倍虚警把单元门限抬到 τ≈2.9，小信号下几乎全漏；多数表决允许单元门限降到 τ≈1.25，用"多路一致性"换灵敏度。</p>
+<p><strong>结论</strong>：★[2] 用 OR 是<strong>覆盖率优先</strong>（任一振子看到就算），不是检测性能优先。本课题若要报 $P_d@P_{fa}$，融合规则必须作为设计变量写出来——这恰好是第六节那张"$\lambda$–$\gamma_c$–虚警"权衡表的另一半。</p>
+<hr>
+<h2>三、三条部分结清</h2>
+<h3>Q1 ★｜现象属实，卖点不成立</h3>
+<p>★[3] 只给 $P_d$（−20/−15/−10 dB → 23%/72%/98%）、无 $P_{fa}$，这一点核实无误。但"补 $P_{fa}$"已被做过（见 Q5），所以：</p>
+<ul><li><strong>不能写</strong>："本课题首次给出 $P_d$–$P_{fa}$ 曲面，是本课题最主要的方法学卖点"；</li><li><strong>可以写</strong>："已有工作给出的是单点或单条件下的 $P_d$/$P_{fa}$；本课题在变尺度 + 阵列条件下给出<strong>随 $\gamma$ 与 $\lambda$ 变化的</strong>门限曲面，并指出 $\lambda$ 的选取本身是 $P_{fa}$ 的函数"；</li><li>真正还有空位的是<strong>"阈值带 + 虚警"的联合口径</strong>：$\lambda\in[0.730,0.740]$ 这条带里，虚警率从 0% 到 10%（本机复现），意味着<strong>不报 $\lambda$ 的 $P_{fa}$ 没有意义</strong>。这一点暂时没查到有人做过。</li></ul>
+<h3>Q3 ★｜温漂量级已定，本机测不了</h3>
+<p>外部量级（磁通门零偏温度系数）：</p>
+<table><thead><tr><th>来源</th><th>数值</th></tr></thead><tbody>
+<tr><td>商用二次谐波磁通门</td><td>±0.1 ~ ±0.6 nT/℃</td></tr>
+<tr><td>Murata &amp; Matsuoka（偏置切换 FM-OFG）</td><td>0.013 nT/℃（−60~+70 ℃）</td></tr>
+<tr><td>火星车磁通门（深空探测学报 2018）</td><td>0.005–0.009 nT/℃</td></tr>
+<tr><td>KMAG 在轨标定</td><td>地面 0.2 nT/℃ → <strong>在轨 1.2 nT/℃</strong></td></tr>
+</tbody></table>
+<p><strong>最值得注意的是最后一行</strong>：地面标定的温漂系数在真实环境下放大了 <strong>6 倍</strong>。E1 的 20 nT 是常温静态值，若按 0.2–1.2 nT/℃ 估，<strong>10 ℃ 温变就带来 2–12 nT</strong>，与 20 nT 同量级。而极低频段（0.1–10 Hz）恰好是温漂与 $1/f$ 的主场。</p>
+<p><strong>结论</strong>：前端"噪声底"在本课题频段内<strong>不是白噪，是温漂决定的 $1/f$ 段</strong>。论文的"局限"要写明：借用 E1 的 20 nT 只在恒温条件下成立；若阶段 5 有条件，做一组升温—回温（≥3 个温度点、每点 ≥40 min）即可给出本机系数。</p>
+<h3>Q6｜步长已答，另更正一处混淆</h3>
+<ul><li>步长维度：四种步长跃变都落在 <strong>0.730–0.740</strong>，边界抖动 ±0.005（阶段 2 实测）；</li><li>恢复力系数、噪声 $\alpha$、判据三个维度<strong>仍未做</strong>；</li><li><strong>更正</strong>：C2 复现得出 $k_c=1/(2\xi)=0.714$ 是<strong>刚度翻转点</strong>（差模方程里 $2\xi k-1$ 变号），<strong>不是检测门限</strong>。上一版文档曾把两者等同，已在 <code>c2-jupyterbook/</code> 第 5 章就地更正。图 5 的"$k&lt;1$ 失效"在复现中未出现（$k=0.1$–$100$ 上 $r$ 恒 0.99），这一项仍是未复现项，不能拿 $k_c$ 去解释。</li></ul>
+<hr>
+<h2>四、两条必须外部输入</h2>
+<h3>Q10｜"极低频"取哪一段</h3>
+<p><strong>当前默认</strong>（可直接用于建模，标注为待替换）：$f_s\in[0.1,10]$ Hz，$\gamma$ 默认 1 nT，$T=300$ s，$f_{\rm samp}=1$ kHz。</p>
+<p><strong>换段触发条件</strong>（任一条成立就重设参数）：</p>
+<ol><li>导师给出实测对象 → 按其频段改（这是唯一权威来源）；</li><li>前端确定为磁通门（1–100 Hz 低噪声窗）→ 下限可上移到 1 Hz；</li><li>确定为频域电磁法应用（mHz–kHz）→ 时长与采样率都要重算，$R$ 的取值范围扩大一个数量级。</li></ol>
+<p><strong>这不是可以自己拍的参数</strong>：频段一改，$R$、$T$、阈值标定、$1/f$ 噪声模型全部跟着变。</p>
+<h3>Q12｜验收形式</h3>
+<p><strong>建议</strong>（待导师确认）：两个都给。</p>
+<ul><li>检测：固定 $P_{fa}=1\%$ 与 10%，报 $P_d$ vs SNR 曲线与最低可检 SNR；</li><li>估计：报幅值相对误差与相位绝对误差的<strong>中位数 + 95% 区间</strong>，不给单点。</li></ul>
+<p>理由：只报误差棒无法与文献比，只报 $P_d$ 又回到 Q1 的老问题。两个一起给，代价是实验量翻倍——这需要在第 1–2 周就定，不能拖到阶段 4。</p>
+<hr>
+<h2>五、必须改的三处口径（对开题的影响）</h2>
+<table><thead><tr><th>#</th><th>原表述</th><th>问题</th><th>改成</th></tr></thead><tbody>
+<tr><td>1</td><td>"本课题给 $P_d$–$P_{fa}$ 曲面，是<strong>最主要的方法学卖点</strong>"</td><td>2011/2016 两篇已给过 $P_{fa}$，2024 年 MAD 主流已在用 ROC</td><td>"在变尺度 + 阵列条件下给<strong>门限曲面</strong>，并指出 $\lambda$ 的选取是 $P_{fa}$ 的函数（阈值带口径）"</td></tr>
+<tr><td>2</td><td>"0.5 nT 前端噪声底 ≈ 0.08 nT RMS"</td><td>0.5 nT 是 10 s 窗峰峰值，折 PSD 差 148 倍</td><td>"屏蔽筒内、10 s 窗、峰峰值 0.5 nT；不与 pT/√Hz 并列"</td></tr>
+<tr><td>3</td><td>用白噪做变尺度对照实验</td><td>白噪下变尺度自带 $10\lg R$ 的 SNR 损失，会把算法冤死</td><td>"变尺度实验一律用 $1/f^{\alpha}$ 噪声，$\sigma$ 按 $R$ 重标"</td></tr>
+</tbody></table>
+<p>第 1 条是<strong>必须改</strong>的：如果开题报告里还写"补 ROC 是主要创新"，评阅人只要搜到 2011 年那篇，整段就站不住。</p>
+<hr>
+<h2>六、本轮新增文献（题录已核实）</h2>
+<ol><li>JIN T, ZHANG H. Statistical approach to weak signal detection and estimation using Duffing chaotic oscillators[J]. Science China Information Sciences, 2011, 54: 2324-2337. DOI:10.1007/s11432-011-4308-6.</li><li>张悦, 刘尚合, 胡小锋, 等. 微弱瞬态电磁辐射信号的双耦合Duffing振子自适应检测方法[J]. 高电压技术, 2016, 42(6): 2009-2016. DOI:10.13336/j.1003-6520.hve.20160616039.</li><li>ROIGNANT T, LE JOSSE N, BOUDRA A, 等. Magnetic anomaly detection using noise-optimized orthonormalized functions on dual magnetometric sensor signals[C]//2024 32nd European Signal Processing Conference (EUSIPCO). Lyon: IEEE, 2024: 2382-2386. DOI:10.23919/EUSIPCO63174.2024.10715193.</li></ol>
+<p><strong>待办</strong>：①② 必须拿全文（① 的 $P_{fa}$ 公式可能直接决定本课题要不要自己推；② 的门限是"两点式"，可对照本课题的曲面）；③ 只需摘要级，用于说明 MAD 主流已有 ROC。</p>
+<hr>
+<h2>七、剩余动作</h2>
+<ul><li>[ ] 入库并精读文献 1、2（优先级最高，直接影响开题表述）</li><li>[ ] 按第五节改 <code>阶段1-问题清单.md</code> 里 Q1 的"答案形态"与 <code>阶段1-信号与噪声模型假设.md</code> 的噪声参数行</li><li>[ ] 阶段 3 补 Q7 的噪声退化实验：$\theta$ 全周 × 3 个 SNR 档，看 $\Delta_{\max}$ 在噪声下缩多少</li><li>[ ] 阶段 2 补 Q6 的恢复力与噪声维度扫描</li><li>[ ] 第 1–2 周向导师要 Q10/Q12 的答案（频段、验收形式），并顺带确认 Q3 能否做温循</li></ul>
+<hr>
+<p><em>相关文档：<a href="阶段1-问题清单.html">阶段 1 问题清单</a> · <a href="阶段1-信号与噪声模型假设.html">信号与噪声模型假设</a> · <a href="阶段1-文献解读与过关清单.html">文献解读与过关清单</a> · <a href="../02-阶段二/阶段2-建模与相变-问题回答.html">阶段 2 建模与相变问题回答</a> · <a href="../c2-jupyterbook/_build/html/index.html">C2 复现书</a></em></p></main></body></html>

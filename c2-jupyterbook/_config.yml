@@ -1,0 +1,32 @@
+title: "C2 完整复现：强耦合 Duffing 振子"
+author: "李俊 · 原文：曹保锋 等，《物理学报》2019, 68(8): 080501"
+copyright: "2026"
+only_build_toc_files: true
+
+execute:
+  # notebook 已由 nbclient 在 .venv 中实跑并内嵌输出，这里只做渲染
+  execute_notebooks: "off"
+  timeout: 1800
+
+parse:
+  myst_enable_extensions:
+    - amsmath
+    - dollarmath
+    - colon_fence
+    - deflist
+
+html:
+  home_page_in_navbar: true
+  use_edit_page_button: false
+  use_issues_button: false
+  use_repository_button: false
+  baseurl: ""
+  extra_footer: "复现口径、对不上的数字及其原因，见第 8 章「结论与边界」。"
+
+sphinx:
+  config:
+    language: zh_CN
+    html_show_copyright: false
+    mathjax3_config:
+      tex:
+        inlineMath: [["$", "$"], ["\\(", "\\)"]]

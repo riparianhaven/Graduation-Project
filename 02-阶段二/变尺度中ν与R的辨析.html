@@ -1,0 +1,122 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>02-阶段二/变尺度中ν与R的辨析.md</title><style>
+:root{--bg:#f6f7f9;--panel:#fff;--line:#e3e7ec;--text:#1b232c;--muted:#63707e;--accent:#2f6fd0;--soft:#eaf1fc}
+@media(prefers-color-scheme:dark){:root{--bg:#14181d;--panel:#1d232a;--line:#303a45;--text:#e7edf3;--muted:#a7b3c0;--accent:#7fb0f5;--soft:#21334d}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.8 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+.bar{position:sticky;top:0;background:var(--panel);border-bottom:1px solid var(--line);padding:9px 24px;font-size:13px;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.bar a{color:var(--accent);text-decoration:none}.bar a:hover{text-decoration:underline}
+.bar .fn{color:var(--muted);margin-left:auto;word-break:break-all}
+main{max-width:980px;margin:0 auto;padding:26px 28px 70px;background:var(--panel);min-height:calc(100vh - 44px);
+  border-left:1px solid var(--line);border-right:1px solid var(--line)}
+h1,h2,h3,h4{line-height:1.4;margin:1.5em 0 .6em;font-weight:650}
+h1{font-size:25px;border-bottom:1px solid var(--line);padding-bottom:10px;margin-top:.4em}
+h2{font-size:20px;border-bottom:1px solid var(--line);padding-bottom:7px}
+h3{font-size:17px}h4{font-size:15px}
+p,li{color:var(--text)}li{margin:.25em 0}
+a{color:var(--accent)}
+code{background:var(--soft);padding:1px 5px;border-radius:4px;font:12.6px ui-monospace,Consolas,monospace}
+pre{background:var(--soft);border:1px solid var(--line);border-radius:8px;padding:14px 16px;overflow:auto}
+pre code{background:none;padding:0}
+blockquote{border-left:3px solid var(--accent);background:var(--soft);margin:12px 0;padding:8px 16px;color:var(--muted)}
+blockquote p{margin:.3em 0}
+.staticnote{max-width:980px;margin:14px auto -8px;padding:9px 14px;border:1px solid var(--line);
+  border-left:3px solid var(--accent);border-radius:0 8px 8px 0;background:var(--soft);
+  font-size:12.6px;color:var(--muted)}
+.staticnote a{color:var(--accent)}
+table{border-collapse:collapse;width:100%;margin:14px 0;font-size:13.4px;display:block;overflow:auto}
+th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top}
+th{background:var(--soft);color:var(--muted);white-space:nowrap}
+tr:nth-child(even) td{background:rgba(127,150,180,.045)}
+hr{border:none;border-top:1px solid var(--line);margin:26px 0}
+strong{font-weight:650}
+</style>
+<script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']]},
+  options:{skipHtmlTags:['script','noscript','style','textarea','pre','code','annotation']}};</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+</head><body>
+<div class="bar"><a href="../index.html">← 返回资料索引</a>
+<a href="变尺度中ν与R的辨析.md">查看 Markdown 源码</a><span class="fn">02-阶段二/变尺度中ν与R的辨析.md</span></div>
+<div class="staticnote">这是 <b>静态排版副本</b>，生成于 2026-11-24 20:12。直接双击 <code>index.html</code> 时看到的就是它；若 Markdown 刚改过，请在工作区运行 <code>py build_static.py</code> 重新生成，或用 <code>start_index.bat</code> 启动本地服务查看实时渲染版。页内公式由 MathJax 渲染，需要联网。</div><main><h1>变尺度里的 ν 到底是什么：R、ν、ω 三者的关系</h1>
+<blockquote><p><strong>回答三个问题</strong>：① 扫 R 时 ν 是不是有问题？② 待测 ω 未知，ν 怎么确定？③ 这么做的代价是什么？</p><p></p><p><strong>蓝本</strong>：Yang Y, Ding Q, Gao Y, Chen J. <em>Chaotic Effect-Based Array Duffing Systems with Improved Nonlinear Restoring Force for Weak Signal Detection in Dynamic MWD</em>[J]. Sensors, 2023, 23(17): 7598. DOI: <a href="https://doi.org/10.3390/s23177598">10.3390/s23177598</a></p><p></p><p><strong>可执行版本</strong>：[★[2] 完整复现 · 第 3 章](../s2-jupyterbook/_build/html/03-变尺度与nu.html) · 数值内核 <a href="../s2-jupyterbook/_src/s2sim.py"><code>s2sim.py</code></a> · 数据 <a href="../s2-jupyterbook/_data/nu.json"><code>nu.json</code></a></p><p></p><p><strong>核实日期</strong>：2026-11-24</p></blockquote>
+<hr>
+<h2>一句话结论</h2>
+<p><strong>ν 不是输入参数，它是 $\omega/R$ 的别名。</strong> 待测 $\omega$ 未知时，ν 不需要（也不可能）事先确定；<br>你扫的是 $R$，相变发生那一点的 $R$ 就是 $\omega$。ν 是事后才被确认等于 1 的量。</p>
+<hr>
+<h2>一、三个符号各是谁</h2>
+<table><thead><tr><th>符号</th><th>物理含义</th><th>谁定的</th><th>在代码里</th></tr></thead><tbody>
+<tr><td>$\omega$</td><td>待测信号的真实角频率</td><td>物理世界</td><td><strong>不出现</strong>（盲测时）</td></tr>
+<tr><td>$R$</td><td>变尺度系数</td><td>算法扫描</td><td><code>for R in grid:</code></td></tr>
+<tr><td>$\nu$</td><td>变尺度后信号与内驱的频率比</td><td>由 $R$ 与信号共同决定</td><td>解析写法 <code>nu=omega/R</code>；数据写法由采样序列隐式产生</td></tr>
+</tbody></table>
+<p>原文 2.2.1 节的变换：设 $t_1=Nt$（$N$ 即后文的 $R$）、$\omega=N$，则</p>
+<p>$$a(t_1)=\gamma\cos(\omega t)=\gamma\cos\!\left(\frac{\omega}{N}t_1\right)=\gamma\cos(t_1)$$</p>
+<p>新时间轴上的信号角频率是 $\omega/N=\omega/R$，内驱固定 1 rad/s。所以</p>
+<p>$$\boxed{\nu=\frac{\omega}{R}}$$</p>
+<p>$\nu=1$ 等价于"信号与内驱严格同频"，也就是 $R=\omega$。</p>
+<hr>
+<h2>二、为什么"扫 R 时用 <code>nu=omega/R</code>"会让人不安</h2>
+<p>因为这一行代码把<strong>答案</strong>写进了输入。它的真实含义是：</p>
+<blockquote><p>我已经知道 $\omega=10$，所以我给每个候选 $R$ 配一个 $\nu=10/R$；当 $R=10$ 时 $\nu=1$，必然共振。</p></blockquote>
+<p>这在<strong>验证模式</strong>下完全正当——你要检查的是"方法在 $R=\omega$ 时是否真的相变"，而不是"能不能找到 $\omega$"。<br>数值上它与"逐点读原采样序列、把步长放大 $R$ 倍"是同一个方程的不同参数化：</p>
+<table><thead><tr><th>实现</th><th>信号来源</th><th>步长</th><th>是否用了 $\omega$</th></tr></thead><tbody>
+<tr><td>解析写法</td><td>$\gamma\cos(\nu\tau+\theta)$</td><td>固定 $h$</td><td><strong>用了</strong>（$\nu=\omega/R$）</td></tr>
+<tr><td>数据写法（盲测）</td><td>采样序列第 $i$ 点 <code>sig[i]</code></td><td>$h_1=R\,\Delta t$</td><td><strong>没用</strong></td></tr>
+</tbody></table>
+<p>数据写法里，第 $i$ 步的数值时间是 $\tau_i=iR\Delta t$，而它读的是物理时间 $i\Delta t$ 处的采样值，<br>于是信号在新时间轴上的频率自动变成 $\omega/R$ —— 这就是 ν，但代码里从未出现 $\omega$。</p>
+<p>【实测】两种写法在无噪声下给出同一个 $R$：</p>
+<table><thead><tr><th>$\omega$ 真值</th><th>解析写法命中</th><th>数据写法（盲测）命中</th><th>误差</th></tr></thead><tbody>
+<tr><td>10.0 rad/s</td><td>$R=10.0$</td><td><strong>$R=10.000$</strong></td><td>0.00%</td></tr>
+<tr><td>7.3 rad/s</td><td>—</td><td><strong>$R=7.305$</strong></td><td>+0.07%</td></tr>
+<tr><td>3.7 rad/s</td><td>—</td><td><strong>$R=3.695$</strong></td><td>−0.14%</td></tr>
+</tbody></table>
+<p>盲测脚本里只有 <code>sig = 0.02*cos(w_true*k*dt + theta)</code> 生成数据的那一行用到真值，<br>检测函数 <code>simulate_seq(sig, R, dt, ...)</code> 的签名中没有任何频率参数。</p>
+<hr>
+<h2>三、$\omega$ 未知时，ν 怎么定？——答案是"不定"</h2>
+<p>原文步骤 4 写得很直白：</p>
+<blockquote><p>Adjust the transformation coefficient $R$ and observe the output state …</p><p>As long as one of the phase trajectories jumps …, it means that **the value of the</p><p>transformation coefficient at this time is the frequency value of the characteristic signal.**</p></blockquote>
+<p>所以流程是：</p>
+<ol><li>先由物理先验圈定搜索范围（如 MWD 信号 0–10 Hz → $R\in[0,6\pi]$，原文给 $N\in[2\pi,6\pi]$）；</li><li>在该范围内按网格扫 $R$，每个 $R$ 跑一次三振子积分；</li><li>找到相变（$p_{std}$ 掉到判据以下）的那个 $R$，令 $\hat\omega=R$；</li><li>此后所有后续处理（参数估计、姿态解算）都用这个 $\hat\omega$ 构造 ν。</li></ol>
+<p><strong>ν 从头到尾没有被"设定"过，它是 $\hat\omega/R$ 的副产品。</strong></p>
+<hr>
+<h2>四、代价：三件必须写进报告的事</h2>
+<h3>① 频率分辨率 = $R$ 网格间距，不是方法本身</h3>
+<p>$p_{std}$ 的谷极窄。实测固定 $R=10$ 扫 $\nu$：</p>
+<table><thead><tr><th>$\nu$</th><th>0.990</th><th>0.995</th><th><strong>1.000</strong></th><th>1.005</th><th>1.010</th></tr></thead><tbody>
+<tr><td>$p_{std}$</td><td>0.469</td><td>0.452</td><td><strong>0.000</strong></td><td>0.564</td><td>0.437</td></tr>
+</tbody></table>
+<p><strong>偏 0.5% 就完全退回混沌。</strong> 因此 $R$ 网格粗了会整条漏掉这个尖谷：<br>网格步长 0.05 时 $\omega=10$ 定位到 10.000；步长 0.5 时可能直接跳过。</p>
+<h3>② 扫 $R$ 是多重检验，虚警要校正</h3>
+<p>每试一个 $R$ 都是一次判决。单点虚警 5% 时，扫 $N$ 个点的总虚警是</p>
+<p>$$P_{fa,total}=1-(1-0.05)^{N}$$</p>
+<p>$N=11\to43\%$，$N=21\to66\%$，$N=41\to88\%$。原文只报单点门限，没有提这一层。<br>工程上要么按 Bonferroni 把单点门限压到 $0.05/N$，要么用"谷底显著性"而不是"越过门限"来判决。</p>
+<h3>③ 变尺度会改变噪声的等效带宽</h3>
+<p>数据写法里每步读一个新噪声样本，步长 $h_1=R\Delta t$。离散白噪声的连续功率谱密度正比于步长，<br>所以 <strong>$R$ 越大，进入振子的噪声 PSD 越高</strong>。实测（$\sigma=0.2$，$R=10$）：</p>
+<table><thead><tr><th>模式</th><th>步长</th><th>$p_{std}$（−23 dB）</th></tr></thead><tbody>
+<tr><td>解析（不压缩，$h=2\pi/300$）</td><td>0.021 s</td><td><strong>0.0096</strong>（检出）</td></tr>
+<tr><td>数据（压缩 $R=10$，$h_1=0.05$ s）</td><td>0.05 s</td><td><strong>0.098</strong>（接近门限）</td></tr>
+</tbody></table>
+<p>同一输入 SNR，压缩后判据值高一个量级。**"变尺度不改变 SNR"这句话只对连续时间成立，<br>离散重采样实现必须按 $h_1$ 重算噪声强度。**</p>
+<hr>
+<h2>五、还有一处原文自身的矛盾</h2>
+<p>表 2 给 $f_s=10$ Hz、$T=0.1$ s；步骤 3 要求 $T_1=R/f_s$。$R=10$ 时 $T_1=1$ s，<br>而内驱周期是 $2\pi$ s，<strong>每周期只剩 6.28 步</strong>。实测：</p>
+<table><thead><tr><th>$h_1$</th><th>步/周期</th><th>结果</th></tr></thead><tbody>
+<tr><td>1.0 s</td><td>6.28</td><td><strong>数值发散</strong>（$x^5$ 项把 RK4 误差放大到溢出）</td></tr>
+<tr><td>0.5 s</td><td>12.6</td><td>$p_{std}=0.56$，判据失真</td></tr>
+<tr><td>0.1 s</td><td>62.8</td><td>$p_{std}=0.03$，勉强可信</td></tr>
+<tr><td>$2\pi/300$</td><td>300</td><td>$p_{std}&lt;10^{-5}$，可信</td></tr>
+</tbody></table>
+<p>所以要么实际 $f_s$ 更高，要么论文并没有真的按 $T_1=R/f_s$ 改步长（而是保持 0.1 s、<br>把仿真时长从 300 s 拉到 3000 s）。<strong>两种口径至少有一种与文中表述不符</strong>，复现者必须自己选一种并声明。<br>本书选后者：$\Delta t=0.005$ s、$R=10\to h_1=0.05$ s，落在"可信"区间。</p>
+<hr>
+<h2>六、顺带修正的判据缺陷（比 ν 更影响结论）</h2>
+<p>早期复现用"每 $N=\mathrm{round}(2\pi/h)$ 步采一次"实现 Poincaré 截面。<br>当 $h$ 不整除 $2\pi$ 时（如 $h=0.02$，$2\pi/h=314.159$），采样相位每周期漂 0.003 rad，<br>累积起来让 Poincaré 点沿轨道游走，$p_{std}$ 从 $10^{-6}$ 被抬到 $10^{-2}$。实测（$h=0.02$）：</p>
+<table><thead><tr><th>采样方式</th><th>$\lambda=0.734$ 的 $p_{std}$</th><th>$\lambda=0.700$ 的 $p_{std}$</th><th>两态之比</th></tr></thead><tbody>
+<tr><td>每 314 步采一次</td><td>$1.5\times10^{-2}$</td><td>$5.2\times10^{-1}$</td><td>35×</td></tr>
+<tr><td>精确 $\tau=2\pi k$ 时刻插值</td><td>$\mathbf{3.2\times10^{-6}}$</td><td>$3.7\times10^{-1}$</td><td><strong>$10^{5}$×</strong></td></tr>
+</tbody></table>
+<p>判读没被翻转（1.5e-2 仍在 0.08 门限之下），但<strong>动态范围被压掉三个半量级</strong>——<br>门限裕度、噪声下的判据漂移、定点化的等效阈值漂移，全部因此失真。</p>
+<p>修正后重标 $\lambda_c$，网格 0.001：<strong>0.733 混沌（0.358）、0.734 周期（$3.2\times10^{-6}$）</strong>；<br>再加密到 0.0002 并把时窗拉到 1200 s：<strong>$\lambda_c\in(0.7334,\,0.7336]$，取 $\lambda_c\approx0.7335$。</strong></p>
+<p>两条旧误差都要销账：</p>
+<ol><li><strong>阈值报高了</strong>：旧说 0.735/0.736，实为 0.7335。主因不是采样，而是<strong>粗网格（0.005）+ 短时窗</strong>。</li><li><strong>"0.734–0.736 内混沌/周期交替"是假象</strong>。$T=400$ 时 $\lambda=0.735$ 的 $p_{std}=0.435$（像混沌），</li></ol>
+<p>同一参数跑到 $T=1200$ 就是 $3.1\times10^{-6}$（周期）—— 靠近 $\lambda_c$ 的瞬态长达数百秒，<br>短时窗读到的"交替"是还没收敛，不是间歇混沌或双稳竞争。<strong>判态实验的时窗必须长到瞬态跑完，否则会系统性低估可检测性。</strong></p></main></body></html>

@@ -1,0 +1,19 @@
+format: jb-book
+root: 00-复现总览
+parts:
+  - caption: 模型与阈值
+    chapters:
+      - file: 01-模型与势函数
+      - file: 02-分岔与临界阈值
+  - caption: 核心
+    chapters:
+      - file: 03-变尺度与nu
+      - file: 04-全相位阵列
+  - caption: 结果
+    chapters:
+      - file: 05-检测门限
+      - file: 06-参数估计
+  - caption: 收尾
+    chapters:
+      - file: 07-姿态与边界
+      - file: 08-结论

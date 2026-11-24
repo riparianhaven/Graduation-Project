@@ -1,0 +1,16 @@
+# Thesis notebook environment (Python 3.13, Windows)
+# Recreate:  py -m venv .venv
+# Install:   .venv\Scripts\python.exe -m pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
+# These versions match the notebook that was actually executed; do not upgrade
+# numpy / matplotlib casually, otherwise the plotted numbers may shift.
+numpy==2.4.6
+matplotlib==3.11.0
+ipykernel==6.30.0
+nbformat==5.11.1
+nbclient==0.11.0
+nbconvert==7.17.2
+jupyterlab==4.4.5
+
+# 单元测试（tests/ 下两个文件验证 learn/0.ipynb）。
+# 只有要跑测试时才需要；不跑测试可跳过这一行。
+pytest==9.2.0

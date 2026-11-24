@@ -1,0 +1,96 @@
+{
+  "stage": 2,
+  "equation": "x'' + 0.5x' - x^3 + x^5 = lambda*cos(t+beta) + gamma*cos(t+theta) + n(t)",
+  "potential": "V(x) = -x^4/4 + x^6/6; wells x=+-1 (V=-1/12), barrier x=0 (V=0)",
+  "parameters": {
+    "k": 0.5,
+    "omega_rad_s": 1.0,
+    "lambda0": 0.72,
+    "lambda_paper": 0.72,
+    "C_trig_paper": 0.73,
+    "h_s": 0.02,
+    "T_s": 400.0,
+    "burn_s": 200.0,
+    "init": [
+      0,
+      0
+    ],
+    "pstd_threshold": 0.08,
+    "verdict": "pstd < 0.08 -> large-scale periodic (signal present)"
+  },
+  "phase_portraits": {
+    "lambda_chaos": 0.7,
+    "lambda_periodic": 0.76,
+    "pstd": [
+      0.37,
+      0.0
+    ]
+  },
+  "threshold": {
+    "coarse_grid": [
+      0.6,
+      0.85,
+      0.005
+    ],
+    "first_stable_lambda": 0.74,
+    "crossing_band_0p001": [
+      0.733,
+      0.734
+    ],
+    "lc_fine_0p0002_T1200": [
+      0.7334,
+      0.7336
+    ],
+    "lc_estimate": 0.7335,
+    "poincare_sampling": "exact linear interpolation at tau=2*pi*k",
+    "note": "report a band, not a point; conditions: clean, h=0.02, T=1200 for the fine scan; the old 0.734-0.736 alternation was a T=400 transient artifact"
+  },
+  "step_sensitivity": {
+    "0.1": {
+      "first_jump": "0.730→0.735"
+    },
+    "0.05": {
+      "first_jump": "0.735→0.740"
+    },
+    "0.02": {
+      "first_jump": "0.735→0.740"
+    },
+    "0.01": {
+      "first_jump": "0.730→0.735"
+    }
+  },
+  "rescale": {
+    "true_omega_rad_s": 10.0,
+    "R_grid": [
+      6.0,
+      7.0,
+      8.0,
+      9.0,
+      9.5,
+      10.0,
+      10.5,
+      11.0,
+      12.0,
+      13.0,
+      14.0
+    ],
+    "spurious_low_pstd_R": [
+      8.0,
+      9.5,
+      12.0,
+      13.0
+    ],
+    "coherence_range": [
+      0.758,
+      0.995
+    ],
+    "verdict": "phase transition alone cannot identify frequency; noise aliasing risk"
+  },
+  "stage1_questions_answered": [
+    "Q6 (step-size dimension only)",
+    "Q8 (aliasing risk flagged)"
+  ],
+  "stage1_questions_pending": [
+    "Q10 (frequency band — mentor decision)"
+  ]
+}

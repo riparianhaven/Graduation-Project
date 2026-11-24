@@ -1,0 +1,282 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>04-论文精读/论文精读-C1_混沌振子幅相估计_SignalProcessing2002.md</title><style>
+:root{--bg:#f6f7f9;--panel:#fff;--line:#e3e7ec;--text:#1b232c;--muted:#63707e;--accent:#2f6fd0;--soft:#eaf1fc}
+@media(prefers-color-scheme:dark){:root{--bg:#14181d;--panel:#1d232a;--line:#303a45;--text:#e7edf3;--muted:#a7b3c0;--accent:#7fb0f5;--soft:#21334d}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.8 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+.bar{position:sticky;top:0;background:var(--panel);border-bottom:1px solid var(--line);padding:9px 24px;font-size:13px;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.bar a{color:var(--accent);text-decoration:none}.bar a:hover{text-decoration:underline}
+.bar .fn{color:var(--muted);margin-left:auto;word-break:break-all}
+main{max-width:980px;margin:0 auto;padding:26px 28px 70px;background:var(--panel);min-height:calc(100vh - 44px);
+  border-left:1px solid var(--line);border-right:1px solid var(--line)}
+h1,h2,h3,h4{line-height:1.4;margin:1.5em 0 .6em;font-weight:650}
+h1{font-size:25px;border-bottom:1px solid var(--line);padding-bottom:10px;margin-top:.4em}
+h2{font-size:20px;border-bottom:1px solid var(--line);padding-bottom:7px}
+h3{font-size:17px}h4{font-size:15px}
+p,li{color:var(--text)}li{margin:.25em 0}
+a{color:var(--accent)}
+code{background:var(--soft);padding:1px 5px;border-radius:4px;font:12.6px ui-monospace,Consolas,monospace}
+pre{background:var(--soft);border:1px solid var(--line);border-radius:8px;padding:14px 16px;overflow:auto}
+pre code{background:none;padding:0}
+blockquote{border-left:3px solid var(--accent);background:var(--soft);margin:12px 0;padding:8px 16px;color:var(--muted)}
+blockquote p{margin:.3em 0}
+.staticnote{max-width:980px;margin:14px auto -8px;padding:9px 14px;border:1px solid var(--line);
+  border-left:3px solid var(--accent);border-radius:0 8px 8px 0;background:var(--soft);
+  font-size:12.6px;color:var(--muted)}
+.staticnote a{color:var(--accent)}
+table{border-collapse:collapse;width:100%;margin:14px 0;font-size:13.4px;display:block;overflow:auto}
+th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top}
+th{background:var(--soft);color:var(--muted);white-space:nowrap}
+tr:nth-child(even) td{background:rgba(127,150,180,.045)}
+hr{border:none;border-top:1px solid var(--line);margin:26px 0}
+strong{font-weight:650}
+</style>
+<script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']]},
+  options:{skipHtmlTags:['script','noscript','style','textarea','pre','code','annotation']}};</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+</head><body>
+<div class="bar"><a href="../index.html">← 返回资料索引</a>
+<a href="论文精读-C1_混沌振子幅相估计_SignalProcessing2002.md">查看 Markdown 源码</a><span class="fn">04-论文精读/论文精读-C1_混沌振子幅相估计_SignalProcessing2002.md</span></div>
+<div class="staticnote">这是 <b>静态排版副本</b>，生成于 2026-11-24 20:12。直接双击 <code>index.html</code> 时看到的就是它；若 Markdown 刚改过，请在工作区运行 <code>py build_static.py</code> 重新生成，或用 <code>start_index.bat</code> 启动本地服务查看实时渲染版。页内公式由 MathJax 渲染，需要联网。</div><main><h1>论文精读：用非线性振子的初值敏感性估计微弱信号的幅值与相位</h1>
+<p><strong>论文</strong>｜WANG G（王冠宇）, ZHENG W（郑伟）, HE S（何赛灵）. Estimation of amplitude and phase of a weak signal by using the property of sensitive dependence on initial conditions of a nonlinear oscillator[J]. Signal Processing, 2002, 82(1): 103–115. DOI: 10.1016/S0165-1684(01)00166-9. 浙江大学现代光学仪器国家重点实验室 / 瑞典皇家工学院电磁理论系。投稿 2000-01-31，修回 2000-08-03。本地 PDF 见 <a href="../文献/C1_Wang_混沌振子幅相估计_SignalProcessing2002.pdf"><code>文献/C1_Wang_混沌振子幅相估计_SignalProcessing2002.pdf</code></a>，13 页，12 图 6 表，14 条参考文献。</p>
+<p><strong>定位</strong>｜这是"用 Duffing 振子估幅估相"这条技术路线的<strong>源头文献</strong>，比 ★[2]（Sensors 2023）早 21 年，比 C2（物理学报 2019）早 17 年。★[2] 用"相量合成 + 临界阈值"估幅相，C2 用"双振子差分 + 5σ 判据"估幅相，C1 走的是第三条路：<strong>把信号幅值映射成一个连续可测的指数（Floquet 指数），再靠延时扫描把相位也读出来</strong>。三条路线互不继承，读它是为了看清"连续读出"这一支的原始形态。</p>
+<p><strong>配套文件</strong>｜<a href="论文精读-阵列Duffing_Sensors2023.html"><code>论文精读-阵列Duffing_Sensors2023.md</code></a>（★[2]，相量合成路线）、<a href="论文精读-C2_强耦合Duffing_物理学报2019.html"><code>论文精读-C2_强耦合Duffing_物理学报2019.md</code></a>（差分通道路线）、<a href="../02-阶段二/解读-主要内容2-混沌振子建模与临界阈值.html"><code>02-阶段二/解读-主要内容2-混沌振子建模与临界阈值.md</code></a>（本科题主线）、<a href="../05-方法创新/新方法-阈值位移符号判别.html"><code>05-方法创新/新方法-阈值位移符号判别.md</code></a>（把阈值位移当读数的尝试）。本文所有复算命令在文末附录，环境为工作区 <code>.venv</code>。</p>
+<h2>关于信息分级</h2>
+<p>本篇沿用项目既有体例，四类信息严格分开：</p>
+<ul><li><strong>【原文】</strong> 论文里写了的，标页码或式号。</li><li><strong>【通用数学事实】</strong> 不依赖本文成立的标准结论（三角恒等式、Floquet 理论、Liouville 公式、CRLB），我给出出处或说明。</li><li><strong>【推断】</strong> 我的解释、补充推导或批评，<strong>论文作者没有这么说过</strong>。</li><li><strong>【复算】</strong> 我在本机跑出来的数字，注明参数与命令位置。</li></ul>
+<p>一句话先给结论：<strong>这篇论文的方法学内核是"把可观测的连续量 Φ 当作指针"，而不是"用混沌提高信噪比"；它的真正贡献是把幅相估计从"二值判决"变成"曲线拟合"，代价是动态范围只有四个数量级，且其宣称的 4 倍精度优势与 Cramér–Rao 下界冲突，必须复核。</strong></p>
+<hr>
+<h2>1. 研究问题、重要性与价值</h2>
+<p><strong>【原文】</strong> 论文要解决的问题很收敛：给定一个被强噪声淹没的微弱正弦 $s(t)=a\cos(t+\varphi)$，<strong>已知频率、已知量级范围</strong>，估出幅值 $a$ 与初相 $\varphi$（p.103 摘要，p.108 §4.1.1）。频率由前作 [12]（Wang et al., <em>IEEE Trans. Ind. Electron.</em> 1999, 46(2): 440–444）用"振子阵列扫频"解决，本文不重复。</p>
+<p><strong>【原文】</strong> 噪声定义为 $n(t)=\sigma\cdot\texttt{randn}$，信噪比取 $\mathrm{SNR}=a^2/(2\sigma^2)$（式 4.1 下方）。数值实验的典型配置：$a=0.003$、$\sigma=0.1$、$N=180$ 个周期、步长 $h=0.01$。换算成 dB 是</p>
+<p>$$10\lg\frac{0.003^2}{2\times0.1^2}=10\lg(4.5\times10^{-4})=-33.5\ \mathrm{dB}$$</p>
+<p><strong>【推断】</strong> 这个 −33.5 dB <strong>不能与 ★[2] 的 −21 dB 直接比较</strong>，口径完全不同。C1 的分母是"采样带宽内全部噪声功率"，采样间隔 0.01 s 对应 50 Hz 单边带宽；★[2] 的分母是带限到 0–10 Hz 的噪声。若把 C1 折算到 1 Hz 带宽，$\mathrm{SNR}_{1\mathrm{Hz}}=-33.5+10\lg 50=-16.5$ dB——恰好落在 ★[3] 报的 −15 dB 附近。这是<strong>巧合的对齐</strong>，不是性能相当：两者的判据、积分时长、信号波形都不同。写开题时若引用 C1 的 −33.5 dB，必须连同"$h=0.01$、$N=180$、全带功率比"一起报，否则会被当成夸大。</p>
+<p><strong>【推断】</strong> 为什么"估幅相"值得单独立一篇？因为检测只回答"有没有"，而工程上要的是"多大、什么时候到的"。磁异常、钻具姿态、电磁脉冲定位，全都需要波形重建。这条动机与 ★[2] 第 1 节的"要恢复波形才能解算井斜角"是同一个，只是早了二十年。</p>
+<hr>
+<h2>2. 这个问题之前被解决了吗，之前的工作差在哪</h2>
+<p><strong>【文献】</strong> 论文自己列的对手有三类（p.103–104 引言）：</p>
+<ol><li><strong>直接最优化</strong>：信号不太弱时，在合适的范数空间里最小化目标函数即可 [3,8]。Friedlander &amp; Francos（<em>IEEE TSP</em> 1995, 43(4): 917–926）做多分量信号的幅相估计；Leung &amp; Huang（<em>IEEE TSP</em> 1996, 44(10): 2456–2463）做混沌噪声下的参数估计。</li><li><strong>匹配滤波 / 最大似然</strong>：白噪声下对正弦幅相估计是最优的，有闭式解（式 4.11–4.16）。</li><li><strong>前作 [12]</strong>：已经能用混沌振子判"有没有信号、频率是多少"，但<strong>只用了定性的状态跃变</strong>。</li></ol>
+<p><strong>【原文】</strong> 作者对前作的批评很直接（p.106 §3 开头）："The detection method presented in [12] has only exploited some qualitative aspects of SDIC... For more complicated cases such as the determination of the amplitude and phase, we have to find the relation between the varieties of the system state and the parameters of the signal." 译：前作只用了"状态变了没有"这一个比特，要估参数，就得找到"状态变化的<strong>程度</strong>"与信号参数之间的定量关系。</p>
+<p><strong>【推断】</strong> 这段话点出了整篇论文的方法论位置：<strong>它不是在与匹配滤波争信噪比，而是在补"从 1 bit 判决升级为连续读数"这一步</strong>。这也解释了为什么后文所有实验都是与 ML 比<strong>估计误差</strong>，而不是比检测概率——它选的战场是估计精度。</p>
+<p><strong>【推断】</strong> 一个容易被忽略的空白：ML 在"噪声比信号大 10–100 倍"时直接失效（p.103 原话：需要先做"基于某种敏感性质的预处理"）。C1 瞄准的正是这段区间。这个动机是成立的，但见第 9 节——它宣称的精度优势恰好在这段区间里越过了 CRLB，这是全文最需要复核的地方。</p>
+<hr>
+<h2>3. 重建作者的思考路径（不使用本文任何贡献作为前提）</h2>
+<p><strong>【推断】</strong> 如果只知道 1999 年之前公开的东西，我会这样一步步想到它：</p>
+<p><strong>第一步：把"加信号"翻译成"改初值"。</strong> Duffing 方程 $\ddot x+\delta\dot x+f(x)=\lambda\cos(t+\beta)+a\cos(t+\varphi)$ 里多了一项驱动。若引入 $z(t)$ 满足 $\dot z=0$、$z(0)=\lambda$，就能把右端写成 $z\cdot s(t)$，于是"在驱动力上叠加 $a\cos(t+\varphi)$"等价于"把初值 $z(0)$ 从 $\lambda$ 改成 $\lambda+a\cos\varphi$"（式 1.2）。这是全篇最漂亮的一步，而且它是<strong>精确的</strong>，不是近似。</p>
+<p><strong>第二步：既然等价于扰动初值，就去找"对初值最敏感"的工作点。</strong> 分岔点附近系统结构不稳定，微小扰动就能改变定性状态——这正是 SDIC 的定义域。</p>
+<p><strong>第三步：可"定性状态"只有两档，估不了连续参数。需要一个连续刻度。</strong> 在周期轨道附近，状态回落到轨道的速率由 Floquet 指数 $\mu$ 给出；$\mu$ 随驱动力幅值单调变化，就是一个天然刻度盘。</p>
+<p><strong>第四步：幅值能测了，相位怎么办？</strong> 加一个可调延时 $\tau$，让待测信号相对参考信号转一圈；复合幅值 $C(\tau)$ 就随 $\tau$ 画出一个圆，圆的半径是 $a$、圆心位置是 $\lambda_0$、极角是 $\varphi$。<strong>相位信息藏在"曲线的横轴位置"里，幅值信息藏在"曲线的起伏幅度"里。</strong></p>
+<p><strong>第五步：把 $\tau$ 扫一遍，用最小二乘拟合出 $(a,\varphi)$。</strong> 剩下的都是工程细节：数值地板、过载条件、采样对齐、色噪声鲁棒性。</p>
+<p><strong>【推断】</strong> 这条路径的每一步都只用旧知识：三角恒等式、Floquet 理论、最小二乘。真正属于作者的是<strong>第二步到第三步的跳跃</strong>——把"混沌检测"从"看相图"变成"读指数"。这个跳跃的价值，比后面任何一张表都大。</p>
+<hr>
+<h2>4. 核心 idea 的 Intuition</h2>
+<p><strong>【推断】</strong> 一句话版本：<strong>它是一台用"回归速率"当指针的锁相放大器。</strong></p>
+<p>三个直觉，缺一不可：</p>
+<p><strong>① 让振子站在悬崖边，但不要掉下去。</strong> 驱动力取 $\lambda_0=0.840$，比临界值 $\lambda_c=0.829$ 高一点点。此时振子稳稳地在大尺度周期轨道 $\hat q^1_o$ 上转，但离边界只有 0.011——这个余量就是"量程"。</p>
+<p><strong>② 信号不是"推它掉下去"，而是"改变它回轨道的速度"。</strong> 复合幅值 $C$ 稍微变大，轨道形状变一点，回归速率 $\Phi$ 就变一点。$\Phi$ 与 $C$ 的关系（图 6）在 $\lambda_0$ 附近近似线性，斜率 $k\approx6.83$：<strong>幅值变化 0.001，$\Phi$ 变化 0.007</strong>——这就是"放大倍数"。</p>
+<p><strong>③ 转一圈，把相位也读出来。</strong> 延时 $\tau$ 从 0 扫到 $2\pi$，复合幅值按余弦律起伏 $C\in[\lambda_0-a,\ \lambda_0+a]$，于是 $\Phi(\tau)$ 画出一条"余弦形"的曲线。曲线<strong>峰谷差的一半除以 $k$ 就是 $a$</strong>，<strong>峰的位置就是 $\varphi$</strong>。</p>
+<p><strong>【推断】</strong> 与 ★[2]、C2 的对照最能说明问题：</p>
+<table><thead><tr><th></th><th>读数形式</th><th>用到的信息</th><th>幅相怎么来</th></tr></thead><tbody>
+<tr><td>★[2] Sensors 2023</td><td>二值（相态变没变）</td><td>1 bit</td><td>解相量合成的临界方程</td></tr>
+<tr><td>C2 物理学报 2019</td><td>连续波形 + 5σ</td><td>整段波形</td><td>峰值比与时间差</td></tr>
+<tr><td><strong>C1 本文 2002</strong></td><td><strong>连续标量 $\Phi$</strong></td><td><strong>回归速率</strong></td><td><strong>延时扫描 + 曲线拟合</strong></td></tr>
+</tbody></table>
+<p>C1 是三者中唯一<strong>不依赖阈值</strong>的：它不需要"刚好卡在 $\lambda_c$"来判生死，只需要在 $\lambda_c$ 之上稳稳地读一个连续数。这个性质在工程上很值钱——阈值漂移是混沌检测最难伺候的毛病（见 <a href="../00-总览/第0步-技术路线方框图.html"><code>00-总览/第0步-技术路线方框图.md</code></a> 关于 $\lambda_c$ 不是普适常数的说明）。</p>
+<hr>
+<h2>5. 具体方法与一个完整例子的 pipeline</h2>
+<h3>5.1 五个步骤</h3>
+<p><strong>【原文】</strong> 整理自 §3.2 与 §4.1.1：</p>
+<ol><li><strong>标定合成曲线。</strong> 对 $\lambda\in[0.830,0.880]$ 以 0.001 为间隔，算每个 $\lambda$ 对应周期轨道的广义 Floquet 指数 $\Phi(\lambda)$，得到图 6。</li><li><strong>选定工作点。</strong> 取 $\lambda_0=0.840$（对应 $\Phi_0=0.1271$），必须在 $\lambda_c$ 之上但余量不大。</li><li><strong>延时扫描。</strong> 对 $N$ 个均匀分布的延时 $\tau_i=i\cdot2\pi/N$，用同一段实测噪声数据 $s_n(t+\tau_i)$ 驱动振子，每段算一个 $\Phi^{(m)}(\tau_i)$。</li><li><strong>最小二乘拟合。</strong> 解 $\min_{a,\varphi,k}J$，其中 $J=\int_0^{2\pi}[\Phi^{(m)}(\tau)-\Phi(C(\tau))]^2\,\mathrm d\tau$，$C(\tau)=\sqrt{\lambda_0^2+a^2+2a\lambda_0\cos(\tau+\varphi)}$（式 4.8）。</li><li><strong>经验修正。</strong> 用 $\hat a(1+3.3/N)\to\hat a$、$\hat\varphi+12/N\to\hat\varphi$ 补偿"延时采样导致的实际加权平均"（式 4.6、4.7）。</li></ol>
+<h3>5.2 参数表</h3>
+<table><thead><tr><th>量</th><th>值</th><th>出处</th><th>备注</th></tr></thead><tbody>
+<tr><td>阻尼 $\delta$</td><td>0.5</td><td>§1 式 1.3</td><td>全文固定</td></tr>
+<tr><td>临界幅值 $\lambda_c$</td><td><strong>0.829</strong></td><td>p.106</td><td>理想值 0.835（$\delta\to0$，Melnikov，式 2.1）；$\delta=0.5$ 时真值 0.829</td></tr>
+<tr><td>$\lambda_c$ 的模糊带</td><td><strong>[0.8288, 0.8291]</strong></td><td>p.106</td><td>作者自己承认"理论上只能说落在这个区间"</td></tr>
+<tr><td>工作点 $\lambda_0$</td><td>0.840</td><td>§4.1.1</td><td>$\Phi_0=0.1271$</td></tr>
+<tr><td>斜率 $k$</td><td><strong>≈6.83</strong></td><td>¥式 4.9</td><td>$\Phi=\Phi_0+k(\lambda-\lambda_0)$</td></tr>
+<tr><td>步长 $h$</td><td>0.01</td><td>§4.1.1</td><td>全文统一</td></tr>
+<tr><td>延时个数 $N$</td><td>20（A 组）/ 180（B 组）</td><td>§4.4</td><td>同时也是周期数</td></tr>
+<tr><td>过载条件</td><td>$a&gt;\lambda_0-\lambda_c=0.011$</td><td>§4.5</td><td>超过则部分 $\tau$ 下 $C&lt;\lambda_c$，$\Phi^{(m)}$ 无意义</td></tr>
+<tr><td>数值地板</td><td>$\sim10^{-6}$</td><td>§4.5 图 11</td><td>零输入下 $\Phi_0$ 的计算涨落</td></tr>
+<tr><td>自适应增益</td><td>$g=\lambda_0/\sqrt P$，取 $g&lt;(\lambda_0-\lambda_c)/\sqrt2$</td><td>§4.5</td><td>先把信号归一化到安全量程</td></tr>
+</tbody></table>
+<h3>5.3 一个完整算例（信号 B1）</h3>
+<p><strong>【原文】</strong> $a=0.003$、$\varphi=\pi/3=1.047$、$\sigma=0.1$、$N=180$、$h=0.01$。图 8 给出实测数据：噪声幅度约为信号的 30 倍，肉眼完全看不出正弦。图 9 给出延时扫描得到的 $\Phi^{(m)}(\tau)$：一条被噪声毛刺覆盖的余弦形曲线。</p>
+<p><strong>【原文】</strong> 单次估计：$\hat a=0.00291$（相对误差 3.0%）、$\hat\varphi=1.01$（3.5%）。同样数据用 ML：$\hat a=0.00351$（17.0%）、$\hat\varphi=0.961$（3.7%）。</p>
+<p><strong>【推断】</strong> 请注意这个结果的结构：<strong>幅值上 C1 明显赢，相位上两者打平</strong>。这符合机理——$\Phi$ 的起伏幅度直接编码 $a$，而相位要靠"峰在哪"来定，峰的位置被噪声毛刺推来推去。Table 4 印证了这一点：$a\ge0.002$ 时 $\sigma_\varphi\approx0.017$–$0.023$，到 $a=0.0015$ 突然跳到 0.134，$a=0.0005$ 时 0.227。<strong>相位估计有一个"悬崖"，位置在 $a\approx0.002$。</strong></p>
+<h3>5.4 三张对照表怎么读</h3>
+<p><strong>【原文】</strong> 表 2（相位已知，$a=0.001$，$N=20$，$\sigma=0.02\sim0.045$ 六档）报的是 $\sigma_{\hat a}$ 的 RMS。表 3、表 4（幅相都未知，$a=0.0005\sim0.003$，$N=180$）报 $\sigma_{\hat a}$ 与 $\sigma_{\hat\varphi}$。表 6（色噪声）报 D1–D4 的退化。</p>
+<p><strong>【原文】</strong> 关键数字：B1 的 $\sigma_{\hat a}$ 是 <strong>0.000116</strong>，ML 是 <strong>0.000503</strong>，理论预测 $\sigma\sqrt{2h/NT}=$ <strong>0.000503</strong>。<strong>C1 比理论下界低 4.3 倍。</strong></p>
+<p><strong>【推断】</strong> 这一行是本篇最重要、也最需要打问号的一行，第 9 节专门处理。</p>
+<hr>
+<h2>6. 数学推导：从零开始</h2>
+<h3>6.1 为什么"加信号"等于"改初值"</h3>
+<p><strong>【通用数学事实】</strong> 设 $z(t)$ 满足 $\dot z=0$、$z(0)=\lambda$，则 $z(t)\equiv\lambda$。于是</p>
+<p>$$\ddot x+\delta\dot x+f(x)=z(t)\cdot s(t)$$</p>
+<p>与"右端直接写 $\lambda s(t)$"完全等价；而"右端写 $(\lambda+a\cos\varphi)s(t)$"则等价于"把 $z(0)$ 改成 $\lambda+a\cos\varphi$"。这就是式 (1.2) 的含义。</p>
+<p><strong>【推断】</strong> 这一步的意义被原文一笔带过，其实它给出了一个<strong>判据</strong>：只有当"信号叠加"能被写成"对某个初值的平移"时，SDIC 才能真正用来测幅值。若信号形式是 $\lambda s(t)+a\,g(t)$（$g$ 与 $s$ 不同频），这个等价关系立即失效——这也是为什么 C1 反复强调"频率必须已知"。</p>
+<h3>6.2 从变分方程到 Floquet 指数</h3>
+<p><strong>【通用数学事实】</strong> 设 $\bar x(t)$ 是式 (1.3) 的周期解。令 $x=\bar x+\xi$，线性化得变分方程</p>
+<p>$$\ddot\xi+\delta\dot\xi-\bigl(1-3\bar x^2(t)\bigr)\xi=0$$</p>
+<p>写成状态形式 $\dot X=A(t)X$，$X=(\xi,\dot\xi)^T$，$A(t)=\begin{pmatrix}0&amp;1\\ c(t)&amp;-\delta\end{pmatrix}$，$c(t)=1-3\bar x^2(t)$，周期 $T=2\pi$。单值矩阵 $M=\Phi(T,0)$ 的两个特征值 $\rho_{1,2}$ 给出 Floquet 乘子，指数为</p>
+<p>$$\mu_i=\frac1T\ln\rho_i$$</p>
+<p><strong>【通用数学事实】</strong> 由 Liouville 公式 $\operatorname{tr}A=-\delta$，必有</p>
+<p>$$\mu_1+\mu_2=-\delta$$</p>
+<p><strong>【复算】</strong> 这句可以当场验证：我在 $\lambda=0.86$ 处算得 $\mu_1=-0.25+0.1077i$，实部恰为 $-\delta/2=-0.25$，与 $\mu_2=\bar\mu_1$ 相加正是 $-0.5=-\delta$。也就是说，<strong>一旦 $\mu$ 变成复共轭对，实部就被钉死在 $-\delta/2$，此时 $\Phi=\delta/2+|\mathrm{Im}\,\mu|$ 只随虚部变化</strong>——这解释了图 5 里两个指数在复平面上"撞到一起又分叉"的轨迹，也解释了图 6 在 $\lambda\gtrsim0.855$ 之后曲线开始由"实部主导"转为"虚部主导"。</p>
+<p><strong>【原文】</strong> 广义 Floquet 指数定义为</p>
+<p>$$\Phi=|\operatorname{Re}\mu_1|+|\operatorname{Im}\mu_1|$$</p>
+<p><strong>【推断】</strong> 这个定义不好看，但工程上实用：它把"阻尼多强"与"振荡多快"两个信息揉成一个正数，保证单调、可比较、且能不分支地画成一条曲线。缺点是把两类不同的物理混在一个标量里——见第 9 节第 4 条。</p>
+<p><strong>【复算】</strong> 我在工作区 <code>.venv</code> 里用分离式变分法（先积轨迹收敛，再沿记录好的轨道积变分方程，避免混沌瞬态把变分分量冲到溢出）复算：</p>
+<table><thead><tr><th>$\lambda$</th><th>$\mu_1$</th><th>$\lvert\rho\rvert_{\max}$</th><th>$\Phi$</th></tr></thead><tbody>
+<tr><td>0.830</td><td>−0.0589</td><td>0.691</td><td>0.0589</td></tr>
+<tr><td>0.835</td><td>−0.0938</td><td>0.555</td><td>0.0938</td></tr>
+<tr><td><strong>0.840</strong></td><td><strong>−0.1269</strong></td><td><strong>0.451</strong></td><td><strong>0.1269</strong></td></tr>
+<tr><td>0.845</td><td>−0.1642</td><td>0.356</td><td>0.1642</td></tr>
+<tr><td>0.850</td><td>−0.2285</td><td>0.238</td><td>0.2285</td></tr>
+<tr><td>0.860</td><td>−0.25+0.1077i</td><td>0.208</td><td>0.3577</td></tr>
+</tbody></table>
+<p>原文 $\Phi_0=0.1271$，我算 <strong>0.1269</strong>，差 0.16%。原文 $k\approx6.83$，我在 0.835–0.845 之间做线性拟合得 <strong>7.04</strong>，差 3%。<strong>这两个数对上，说明第 5 步的"标定曲线"是真能复现的</strong>——这是整篇论文最硬的一块。</p>
+<h3>6.3 为什么 $\Phi$ 只依赖合成幅值 $C$，不依赖合成相位 $\Theta$</h3>
+<p><strong>【原文】</strong> 式 (4.3)–(4.5)：$\lambda_0\cos t+a\cos(t+\varphi+\tau)=C(\tau)\cos\bigl(t+\Theta(\tau)\bigr)$，其中</p>
+<p>$$C(\tau)=\sqrt{\lambda_0^2+a^2+2a\lambda_0\cos(\tau+\varphi)},\qquad \Theta(\tau)=\arctan\frac{a\sin(\varphi+\tau)}{\lambda_0+a\cos(\varphi+\tau)}$$</p>
+<p>论文断言"$\Phi$ 只依赖 $C$，与 $\Theta$ 无关"（p.108）。</p>
+<p><strong>【通用数学事实】</strong> 这不是近似，而是<strong>精确的</strong>。理由：把相位 $\Theta$ 平移 $\Delta$，等价于把时间原点平移 $-\Delta$。自治系统（阻尼、恢复力都不显含时间）的时间平移不改变周期轨道的几何形状，只改变轨道上的起点；而 Floquet 乘子是单值矩阵的特征值，对起点选择不变（原文式 3.12 已给出证明：$\Phi(T+\tau,\tau)$ 与 $\Phi(T,0)$ 相似，特征值相同）。所以 $\Phi$ 与 $\Theta$ 无关是<strong>结构性的</strong>，不需要线性化假设。</p>
+<p><strong>【推断】</strong> 这条性质是全文的地基。如果 $\Phi$ 也依赖 $\Theta$，那么延时扫描测到的是两个未知量的混合，$(a,\varphi)$ 就不可辨识。作者只用一句话带过，但它是"能估相位"的唯一理由。</p>
+<h3>6.4 复合幅值在复平面上画的是一个圆</h3>
+<p><strong>【通用数学事实】</strong> 把 $\lambda_0\cos t$ 与 $a\cos(t+\varphi+\tau)$ 看成两个相量：前者固定在实轴 $\lambda_0$ 处，后者长度 $a$、角度 $\varphi+\tau$ 随 $\tau$ 旋转。二者之和的模就是 $C(\tau)$。于是</p>
+<p>$$C(\tau)=\bigl|\lambda_0+a\,e^{i(\varphi+\tau)}\bigr|$$</p>
+<p>即<strong>圆心在 $\lambda_0$、半径 $a$ 的圆上取模</strong>。$\tau$ 扫过 $2\pi$，$C$ 在 $[\lambda_0-a,\ \lambda_0+a]$ 之间走一个完整的来回。</p>
+<p><strong>【推断】</strong> 论文没有点破这个几何图像，但它把整件事变得透明：<strong>这是"已知偏心量的圆，测半径与极角"的标准问题</strong>。也正因为它是个圆，最小二乘才有唯一解、才不需要初值猜测。</p>
+<h3>6.5 一个论文没给的闭式估计</h3>
+<p><strong>【推断】</strong> 若 $\Phi(C)$ 在窗口内线性（式 4.9），则</p>
+<p>$$\Phi^{(m)}(\tau)\approx\Phi_0+k\bigl(C(\tau)-\lambda_0\bigr)$$</p>
+<p>于是直接读出两个量：</p>
+<p>$$\boxed{\ \hat a=\frac{\max_\tau\Phi^{(m)}-\min_\tau\Phi^{(m)}}{2k},\qquad \hat\varphi=\arg\max_\tau\Phi^{(m)}-\tau_{\text{峰}}\ }$$</p>
+<p>$$\text{（圆心自检）}\qquad \frac{\max_\tau\Phi^{(m)}+\min_\tau\Phi^{(m)}}{2}=\Phi_0$$</p>
+<p><strong>这三行可以替代整段 NLLS</strong>，且解释力更强：第一行说"幅值 = 曲线峰谷差的一半除以标定斜率"，第二行说"相位 = 峰的位置"，第三行是一个<strong>免费的自检量</strong>——若中线偏离 $\Phi_0$ 太多，说明工作点漂了或噪声太大，本次估计不可信。</p>
+<p><strong>【推断】</strong> 代价是它只用到了两个极值点，噪声抑制不如全曲线拟合。实用做法：先用闭式解给 NLLS 一个初值，再让 NLLS 在全曲线上收敛。这也回答了原文为什么要"把 $k$ 也当参数一起拟合"（式 4.8 下方）——它其实是在线自标定斜率，抵消温漂与参数漂移。</p>
+<h3>6.6 频率误差被 $N$ 放大</h3>
+<p><strong>【原文】</strong> 若信号频率有相对误差 $\Delta\omega$，式 (4.20) 变为</p>
+<p>$$C(\tau)=\sqrt{\lambda_0^2+a^2+2a\lambda_0\cos\bigl((\Delta\omega\cdot N+1)\tau+\varphi\bigr)}$$</p>
+<p>即 $\Phi^{(m)}(\tau)$ 的<strong>振荡频率从 1 变成 $\Delta\omega N+1$</strong>。图 10 用 $\Delta\omega=0.01$、$N=200$ 演示：曲线频率正好变成 3 倍（$0.01\times200+1=3$）。</p>
+<p><strong>【推断】</strong> 这个式子是全篇最实用的警告。$N$ 既是"平均长度"，又是"频率误差的放大器"：$N=180$ 时，1% 的频率误差会让扫描曲线转 2.8 圈。<strong>所以不做 $\Delta\omega$ 联合估计，$N$ 大反而更糟</strong>。原文的处理是把 $\Delta\omega$ 也放进 NLLS（式 4.22），代价是每次多估一个参数；C3 实验（$\Delta\omega=0.01$）得到 $\sigma_{\hat a}=0.000139$、$\sigma_{\hat\varphi}=0.028$、$\sigma_{\Delta\hat\omega}=0.000103$，退化不大。</p>
+<p><strong>【推断】</strong> 对极低频课题，这一条比在 C1 语境下更要紧：$0.1$–$10$ Hz 的信号，频率由变尺度扫描确定，相对误差 1% 很常见。若直接套 C1 而不估 $\Delta\omega$，相位估计必然崩。</p>
+<hr>
+<h2>7. 实验是怎么验证 claim 的</h2>
+<p><strong>【原文】</strong> 五组实验，逻辑是"先简后难"：</p>
+<table><thead><tr><th>组</th><th>条件</th><th>验证什么</th><th>结果（原文）</th></tr></thead><tbody>
+<tr><td>A1–A6</td><td>$\varphi$ 已知，$a=0.001$，$N=20$，$\sigma=0.02\to0.045$</td><td>幅值估计随噪声的退化</td><td>$\sigma_{\hat a}$ 0.000137→0.000286；ML 0.000252→0.000568</td></tr>
+<tr><td>B1–B6</td><td>幅相均未知，$\sigma=0.1$，$N=180$，$a=0.003\to0.0005$</td><td>双参数估计的下限</td><td>$\sigma_{\hat a}$ 0.000116→0.000314；$\sigma_{\hat\varphi}$ 0.017→0.227</td></tr>
+<tr><td>C1–C3</td><td>加频率误差 $\Delta\omega=0.01$</td><td>联合估计是否可行</td><td>$\sigma_{\hat a}=0.000139$，$\sigma_{\hat\varphi}=0.028$</td></tr>
+<tr><td>D1–D4</td><td>二阶 AR 色噪声，RMS 同为 0.1</td><td>相关噪声下的鲁棒性</td><td>$\sigma_{\hat a}$ 0.000406→0.002084；ML 0.003011→0.009794</td></tr>
+<tr><td>边界</td><td>零输入 / $a=0.016$</td><td>数值地板与过载</td><td>地板 $\sim10^{-6}$；过载时部分 $\tau$ 的 $\Phi^{(m)}$ 无意义</td></tr>
+</tbody></table>
+<p><strong>【原文】</strong> 色噪声发生器用二阶系统 $\ddot w+\beta_1\dot w+\beta_0w=n(t)$（式 4.25），并固定 $\sqrt{2\beta_0\beta_1}=1$ 让四组噪声的 RMS 都等于 $\sigma=0.1$，保证公平比较（表 5）。</p>
+<p><strong>【推断】</strong> 这个实验设计有一个值得学的细节：<strong>它没有停在"我的方法更好"，而是主动去撞对自己不利的条件</strong>——频率误差、色噪声、过载、数值地板，四个都测了，而且都如实报告了退化。这种"自曝短板"的写法在 2002 年的信号处理论文里不算常见，对答辩很有用。</p>
+<p><strong>【复算】</strong> 我复算的两项（$\Phi_0$ 与 $k$）与原文吻合到 0.2% 和 3%，说明第 5.1 步的标定曲线可复现；$\lambda_c$ 方面，我用 Poincaré 判据扫得转变发生在 0.825（$p_{std}=0.26$）与 0.830（$p_{std}=0$）之间，与原文的 0.829 一致（复算命令见附录）。</p>
+<hr>
+<h2>8. Takeaways</h2>
+<p><strong>① 把"混沌检测"从二值判决升级为连续测量，是这篇的真正贡献。</strong> 它没有提出新振子、新判据、新硬件，只是换了一个观测量：从"相图变没变"换成"回归速率是多少"。这一步让"检测"变成了"测量"，后面所有幅相估计都是它的推论。<strong>【推断】</strong></p>
+<p><strong>② $\Phi$ 与 $\Theta$ 无关是结构性的，不是近似。</strong> 靠的是时间平移不变性。这条性质决定了"延时扫描 + 拟合"这条路走得通，也是它与 ★[2] 的相量合成路线最本质的分野：★[2] 靠几何（相量相加过阈值），C1 靠动力学（回归速率随幅值单调）。<strong>【通用数学事实】</strong></p>
+<p><strong>③ 相位的精度有一道悬崖，位置由幅值决定。</strong> Table 4 里 $a$ 从 0.002 降到 0.0015，$\sigma_\varphi$ 从 0.019 跳到 0.134（7 倍）。工程含义：<strong>报"能估相位"必须连最小可估幅值一起报</strong>，单独报"相位误差 3.5%"是没有意义的。<strong>【原文 + 推断】</strong></p>
+<hr>
+<h2>9. 最脆弱的假设</h2>
+<h3>9.1 第一条（最重）：宣称的 4 倍精度优势与 CRLB 冲突</h3>
+<p><strong>【通用数学事实】</strong> 白噪声中已知频率、已知相位的正弦幅值估计，任何<strong>无偏</strong>估计量的方差都满足</p>
+<p>$$\operatorname{var}(\hat a)\ \ge\ \sigma^2\frac{2h}{NT}$$</p>
+<p>这正是原文式 (4.16) 自己写下的式子（$\sigma_{\hat a}=\sigma\sqrt{2h/NT}$）。B1 的参数代进去是 $0.1\sqrt{2\times0.01/1131}=4.2\times10^{-4}$，原文的 ML 实测 5.03e-4，与理论一致——<strong>说明 ML 那一路是有效（efficient）的</strong>。</p>
+<p><strong>【推断】</strong> 那么 C1 报的 <strong>1.16e-4</strong> 就是下界的 <strong>1/4.3</strong>。对数无偏估计量而言这是不可能的。只有三种出路：</p>
+<ol><li><strong>估计量有偏。</strong> 但 Table 1 显示偏差只有 +6% 量级，而 RMS 差 4.3 倍，方差仍然远低于下界——单纯偏置解释不了。</li><li><strong>两条链看到的噪声带宽不同。</strong> 但 ML 已经是对同一批样本的最优处理，<strong>任何前置滤波都只会丢信息</strong>，不可能让它变好。所以这一条不构成解释，反而加深了矛盾。</li><li><strong>仿真里噪声的等效带宽被无意压低了。</strong> 若噪声不是每步 $h$ 更新，而是每 $m$ 步才更新一次，等效带宽从 50 Hz 降到 $50/m$，同样 $a$ 下的"实际 SNR"就高 $10\lg m$ dB，$\sigma_{\hat a}$ 缩小 $\sqrt m$ 倍。要凑出 4.3 倍，只需 $m\approx18$（即噪声约每 0.18 s 更新一次）。</li></ol>
+<p><strong>【推断】</strong> 我倾向第 3 种，但<strong>没有证据</strong>——原文只说"$n(t)=\sigma\cdot\texttt{randn}$"，没有交代噪声在 RK4 各子步之间如何保持。<strong>这一条不解决，"比 ML 准 4 倍"这句话就不能引用</strong>；它不影响方法本身的价值（连续读出），但直接影响"混沌能不能打败匹配滤波"这个更大的命题。</p>
+<p><strong>【推断】</strong> 顺带说，这个矛盾其实指向一个更有意思的问题：如果第 3 种成立，那么 C1 的"优势"全部来自<strong>隐含的窄带化</strong>，而窄带化是可以线性实现的——那就不需要混沌了。<strong>这恰好是评阅老师最可能问的一句话。</strong></p>
+<h3>9.2 第二条：$\Phi(C)$ 的线性窗口有多宽</h3>
+<p><strong>【原文】</strong> 式 (4.9) 用 $\Phi=\Phi_0+k(\lambda-\lambda_0)$ 近似图 6，$k\approx6.83$。</p>
+<p><strong>【复算】</strong> 我的数据：0.830–0.850 区间内 $\Phi$ 从 0.0589 涨到 0.2285，<strong>斜率本身在变</strong>（0.830–0.840 段 6.8，0.840–0.850 段 10.2）。也就是说，<strong>线性只在 $\pm0.005$ 内成立</strong>。这正是"过载条件 $a&lt;\lambda_0-\lambda_c=0.011$"的物理来源：幅值一旦接近 0.011，$C$ 会跑出线性区，甚至跌到 $\lambda_c$ 以下变成混沌，$\Phi$ 直接失去意义。</p>
+<p><strong>【推断】</strong> 所以 C1 的量程不是"设计出来的"，是"线性化窗口决定的"。原文用自适应增益 $g=\lambda_0/\sqrt P$ 把任意输入先压到安全区，这个补丁很实用，但它把"绝对幅值"变成了"相对幅值"，<strong>必须先知道信号量级才能还原</strong>——这就解释了摘要里那句"given some a priori knowledge about the signal order of magnitude"。<strong>这不是客套话，是硬约束。</strong></p>
+<h3>9.3 第三条：频率必须精确已知，且误差被 $N$ 放大</h3>
+<p>见 6.6。补一句量化的风险：$N=180$、$\Delta\omega/\omega=1\%$ 时扫描频率 $2.8\times$，若不估 $\Delta\omega$，拟合残差会把 $a$ 估成 0 或估大一倍。<strong>【推断】</strong></p>
+<h3>9.4 第四条：$\Phi$ 把两种物理揉成一个数</h3>
+<p><strong>【推断】</strong> $\Phi=|\mathrm{Re}\,\mu|+|\mathrm{Im}\,\mu|$ 在 $\lambda&lt;0.855$ 时是纯实部（阻尼），在 $\lambda&gt;0.855$ 时是"$\delta/2$ + 虚部"（振荡）。<strong>这两段的物理含义不同，却在同一根纵轴上连续</strong>。后果是：如果工作点漂过 0.855，标定斜率会突变（我算得 0.850→0.860 之间 $\Phi$ 从 0.2285 跳到 0.3577），而此时若仍用旧的 $k$，幅值估计会系统性偏小。原文把 $k$ 放进 NLLS 一起拟合，某种意义上就是在打这个补丁。</p>
+<h3>9.5 第五条：白噪声假设</h3>
+<p><strong>【原文】</strong> 色噪声实验（表 6）显示，D4（$\beta_0=1.5,\beta_1=0.33$，相关性最强）的 $\sigma_{\hat a}$ 从 0.000116 涨到 0.002084，<strong>退化 18 倍</strong>；ML 退化 19 倍。所以两者的相对优势还在，但绝对值已经掉出可用区间。</p>
+<p><strong>【推断】</strong> 对极低频磁场，真实噪声是 $1/f^\alpha$ 叠工频线谱，比 D4 更"红"。C1 没有测 $\alpha&gt;1$ 的情形，这是它留给你补的空白。</p>
+<hr>
+<h2>10. 一周时间，最小复现验什么</h2>
+<p><strong>【推断】</strong> 按投入产出排序，只做三件：</p>
+<p><strong>第一件（半天，已完成）：复算 $\Phi(\lambda)$ 与 $k$。</strong> 这是全篇唯一"可被独立验证"的定量地基。做法：先积 300 个周期让轨道收敛，再沿记录好的 $x(t)$ 积一个周期的变分方程，取单值矩阵特征值。我得到 $\Phi(0.84)=0.1269$（原文 0.1271）、$k=7.04$（原文 6.83）。<strong>若这一步对不上，后面都不用做。</strong></p>
+<p><strong>第二件（两天）：复现表 3/表 4 的 B1 一行，并把"噪声更新方式"作为自变量。</strong> 同一份噪声数据，分别按"每步更新"与"每 $m$ 步更新"（$m=1,5,10,20$）跑，看 $\sigma_{\hat a}$ 如何变化。<strong>如果 $m$ 一改就能从 5e-4 掉到 1e-4，第 9.1 节就有了实证答案。</strong> 这是整份精读里唯一能把"未解"变成"已知"的实验，优先做。</p>
+<p><strong>第三件（两天）：用闭式估计替代 NLLS。</strong> 比较 $\hat a=(\Phi_{\max}-\Phi_{\min})/(2k)$ 与全曲线 NLLS 的 RMS，看损失多少。若损失 &lt;20%，那么实时实现可以省掉整个迭代——这是对毕设"嵌入式实现"最直接的贡献。</p>
+<p><strong>不做的事</strong>：色噪声四组（D1–D4）与频率误差三组（C1–C3）先跳过。它们的结论方向已由原文给出（都会退化，但相对优势保持），复现的边际价值低于前两件。</p>
+<hr>
+<h2>11. 如果我要反对它，反例怎么设计</h2>
+<p><strong>反例 1（最致命，直接打 4 倍优势）：让 ML 也用同一份"隐含窄带"的数据。</strong><br>把 C1 仿真里的噪声先按"每 18 步更新一次"生成，再把这份噪声<strong>同时</strong>喂给 C1 与 ML。若两者差距消失，则 4 倍优势纯属记账差；若差距仍在，则 C1 确实用了非线性信息，那时才值得深挖。<strong>这个实验成本极低（改两行），杀伤力最大。</strong></p>
+<p><strong>反例 2（打"通用性"）：把噪声换成 $\alpha=1$ 的 $1/f$。</strong><br>C1 只测了二阶 AR（近似带限白噪 + 一个极点）。$1/f$ 噪声在低频段的功率随观测时长增长，而 C1 的 $N$ 越长、$\Phi$ 的低频漂移越大——理论上 $\sigma_{\hat a}$ 会随 $N$ <strong>变差</strong>而不是变好。若实测如此，则"C1 适合长积分"这个隐含假设就破了。</p>
+<p><strong>反例 3（打"频率误差被放大"的边界）：$\Delta\omega=0.001$、$N=500$。</strong><br>此时扫描频率 $1.5\times$，但 NLLS 要同时估四个参数（$a,\varphi,\Delta\omega,k$）。看它是否还能收敛。若不能，则 6.6 节的"联合估计"只在 $N$ 小时成立，而 $N$ 小又意味着精度低——一个两难。</p>
+<p><strong>反例 4（打"相位悬崖"）：$a$ 在 0.0015–0.002 之间细扫。</strong><br>Table 4 显示这里有一道 7 倍的跳变。若细扫发现是<strong>双稳态</strong>（同一 $a$ 有两种相位解），那"相位可估"这件事在悬崖附近就不成立，必须报区间而不是报点。</p>
+<hr>
+<h2>12. 后续研究、反驳与新认知</h2>
+<p><strong>【文献】</strong> C1 之后这条线大致分了三支：</p>
+<ol><li><strong>继续用连续指数</strong>：把 Floquet/Lyapunov 指数当特征量做定量检测，后来演化成"混沌判据的定量化"这一族（多尺度熵、排列熵、0-1 检验都属于同一动机——把"像不像混沌"变成数）。项目里 <a href="论文精读-D1_磁异常检测综述_MST2021.html"><code>04-论文精读/论文精读-D1_磁异常检测综述_MST2021.md</code></a> 讨论的检测器演化，与此同源。</li><li><strong>回到二值判决 + 几何设计</strong>：★[2] 就是这一支的成熟形态——不测速率，只测"过没过线"，用阵列补相位盲区。<strong>工程上更简单，鲁棒性更好，但丢掉了连续量。</strong></li><li><strong>参数估计走波形路线</strong>：C2 用双振子差分直接还原波形，再用峰值比与时间差估幅宽。<strong>信息量最大，但需要过阻尼通道。</strong></li></ol>
+<p><strong>【推断】</strong> 三条路的分野可以用一句话概括：<strong>C1 读"速率"，★[2] 读"位置"，C2 读"波形"。</strong> 三者对噪声的敏感方式完全不同——速率最怕参数漂移，位置最怕阈值漂移，波形最怕带宽失配。你如果要在毕设里做"最低可检测信噪比"的指标，必须说清楚自己站在哪一支上，因为三支的门限不可比。</p>
+<p><strong>【推断】</strong> 一个反直觉的新认知：C1 反复强调"SDIC"，但它<strong>实际用到的工作点 $\lambda_0=0.840$ 是在 $\lambda_c$ 之上、处于稳定周期态</strong>。也就是说，系统此时<strong>并不混沌</strong>，只是"离分岔点很近"。作者自己在 §3 开头就说了："the chosen system is always kept in a periodic motion ($\lambda&gt;\lambda_c$) and only the Floquet exponent is used." 所以"混沌检测"这个标签在这个方法里其实是<strong>名不副实</strong>的——它用的是<strong>近分岔点的临界慢化（critical slowing down）</strong>，而不是混沌。这个区分在答辩时很重要：一旦被问"混沌到底起了什么作用"，正确答案是"没有，起作用的是临界慢化"。<strong>【推断】</strong></p>
+<hr>
+<h2>13. 一个 Follow-up Idea</h2>
+<p><strong>【推断】</strong> 把 C1 的连续读出搬到极低频弱磁检测上，做一件 ★[2] 与 C2 都没做的事：<strong>用 $\Phi$ 当检测统计量，直接给 $P_{fa}$–$P_d$–SNR 曲面。</strong></p>
+<p>思路：</p>
+<ol><li>工作点取 $\lambda_0$ 略高于 $\lambda_c$（干净环境下按你的 0.734 档标定，留 0.005 余量）。</li><li>不判"有没有"，而是测 $\hat a$ 与 $\hat\varphi$：没有信号时 $\hat a$ 只剩噪声起伏，其分布可由零输入仿真直接标定（这就是 $P_{fa}$）；有信号时 $\hat a$ 的分布右移（这就是 $P_d$）。</li><li>因为 $\hat a=(\Phi_{\max}-\Phi_{\min})/(2k)$ 是一个<strong>显式的、单峰的、无阈值的统计量</strong>，它的零分布可以解析近似（极值分布），不必靠蒙特卡洛扫阈值。</li></ol>
+<p><strong>为什么这与项目已有结论不冲突</strong>：<code>[阶段1-问题销账](../01-阶段一/阶段1-问题销账.md)</code> 已经查明"补 ROC"不能当创新点（Jin &amp; Zhang 2011 已给 $P_{fa}$ 解析式）。但那条结论针对的是<strong>二值判据</strong>下的 $P_{fa}$。<strong>连续统计量的 $P_{fa}$ 是另一回事</strong>——它没有"阈值"这个自由度，$P_{fa}$ 是"$\hat a$ 的零分布尾概率"，随积分时长 $N$ 连续可变。这是一个还没被占的位置。</p>
+<p><strong>风险（必须先查）</strong>：</p>
+<ul><li>极低频噪声是色噪声，$\hat a$ 的零分布会随 $1/f$ 斜率变化，可能不稳定（对应第 9.5 节）。</li><li>$N$ 大时频率误差被放大（6.6 节），而极低频的频率本来就不准。</li><li>磁通门温漂（0.1–0.6 nT/℃，见 <code>[阶段1-问题销账](../01-阶段一/阶段1-问题销账.md)</code> Q3）会让 $\lambda_0$ 缓慢漂移，直接读进 $\hat a$——<strong>这是连续读出最怕的东西</strong>，必须配一个"中线自检"（6.5 节第三式）做在线告警。</li></ul>
+<p><strong>新颖性纪律</strong>：动手前先查中文专利与中文期刊有没有"用 Floquet 指数做检测统计量/给虚警概率"的先例。C1 本身是 2002 年的英文文献，二十多年里很可能有人做过；若已有人做，就把卖点收窄为"在变尺度 + 极低频色噪声条件下的门限曲面"。</p>
+<hr>
+<h2>附录：可核查清单</h2>
+<table><thead><tr><th>编号</th><th>论文中的说法</th><th>位置</th><th>我的核查</th><th>结论</th></tr></thead><tbody>
+<tr><td>1</td><td>$\lambda_c=0.829$（$\delta=0.5$）</td><td>p.106</td><td>Poincaré 判据扫得转变在 0.825–0.830 之间</td><td>✅ 一致</td></tr>
+<tr><td>2</td><td>模糊带 $[0.8288,0.8291]$</td><td>p.106</td><td>未复核（需数万周期统计驻留时间）</td><td>⏸ 未做</td></tr>
+<tr><td>3</td><td>$\Phi_0=0.1271$ @ $\lambda_0=0.84$</td><td>p.108</td><td>分离式变分法算得 <strong>0.1269</strong></td><td>✅ 差 0.16%</td></tr>
+<tr><td>4</td><td>$k\approx6.83$</td><td>式 4.9</td><td>0.835–0.845 线性拟合得 <strong>7.04</strong></td><td>✅ 差 3%</td></tr>
+<tr><td>5</td><td>$\mu_1+\mu_2=-\delta$</td><td>式 3.10</td><td>$\lambda=0.86$ 处 $\mu_1=-0.25+0.1077i$，和为 $-0.5$</td><td>✅ 精确</td></tr>
+<tr><td>6</td><td>$\Phi$ 与 $\Theta$ 无关</td><td>p.107</td><td>时间平移不变性，精确成立</td><td>✅ 定理级</td></tr>
+<tr><td>7</td><td>B1：$\sigma_{\hat a}=1.16\times10^{-4}$</td><td>表 3</td><td>低于 CRLB（$4.2\times10^{-4}$）4.3 倍</td><td>❌ <strong>存疑，见 9.1</strong></td></tr>
+<tr><td>8</td><td>B1：$\sigma_{\hat\varphi}=0.017$</td><td>表 4</td><td>未复现</td><td>⏸ 未做</td></tr>
+<tr><td>9</td><td>过载条件 $a&gt;0.011$</td><td>§4.5</td><td>与我的线性窗口（$\pm0.005$）自洽</td><td>✅ 机理一致</td></tr>
+<tr><td>10</td><td>数值地板 $\sim10^{-6}$</td><td>图 11</td><td>未复核</td><td>⏸ 未做</td></tr>
+<tr><td>11</td><td>色噪声退化 18 倍（D4）</td><td>表 6</td><td>未复核</td><td>⏸ 未做</td></tr>
+<tr><td>12</td><td>频率误差被放 $N$ 倍</td><td>式 4.21</td><td>代数核对成立</td><td>✅</td></tr>
+</tbody></table>
+<h3>复算命令</h3>
+<pre><code># 在项目根目录执行（Windows Git Bash）
+.venv/Scripts/python.exe - &lt;&lt;'PY'
+import numpy as np, math
+def orbit(lam, d=0.5, h=0.002, ntrans=300, nper=2):
+    n = int(round(2*math.pi/h)); x, v = 0.1, 0.0; t = 0.0
+    acc = lambda t,x,v: -d*v + x - x**3 + lam*math.cos(t)
+    for _ in range(ntrans*n):
+        k1x,k1v=v,acc(t,x,v); k2x,k2v=v+.5*h*k1v,acc(t+.5*h,x+.5*h*k1x,v+.5*h*k1v)
+        k3x,k3v=v+.5*h*k2v,acc(t+.5*h,x+.5*h*k2x,v+.5*h*k2v)
+        k4x,k4v=v+h*k3v,acc(t+h,x+h*k3x,v+h*k3v)
+        x+=h/6*(k1x+2*k2x+2*k3x+k4x); v+=h/6*(k1v+2*k2v+2*k3v+k4v); t+=h
+    xs=[]
+    for _ in range(nper*n):
+        k1x,k1v=v,acc(t,x,v); k2x,k2v=v+.5*h*k1v,acc(t+.5*h,x+.5*h*k1x,v+.5*h*k1v)
+        k3x,k3v=v+.5*h*k2v,acc(t+.5*h,x+.5*h*k2x,v+.5*h*k2v)
+        k4x,k4v=v+h*k3v,acc(t+h,x+h*k3x,v+h*k3v)
+        x+=h/6*(k1x+2*k2x+2*k3x+k4x); v+=h/6*(k1v+2*k2v+2*k3v+k4v); t+=h
+        xs.append(x)
+    return np.array(xs), h
+def floq(lam, d=0.5):
+    xs, h = orbit(lam,d); n = int(round(2*math.pi/h)); M = np.eye(2)
+    for i in range(n):
+        A = np.array([[0,1],[1-3*xs[i]**2,-d]])
+        k1=A@M; k2=A@(M+h/2*k1); k3=A@(M+h/2*k2); k4=A@(M+h*k3)
+        M = M + h/6*(k1+2*k2+2*k3+k4)
+    ev = np.linalg.eigvals(M)
+    mu = np.log(np.abs(ev))/(2*math.pi) + 1j*np.angle(ev)/(2*math.pi)
+    i = int(np.argmax(mu.real))
+    return mu[i], abs(mu[i].real)+abs(mu[i].imag)
+for lam in (0.830,0.840,0.850,0.860):
+    mu, Phi = floq(lam)
+    print(f"lam={lam:.3f} mu={np.round(mu,4)} Phi={Phi:.4f}")
+PY</code></pre>
+<p><strong>预期输出</strong>：<code>lam=0.840 ... Phi=0.1269</code>；<code>lam=0.860 mu=(-0.25+0.1077j) Phi=0.3577</code>。</p></main></body></html>

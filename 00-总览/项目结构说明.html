@@ -1,0 +1,255 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>00-总览/项目结构说明.md</title><style>
+:root{--bg:#f6f7f9;--panel:#fff;--line:#e3e7ec;--text:#1b232c;--muted:#63707e;--accent:#2f6fd0;--soft:#eaf1fc}
+@media(prefers-color-scheme:dark){:root{--bg:#14181d;--panel:#1d232a;--line:#303a45;--text:#e7edf3;--muted:#a7b3c0;--accent:#7fb0f5;--soft:#21334d}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.8 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+.bar{position:sticky;top:0;background:var(--panel);border-bottom:1px solid var(--line);padding:9px 24px;font-size:13px;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.bar a{color:var(--accent);text-decoration:none}.bar a:hover{text-decoration:underline}
+.bar .fn{color:var(--muted);margin-left:auto;word-break:break-all}
+main{max-width:980px;margin:0 auto;padding:26px 28px 70px;background:var(--panel);min-height:calc(100vh - 44px);
+  border-left:1px solid var(--line);border-right:1px solid var(--line)}
+h1,h2,h3,h4{line-height:1.4;margin:1.5em 0 .6em;font-weight:650}
+h1{font-size:25px;border-bottom:1px solid var(--line);padding-bottom:10px;margin-top:.4em}
+h2{font-size:20px;border-bottom:1px solid var(--line);padding-bottom:7px}
+h3{font-size:17px}h4{font-size:15px}
+p,li{color:var(--text)}li{margin:.25em 0}
+a{color:var(--accent)}
+code{background:var(--soft);padding:1px 5px;border-radius:4px;font:12.6px ui-monospace,Consolas,monospace}
+pre{background:var(--soft);border:1px solid var(--line);border-radius:8px;padding:14px 16px;overflow:auto}
+pre code{background:none;padding:0}
+blockquote{border-left:3px solid var(--accent);background:var(--soft);margin:12px 0;padding:8px 16px;color:var(--muted)}
+blockquote p{margin:.3em 0}
+.staticnote{max-width:980px;margin:14px auto -8px;padding:9px 14px;border:1px solid var(--line);
+  border-left:3px solid var(--accent);border-radius:0 8px 8px 0;background:var(--soft);
+  font-size:12.6px;color:var(--muted)}
+.staticnote a{color:var(--accent)}
+table{border-collapse:collapse;width:100%;margin:14px 0;font-size:13.4px;display:block;overflow:auto}
+th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top}
+th{background:var(--soft);color:var(--muted);white-space:nowrap}
+tr:nth-child(even) td{background:rgba(127,150,180,.045)}
+hr{border:none;border-top:1px solid var(--line);margin:26px 0}
+strong{font-weight:650}
+</style>
+<script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']]},
+  options:{skipHtmlTags:['script','noscript','style','textarea','pre','code','annotation']}};</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+</head><body>
+<div class="bar"><a href="../index.html">← 返回资料索引</a>
+<a href="项目结构说明.md">查看 Markdown 源码</a><span class="fn">00-总览/项目结构说明.md</span></div>
+<div class="staticnote">这是 <b>静态排版副本</b>，生成于 2026-11-24 20:12。直接双击 <code>index.html</code> 时看到的就是它；若 Markdown 刚改过，请在工作区运行 <code>py build_static.py</code> 重新生成，或用 <code>start_index.bat</code> 启动本地服务查看实时渲染版。页内公式由 MathJax 渲染，需要联网。</div><main><h1>项目结构说明</h1>
+<blockquote><p><strong>一句话</strong>：这是一个「<strong>本地站点 + 可复现实验 + 文献库</strong>」的混合体。分类主轴是<strong>主题与用途</strong>：文档按主题归入 6 个子目录，代码/数据按职责分层。</p><p></p><p>初版整理：2026-11-15｜2026-11-23 上午做引用与信息整理｜<strong>2026-11-23 晚做主题目录重组（本版）</strong>｜范围：整个工作区（不含 <code>.venv</code> 与 <code>.workbuddy</code>）</p></blockquote>
+<hr>
+<h2>一、当前结构速览</h2>
+<table><thead><tr><th>项目</th><th>状态（截至 2026-11-23 晚）</th></tr></thead><tbody>
+<tr><td>文档分层</td><td><strong>29 份 <code>.md</code> + 29 份同名 <code>.html</code> 副本，归入 8 个主题子目录</strong>；另 <code>文献/</code> 下 1 份</td></tr>
+<tr><td>根目录顶层文件</td><td><strong>7 个非隐藏文件</strong> —— 只留站点入口、主交付 notebook 对、一键脚本与配置</td></tr>
+<tr><td>主题目录</td><td><code>00-总览</code>(5 文档) / <code>01-阶段一</code>(7) / <code>02-阶段二</code>(3) / <code>03-阶段三</code>(2) / <code>04-论文精读</code>(4) / <code>05-方法创新</code>(4) / <code>06-阶段四</code>(2) / <code>07-阶段五</code>(2)</td></tr>
+<tr><td>脚本位置</td><td><code>tools/</code> 8 个（运行链 3 + notebook 生成器 5）；<strong>无 <code>legacy/</code></strong></td></tr>
+<tr><td>测试</td><td><code>tests/</code> 2 个；<strong>42 passed，0 failed</strong></td></tr>
+<tr><td>资源</td><td><code>assets/</code> 2 个 SVG；图纸在 <code>复现输出/</code>（10 fig + 阶段 2 五图 + 阶段 3 五图 + 阶段 4 四图 + 阶段 5 四图 + 6 JSON + repro-out）</td></tr>
+<tr><td>教学 notebook</td><td><code>learn/</code> 6 个：<code>0</code>–<code>5.ipynb</code>（15/16/17/26/22/25 单元），均已实跑、内嵌输出</td></tr>
+<tr><td>复现主交付</td><td><code>复现-2-….ipynb / .html</code>（25 单元 / 10 图），仍留根目录</td></tr>
+<tr><td>Jupyter Book</td><td><code>c2-jupyterbook/</code>、<code>s2-jupyterbook/</code>（各 总览 + 8 章 + <code>_src</code>/<code>_data</code> + <code>_build/html</code> 成品）</td></tr>
+<tr><td>文献</td><td><code>文献/</code> 19 篇 PDF + <code>参考文献.bib</code> + <code>00-下载索引</code> + <code>_archive/</code></td></tr>
+<tr><td><strong>本地引用校验</strong></td><td><strong>898 条，0 失效</strong>（覆盖全部主题子目录、<code>文献/</code>、6 个 notebook 内链，排除生成目录）</td></tr>
+</tbody></table>
+<hr>
+<h2>二、目录结构（2026-11-23 晚实况）</h2>
+<pre><code>毕设/
+├─ index.html                    站点入口（也是 8765 服务 web root）
+├─ 复现-2-混沌振子建模与临界阈值.ipynb / .html   主交付复现（留根目录）
+├─ .gitignore / requirements.txt 配置
+├─ start_index.bat / start_notebook.bat / run_ipynb.bat   一键脚本（靠 %~dp0 锚定，必须留根）
+│
+├─ 00-总览/                      【导航与全局说明】5 份
+│   ├─ 阅读路线.md / .html            六阶段总路线（阶段 1/2/3/4/5 已标 ✅）
+│   ├─ 项目结构说明.md / .html        本文件
+│   ├─ 参考资料-….md / .html          课题主清单（30 条文献）
+│   ├─ 第0步-技术路线方框图.md/.html  技术路线，配 assets/ SVG
+│   └─ 环境说明-跑ipynb.md/.html      环境与运行说明
+│
+├─ 01-阶段一/                    【阶段 1 成果】7 份
+│   ├─ 阶段1-文献解读与过关清单.md    五篇文献逐篇拆 + 过关标准
+│   ├─ 阶段1-现状综述草稿.md          约 1100 字，四段结构
+│   ├─ 阶段1-信号与噪声模型假设.md    两档噪声 / SNR 口径 / H₀-H₁
+│   ├─ 阶段1-文献卡片.md              5 张文献卡片
+│   ├─ 阶段1-E1E3获取记录.md          E1/E3 全文获取路径
+│   ├─ 阶段1-问题清单.md              12 条问题（5 条论文没答的）
+│   └─ 阶段1-问题销账.md              7 结清 / 3 部分 / 2 待导师
+│
+├─ 02-阶段二/                    【阶段 2 成果】3 份
+│   ├─ 阶段2-建模与相变-问题回答.md   五问逐答
+│   ├─ 阶段2-过关产出结果.md          验收页：六项打勾 + 五张内嵌图
+│   └─ 解读-主要内容2-….md/.html     「主要内容 2」逐句解读
+│
+├─ 03-阶段三/                    【阶段 3 成果】2 份
+│   ├─ 阶段3-判据与盲区-问题回答.md   四问逐答（含 0-1 test 实现 bug 修正记录）
+│   └─ 阶段3-过关产出结果.md          验收页：三项打勾 + 五张内嵌图
+│
+├─ 06-阶段四/                    【阶段 4 成果】2 份
+│   ├─ 阶段4-检测与估计-问题回答.md  四问逐答 + 两项指标
+│   └─ 阶段4-过关产出结果.md         验收页：六项打勾 + 四张内嵌图
+│
+├─ 07-阶段五/                    【阶段 5 成果】2 份
+│   ├─ 阶段5-嵌入式实现-问题回答.md  四问逐答 + 工作点重标定发现
+│   └─ 阶段5-过关产出结果.md         验收页：五项打勾 + 四张内嵌图（时序仿真口径）
+│
+├─ 04-论文精读/                  【文献精读】4 份
+│   ├─ 论文精读-阵列Duffing_Sensors2023.md
+│   ├─ 论文精读-D1_磁异常检测综述_MST2021.md
+│   ├─ 论文精读-C2_强耦合Duffing_物理学报2019.md
+│   └─ 论文精读-C1_混沌振子幅相估计_SignalProcessing2002.md
+│
+├─ 05-方法创新/                  【方法学与改进】4 份
+│   ├─ 新方法-阈值位移符号判别.md     （原「新方法-…」）
+│   ├─ 新方法-相变边界追踪.md         （原「新方法提案-…」，命名统一）
+│   ├─ 新方法-边界条件与场景适用性.md （原「新方法评估-…」，命名统一）
+│   └─ 方案创新点与版本对比.md        研究创新 / 工程改进分层
+│
+├─ learn/                        【教学 notebook】
+│   ├─ 0.ipynb   阶段 1 复现：信号/噪声/SNR/二元假设（15 单元 / 6 图）
+│   ├─ 1.ipynb   阶段 1 补充：背景与模型（16 单元 / 5 图）
+│   ├─ 2.ipynb   阶段 2：RK4 / 相图 / 阈值带 / 变尺度（18 单元 / 6 图）
+│   ├─ 3.ipynb   阶段 3：判据对比 / γ_c / 盲区 / 伪代码（26 单元 / 5 图）
+│   ├─ 4.ipynb   阶段 4：Pd–SNR / ROC / 融合 / 参数估计（22 单元 / 4 图）
+│   └─ 5.ipynb   阶段 5：定点位宽 / 工作点重标定 / 资源时序 / 时序仿真（25 单元 / 4 图）
+│
+├─ tools/                        【源码 · 运行链】
+│   ├─ serve_index.py            8765 服务 + Markdown 实时渲染
+│   ├─ build_static.py           由 index.html 推导生成同名 .html 副本
+│   ├─ run_ipynb.py              用 venv kernel 执行 notebook 并写回输出
+│   ├─ build_stage1_notebook.py  生成 learn/1.ipynb
+│   ├─ build_stage2_notebook.py  生成 learn/2.ipynb（savefig 须在 show 前）
+│   ├─ build_stage3_notebook.py  生成 learn/3.ipynb（判据 + 盲区，约 260 s）
+│   ├─ build_stage4_notebook.py  生成 learn/4.ipynb（检测性能 + 估计，约 240 s）
+│   └─ build_stage5_notebook.py  生成 learn/5.ipynb（定点化 + 资源时序，约 350 s）
+│
+├─ tests/                        【测试】test_learn0_notebook.py / test_learn0_input_signal.py
+├─ assets/                       【资源】2 个 SVG（技术路线方框图 / 相变边界追踪流程对比）
+├─ 复现输出/                     【产物】10 fig + 阶段 2/3 各五图 + 阶段 4/5 各四图 + 6 JSON + repro-out
+├─ c2-jupyterbook/               【Jupyter Book】C2 论文复现（总览 + 8 章 + 构建成品）
+├─ s2-jupyterbook/               【Jupyter Book】★[2] 论文完整复现（含 ν/R 盲测）
+├─ 文献/                         【文献库】19 篇 PDF + bib + 下载索引 + _archive/
+├─ .venv/                        虚拟环境（不进版本库，按 requirements.txt 重建）
+└─ .workbuddy/                   工具记忆与临时目录（不删）</code></pre>
+<h3>为什么这次敢把文档分进子目录（推翻上午的判断）</h3>
+<p>上午版本说「文档必须留根目录，否则断链」，那是<strong>过于保守</strong>的结论。复核工具链后发现两条关键事实：</p>
+<ol><li><code>serve_index.py</code> 的 <code>ROOT</code> 是<strong>项目根</strong>，<code>do_GET</code> 对任意子路径的 <code>.md</code> 都实时渲染——子目录文档照样能访问。</li><li><code>build_static.py</code> 用 <code>rel.count('/')</code> 计算回跳，副本生成在<strong>源 md 旁边</strong>——它天生支持分层。</li></ol>
+<p>于是这个下午做了受控重组：先用 dry-run 预览 543 处引用改写，把 57 个源文件备份到 <code>.workbuddy/backup/reorg_20261123/</code>，再批量改链 + 移动。<strong>结果：当时 765 条本地引用 0 失效；阶段 4 交付后复校为 850 条 0 失效</strong>（新增 06-阶段四 与 learn/4）；阶段 5 交付后再复校，见文末校验记录。</p>
+<hr>
+<h2>三、分类规则</h2>
+<table><thead><tr><th>判据</th><th>归入</th><th>说明</th></tr></thead><tbody>
+<tr><td><strong>导航与全局说明</strong></td><td><code>00-总览/</code></td><td>阅读路线、结构说明、主清单、技术路线、环境说明</td></tr>
+<tr><td><strong>按阶段的成果</strong></td><td><code>01-阶段一/</code> <code>02-阶段二/</code> <code>03-阶段三/</code></td><td>每份「问题回答 + 过关产出」成对，附支撑材料</td></tr>
+<tr><td><strong>文献精读</strong></td><td><code>04-论文精读/</code></td><td>逐篇拆论文，与阶段成果分离</td></tr>
+<tr><td><strong>方法学与改进</strong></td><td><code>05-方法创新/</code></td><td>提案 / 评估 / 对比，统一「新方法-」前缀</td></tr>
+<tr><td><strong>被主流程执行</strong></td><td><code>tools/</code></td><td>一改就可能让站点或复现失效，集中管理</td></tr>
+<tr><td><strong>被文档当资源引用</strong></td><td><code>assets/</code></td><td>搬动只需改引用，不改逻辑</td></tr>
+<tr><td><strong>验证行为、不参与交付</strong></td><td><code>tests/</code></td><td>可随时运行不影响产物</td></tr>
+<tr><td><strong>程序自动生成</strong></td><td><code>复现输出/</code></td><td>可再生，只读对待</td></tr>
+<tr><td><strong>教学 / 可运行实验</strong></td><td><code>learn/</code>、根目录 <code>复现-2-*.ipynb</code></td><td>前者按阶段分节，后者是主交付</td></tr>
+<tr><td><strong>书籍化复现</strong></td><td><code>c2-jupyterbook/</code>、<code>s2-jupyterbook/</code></td><td>两套独立 jupyter-book 工程</td></tr>
+<tr><td><strong>纯数据与题录</strong></td><td><code>文献/</code></td><td>与文档解耦，可整体搬迁</td></tr>
+<tr><td><strong>工具自建、不可重建</strong></td><td><code>.venv</code> / <code>.workbuddy/</code></td><td>前者可重建但不该动，后者含记忆，禁止删除</td></tr>
+</tbody></table>
+<blockquote><p>注：早期 <code>legacy/</code>（归档退役脚本）已在后续整理中撤销，两个脚本功能由 notebook 覆盖、原始输出留在 <code>复现输出/repro-out.txt</code>。文档中残留的相关叙述均已改为指向现存实现。</p></blockquote>
+<hr>
+<h2>四、文件作用与依赖关系</h2>
+<h3>4.1 依赖链（谁调用谁）</h3>
+<pre><code>start_index.bat
+   ├─→ tools/build_static.py ──(import render_md)──→ tools/serve_index.py
+   │        └─ 读 index.html 提取子目录下的 .md 链接 ─→ 为每份生成同名 .html
+   └─→ tools/serve_index.py 8765
+            └─ 项目根当 web root，实时渲染任意层级 .md、直出 PDF/SVG
+
+start_notebook.bat ─→ .venv 的 JupyterLab（--notebook-dir=.）
+run_ipynb.bat ─→ tools/run_ipynb.py ─→ 执行 notebook ─→ 写 复现输出/*.png + *.json
+tools/build_stage1/2/3_notebook.py ─→ 生成 learn/1/2/3.ipynb（实跑写回输出）
+tests/test_learn0_notebook.py ─→ learn/0.ipynb 前两单元
+index.html ─→ 6 个主题目录下的 .md/.html + 文献/*.pdf + assets/*.svg</code></pre>
+<h3>4.2 核心文件职责</h3>
+<table><thead><tr><th>文件</th><th>类型</th><th>作用</th><th>依赖</th></tr></thead><tbody>
+<tr><td><code>index.html</code></td><td>站点入口</td><td>一页式导航、状态表、打开方式</td><td>各主题目录文档、PDF、SVG</td></tr>
+<tr><td><code>tools/serve_index.py</code></td><td>运行链</td><td>8765 服务 + 自研 Markdown 渲染</td><td>仅标准库</td></tr>
+<tr><td><code>tools/build_static.py</code></td><td>运行链</td><td>从 index.html 提取 <code>.md</code> 链接生成副本</td><td><code>serve_index.render_md</code></td></tr>
+<tr><td><code>tools/run_ipynb.py</code></td><td>运行链</td><td>venv kernel 跑 notebook 并写回</td><td>nbclient</td></tr>
+<tr><td><code>tools/build_stage1/2/3/4_notebook.py</code></td><td>生成器</td><td>生成阶段 1/2/3/4 教学 notebook</td><td>nbformat、matplotlib</td></tr>
+<tr><td><code>tests/test_learn0_*.py</code></td><td>测试</td><td>校验 learn/0 参数与信号公式</td><td>pytest、numpy</td></tr>
+<tr><td><code>learn/0-5.ipynb</code></td><td>教学中</td><td>六阶段可运行实验</td><td>各生成器</td></tr>
+<tr><td><code>复现-2-…ipynb</code></td><td>交付物</td><td>25 单元实跑复现</td><td>numpy/matplotlib</td></tr>
+<tr><td><code>复现输出/</code></td><td>产物</td><td>28 张图 + 6 JSON + repro-out</td><td>各 notebook</td></tr>
+<tr><td><code>c2-jupyterbook/</code></td><td>书籍</td><td>C2 论文完整复现（11 图 5 表）</td><td>jupyter-book</td></tr>
+<tr><td><code>s2-jupyterbook/</code></td><td>书籍</td><td>★[2] 完整复现（11 图，含变尺度 ν 盲测）</td><td>jupyter-book</td></tr>
+<tr><td><code>文献/00-下载索引.md</code></td><td>台账</td><td>30 条题录的下载状态</td><td>文献 PDF</td></tr>
+<tr><td><code>文献/参考文献.bib</code></td><td>题录</td><td>30 条 GB/T 7714 题录</td><td>无</td></tr>
+</tbody></table>
+<h3>4.3 关键路径锚点（改动时必看）</h3>
+<ul><li><code>tools/serve_index.py</code> / <code>tools/build_static.py</code> / <code>tools/run_ipynb.py</code>：<code>ROOT</code> 均上跳一级到项目根，不因文档分层改变。</li><li><strong>三个 notebook 生成器的 <code>find_root()</code> 已改为识别 <code>00-总览/阅读路线.md</code></strong>（并兼容旧根路径）；其内嵌 Markdown 链接也已指向新子目录。</li><li>三个 <code>.bat</code> 用 <code>cd /d "%~dp0"</code> 锚定，<strong>必须留根目录</strong>。</li><li><code>tools/build_stage2_notebook.py</code>：<code>savefig()</code> 必须在 <code>plt.show()</code> 之前，否则存出白图。</li><li>校验器 <code>.workbuddy/tmp/reorg/verify_links.py</code> 已升级为递归扫描全部子目录（排除 <code>.venv</code>/<code>_build</code>）。</li></ul>
+<hr>
+<h2>五、命名规范</h2>
+<table><thead><tr><th>类别</th><th>规范</th><th>示例</th></tr></thead><tbody>
+<tr><td>主题目录</td><td><code>NN-中文主题</code> 两位数字前缀</td><td><code>01-阶段一</code>、<code>05-方法创新</code></td></tr>
+<tr><td>文档</td><td><code>类型-主题.md</code>，副本同名 <code>.html</code></td><td><code>阶段3-过关产出结果.md</code></td></tr>
+<tr><td>方法学文档</td><td>统一 <code>新方法-&lt;主题&gt;.md</code></td><td><code>新方法-相变边界追踪.md</code></td></tr>
+<tr><td>文献 PDF</td><td><code>编号_作者_关键词_期刊年份.pdf</code></td><td><code>B1_黄泽徽_多尺度熵阈值_物理学报2020.pdf</code></td></tr>
+<tr><td>运行脚本</td><td>动词_对象 <code>.py</code></td><td><code>build_static.py</code></td></tr>
+<tr><td>测试</td><td><code>test_&lt;对象&gt;_&lt;方面&gt;.py</code></td><td><code>test_learn0_notebook.py</code></td></tr>
+<tr><td>一键脚本</td><td>动词_对象.bat，全 ASCII</td><td><code>start_index.bat</code></td></tr>
+<tr><td>图纸</td><td><code>figNN_内容.png</code> 或 <code>阶段N-内容.png</code></td><td><code>阶段3-三判据对照扫描.png</code></td></tr>
+<tr><td>教学 notebook</td><td><code>learn/&lt;阶段序号&gt;.ipynb</code></td><td><code>learn/3.ipynb</code></td></tr>
+</tbody></table>
+<p>新增文档请放进对应主题目录，并同步在 <code>index.html</code> 加卡片、跑 <code>build_static.py</code> 重建副本。</p>
+<hr>
+<h2>六、重复 / 临时文件的处置</h2>
+<table><thead><tr><th>文件</th><th>判定</th><th>处置</th><th>理由</th></tr></thead><tbody>
+<tr><td><code>C1_Wang_…pdf</code> 与 <code>_archive/…/Estimation-of-amplitude….pdf</code></td><td>MD5 相同</td><td><strong>保留</strong></td><td>归档包完整性 + 日常引用各一份</td></tr>
+<tr><td><code>__pycache__/</code>（tools、tests）、<code>.pytest_cache/</code></td><td>自动生成</td><td><strong>保留，已 gitignore</strong></td><td>删除零收益</td></tr>
+<tr><td><code>.workbuddy/tmp/</code></td><td>临时工作区</td><td><strong>保留，不整目录删</strong></td><td>含全项目链接校验器等工具</td></tr>
+<tr><td><code>.workbuddy/backup/reorg_20261123/</code></td><td>本轮重组前 57 个源文件的备份</td><td><strong>保留至确认无误</strong></td><td>可回滚；确认稳定后可清理</td></tr>
+<tr><td>早期 <code>legacy/</code> 两个脚本</td><td>已撤销、不可恢复</td><td><strong>不重建</strong></td><td>功能由 notebook 覆盖，数据留存</td></tr>
+</tbody></table>
+<hr>
+<h2>七、本次改动清单（2026-11-23 晚 · 主题目录重组）</h2>
+<table><thead><tr><th>类别</th><th>改动</th></tr></thead><tbody>
+<tr><td>目录结构</td><td>根目录 24 份 md + 24 份 html 按主题移入 6 个子目录；根目录顶层从 47 个文件降到 7 个</td></tr>
+<tr><td>命名统一</td><td><code>新方法提案-相变边界追踪</code> → <code>新方法-相变边界追踪</code>；<code>新方法评估-边界条件与场景适用性</code> → <code>新方法-边界条件与场景适用性</code>（含两份 html 副本）</td></tr>
+<tr><td>引用改写</td><td>543 处引用批量改写（index.html 52 处、各 md/html、4 个 ipynb 内链）；另修复 HTML <code>&lt;img src&gt;</code> 12 处</td></tr>
+<tr><td>脚本适配</td><td>3 个 notebook 生成器的 <code>find_root()</code> 与内嵌链接、校验器递归扫描范围</td></tr>
+<tr><td>备份</td><td>57 个源文件备份至 <code>.workbuddy/backup/reorg_20261123/</code></td></tr>
+<tr><td>全文重写</td><td>本文件从「文档必须留根目录」更新到分层后实况</td></tr>
+</tbody></table>
+<hr>
+<h2>八、常用操作</h2>
+<pre><code>:: 日常看文档（推荐）：重建副本 + 起 8765 + 开浏览器
+start_index.bat
+
+:: 只重建静态副本（改过 Markdown 后）
+py tools\build_static.py
+
+:: 起预览服务（手工）
+py tools\serve_index.py 8765
+
+:: 跑 notebook
+start_notebook.bat            :: 浏览器交互
+run_ipynb.bat                 :: 无界面重跑并写回
+
+:: 跑测试（venv 内）
+.venv\Scripts\python.exe -m pytest tests\ -q
+
+:: 校验全项目本地引用（应报 0 失效）
+.venv\Scripts\python.exe .workbuddy\tmp\reorg\verify_links.py</code></pre>
+<hr>
+<h2>九、校验记录（2026-11-23 晚，含阶段 4/5 交付后复校）</h2>
+<table><thead><tr><th>检查项</th><th>结果</th></tr></thead><tbody>
+<tr><td>本地引用总数 / 失效数</td><td><strong>898 / 0</strong>（递归覆盖全部主题子目录、<code>文献/</code>、6 个 notebook 内链）</td></tr>
+<tr><td>关键路径存在性</td><td>所有主题目录关键文档、脚本、notebook、6 份 JSON 均在位（含阶段 4/5）</td></tr>
+<tr><td>已撤销路径</td><td><code>legacy/</code> 等不存在</td></tr>
+<tr><td>脚本根锚点</td><td>运行链 3 脚本 + 生成器 5 脚本的 <code>find_root()</code> 均正确</td></tr>
+<tr><td>静态副本</td><td>29 份主题副本 + 1 份文献副本，全部重建</td></tr>
+<tr><td>测试</td><td><strong>42 passed，0 failed</strong></td></tr>
+<tr><td>批处理</td><td>3 个 <code>.bat</code> 仍锚定项目根，调用路径正确</td></tr>
+<tr><td>图纸完整性</td><td>阶段 2/3 各五张、阶段 4/5 各四张 PNG 均为真实图，非纯白</td></tr>
+<tr><td>6 个 notebook</td><td><code>learn/0</code>–<code>5.ipynb</code> 共 0 报错、内嵌图完整（阶段 4 为 22 单元 / 4 图 / 237 s；阶段 5 为 25 单元 / 4 图 / 347 s）</td></tr>
+</tbody></table></main></body></html>

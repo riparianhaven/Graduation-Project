@@ -1,0 +1,137 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>05-方法创新/新方法-边界条件与场景适用性.md</title><style>
+:root{--bg:#f6f7f9;--panel:#fff;--line:#e3e7ec;--text:#1b232c;--muted:#63707e;--accent:#2f6fd0;--soft:#eaf1fc}
+@media(prefers-color-scheme:dark){:root{--bg:#14181d;--panel:#1d232a;--line:#303a45;--text:#e7edf3;--muted:#a7b3c0;--accent:#7fb0f5;--soft:#21334d}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.8 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+.bar{position:sticky;top:0;background:var(--panel);border-bottom:1px solid var(--line);padding:9px 24px;font-size:13px;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.bar a{color:var(--accent);text-decoration:none}.bar a:hover{text-decoration:underline}
+.bar .fn{color:var(--muted);margin-left:auto;word-break:break-all}
+main{max-width:980px;margin:0 auto;padding:26px 28px 70px;background:var(--panel);min-height:calc(100vh - 44px);
+  border-left:1px solid var(--line);border-right:1px solid var(--line)}
+h1,h2,h3,h4{line-height:1.4;margin:1.5em 0 .6em;font-weight:650}
+h1{font-size:25px;border-bottom:1px solid var(--line);padding-bottom:10px;margin-top:.4em}
+h2{font-size:20px;border-bottom:1px solid var(--line);padding-bottom:7px}
+h3{font-size:17px}h4{font-size:15px}
+p,li{color:var(--text)}li{margin:.25em 0}
+a{color:var(--accent)}
+code{background:var(--soft);padding:1px 5px;border-radius:4px;font:12.6px ui-monospace,Consolas,monospace}
+pre{background:var(--soft);border:1px solid var(--line);border-radius:8px;padding:14px 16px;overflow:auto}
+pre code{background:none;padding:0}
+blockquote{border-left:3px solid var(--accent);background:var(--soft);margin:12px 0;padding:8px 16px;color:var(--muted)}
+blockquote p{margin:.3em 0}
+.staticnote{max-width:980px;margin:14px auto -8px;padding:9px 14px;border:1px solid var(--line);
+  border-left:3px solid var(--accent);border-radius:0 8px 8px 0;background:var(--soft);
+  font-size:12.6px;color:var(--muted)}
+.staticnote a{color:var(--accent)}
+table{border-collapse:collapse;width:100%;margin:14px 0;font-size:13.4px;display:block;overflow:auto}
+th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top}
+th{background:var(--soft);color:var(--muted);white-space:nowrap}
+tr:nth-child(even) td{background:rgba(127,150,180,.045)}
+hr{border:none;border-top:1px solid var(--line);margin:26px 0}
+strong{font-weight:650}
+</style>
+<script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']]},
+  options:{skipHtmlTags:['script','noscript','style','textarea','pre','code','annotation']}};</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+</head><body>
+<div class="bar"><a href="../index.html">← 返回资料索引</a>
+<a href="新方法-边界条件与场景适用性.md">查看 Markdown 源码</a><span class="fn">05-方法创新/新方法-边界条件与场景适用性.md</span></div>
+<div class="staticnote">这是 <b>静态排版副本</b>，生成于 2026-11-24 20:12。直接双击 <code>index.html</code> 时看到的就是它；若 Markdown 刚改过，请在工作区运行 <code>py build_static.py</code> 重新生成，或用 <code>start_index.bat</code> 启动本地服务查看实时渲染版。页内公式由 MathJax 渲染，需要联网。</div><main><h1>新方法评估：边界条件逐项判定与场景适用性</h1>
+<blockquote><p><strong>评估对象</strong>：<a href="新方法-相变边界追踪.html">新方法-相变边界追踪</a>（PBT）</p><p><strong>评估日期</strong>：2026-11-19</p><p><strong>检索平台</strong>：WebSearch（2026-11-19 当日检索），检索结论均附 URL；本地依据标「本地」。</p><p><strong>一句话结论</strong>：<strong>PBT 的核心机制已被公开文献与专利覆盖，不能作为创新点主张</strong>；其边界条件在「实验室离线」场景下多数成立，在「在线实时」与「嵌入式」场景下多数不成立。建议把它降级为实现路线的一个可选变体，创新主张退回判决层。</p></blockquote>
+<hr>
+<h2>零、必须先说的事：检索推翻了我原来的新颖性判断</h2>
+<p>原提案写了一句很强的话：</p>
+<blockquote><p>「据本项目已入库文献，**没有任何一篇把 $\lambda^*$ 作为观测量**——它们都在固定 $\lambda$ 下讨论判据优劣。」</p></blockquote>
+<p><strong>这句话是错的。</strong> 检索找到至少六处已公开工作，其中两类直接命中 PBT 的两个核心部件：</p>
+<table><thead><tr><th>撞车点</th><th>已公开工作</th><th>它做了什么</th><th>与 PBT 重合</th></tr></thead><tbody>
+<tr><td><strong>① 用「两次临界阈值之差」测幅值</strong></td><td>专利 <strong>CN111190049</strong>（主分量分析+混沌检测纳伏级微弱正弦信号）步骤 S41–S43：先调内驱至临界得 $\gamma_d$，加入待测信号后系统跃迁，再回调内驱至临界得 $\gamma_z$，<strong>「$\gamma_d$ 与 $\gamma_z$ 的差值即为待测正弦信号的幅值」</strong></td><td>说明书层面完整公开了「边界位移 = 幅值」</td><td><strong>核心机制完全相同</strong></td></tr>
+<tr><td>① 同上</td><td>专利 <strong>CN102323476B</strong>（谱估计+混沌理论测谐波/间谐波）：调 $\gamma_1$ 至临界，并入信号后减小 $\gamma$ 至 $\gamma_2$，<strong>「间谐波幅值为 $\gamma_2-\gamma_1$」</strong>，并用最大 Lyapunov 指数判临界</td><td>同上，且给了判据</td><td><strong>核心机制相同</strong></td></tr>
+<tr><td>① 同上</td><td>IOP Conf. Ser. <strong>1656 (2020) 012032</strong>：构造与待测同频的内驱，调幅使回临界得 $\gamma_z$，<strong>「$\gamma_d$ 与 $\gamma_z$ 之差即幅值」</strong></td><td>同上，期刊论文版本</td><td><strong>核心机制相同</strong></td></tr>
+<tr><td>① 同上</td><td>《基于改进型 Duffing 混沌方程的微弱信号检测方法》：<strong>「计算机循环一次，自动地将策动力幅值 $\gamma$ 减少 0.0001，直到系统由周期态变为混沌态」</strong></td><td><strong>已是自动步进搜索</strong>，非人工手调</td><td>连「自动化」也不是首创</td></tr>
+<tr><td><strong>② 用二分法快速定位临界阈值</strong></td><td>《二分法快速求解 Duffing 混沌阈值的微弱信号检测》，实验室研究与探索, 2016, 35(2): 86-88：先用 0.1 步长定粗阈值，再用对分法快速搜精确值</td><td>正是 PBT 的 S2</td><td><strong>S2 已被专门发文</strong></td></tr>
+<tr><td>② 同上</td><td>《基于耦合混沌振子的微弱信号检测》(2019)：给出二分逐步逼近的完整算例（0.775→0.79→0.7895→0.789）</td><td>同上</td><td><strong>S2 相同</strong></td></tr>
+<tr><td>② 同上</td><td>《基于耦合 Van der Pol-Duffing 系统的微弱信号检测研究》，中国测试, 2018, 44(8): 107-112：分岔图 + <strong>二分法确定临界阈值</strong>，SNR 门限 −30 dB</td><td>同上</td><td><strong>S2 相同</strong></td></tr>
+</tbody></table>
+<p><strong>判定</strong>：PBT 的两块基石——「边界位移可读幅值」与「二分快速定位边界」——<strong>分别都已被公开，且已有一篇把两者合起来做自动化</strong>。这不是「高度相似」，这是「核心已被覆盖」。</p>
+<blockquote><p>⚠️ 专利风险另需单独核：CN111190049 与 CN102323476B 的<strong>权利要求书</strong>我未取得（只读到说明书）。若其权利要求覆盖「以临界阈值之差确定幅值」这一普遍步骤，则任何同类实现都可能落入其范围。<strong>这一条必须在动手实现前查清</strong>，属法律风险而非学术风险。</p></blockquote>
+<hr>
+<h2>一、修正后的新颖性主张（强度评级）</h2>
+<p>原提案的 N1（「无人把 $\lambda^*$ 当观测量」）<strong>作废</strong>。剩下的可主张点，逐条评级：</p>
+<table><thead><tr><th>新编号</th><th>可主张的差异</th><th>与最接近工作的具体区别</th><th>强度</th></tr></thead><tbody>
+<tr><td><strong>M1</strong></td><td><strong>单次测量、无需无信号基线</strong></td><td>专利与 2020 IOP 法都要两次：先无信号测 $\gamma_d$，再加信号测 $\gamma_z$，取差。PBT 只测「有信号时的 $\lambda^<em>$」，用离线标定曲线 $\lambda^</em>(\gamma)$ 反演。<strong>在基线会漂的非平稳噪声下，少一次测量 = 少一个误差源</strong></td><td>中（有实质区别，但价值需论证）</td></tr>
+<tr><td><strong>M2</strong></td><td><strong>逐帧在线、输出带不确定度的估计</strong></td><td>已公开工作均为一次性测量（或人工/循环调参），不输出 CI、不报 $P_{fa}$</td><td>中</td></tr>
+<tr><td><strong>M3</strong></td><td><strong>三振子边界联合反演初相</strong></td><td>★[2] 用三振子补覆盖（$\pm60.69°$ 窗口），未把三个边界值联立解 $(\gamma,\theta)$；[5] 明确把「相位差不能覆盖 $[-\pi,\pi]$」列为局限</td><td><strong>较强</strong>（检索未找到同类）</td></tr>
+<tr><td><strong>M4</strong></td><td><strong>滞回环宽当内嵌噪声计</strong></td><td>未检索到同类做法</td><td>较强，但<strong>纯推断，无任何验证</strong></td></tr>
+<tr><td><strong>M5</strong></td><td><strong>驻留比 + $H_0$ 分布给 $P_{fa}$</strong></td><td>与 chaos-CFAR 构想同源，属判决层</td><td>中（且非本方法独有）</td></tr>
+</tbody></table>
+<p><strong>综合评级：组合新颖性「弱到中」。</strong> 若评审熟悉中文混沌检测文献（尤其 2016 年那篇二分法），很可能判定为「A+B 工程拼装」。<strong>不建议把 PBT 作为开题的核心创新点</strong>；若要用，只能定位为「实现路线中的一个可选量测变体」。</p>
+<hr>
+<h2>二、边界条件逐项判定</h2>
+<p>原提案列了 6 条成立前提与 4 条不适用情形。逐条判断在<strong>本课题实际场景</strong>（极低频磁场、磁通门前端、16 周、单机仿真、无实测数据、FPGA 为远期目标）下是否成立。</p>
+<h3>2.1 六条前提</h3>
+<table><thead><tr><th>#</th><th>条件</th><th>判定</th><th>理由</th><th>依据</th></tr></thead><tbody>
+<tr><td><strong>B1</strong></td><td>已知频率的窄带周期信号</td><td><strong>✅ 成立（有条件）</strong></td><td>课题前提就是「已知频率的周期弱信号」，这条天然满足。但「已知」的精度要求很高：耦合系统要求频差 $\lvert\Delta\omega\rvert\le0.004$ rad/s，超过 0.005 就难辨阵发混沌；清华博士论文专门指出<strong>频率精度与相位信息会显著影响测试精度</strong>，并用二分查找逐次逼近频率与相位。极低频靠变尺度 $R=\omega$ 折算，$R$ 的量化误差直接变成等效频差</td><td>本地（综述第四节）+ 检索（清华学位论文；耦合混沌振子 2019）</td></tr>
+<tr><td><strong>B2</strong></td><td>$\lambda^*(\gamma)$ 单调</td><td><strong>❌ 部分不成立</strong></td><td>本机复现已证：<strong>0.734 已周期 → 0.735 回混沌 → 0.736 起稳定</strong>，即跃变带内非单调。文献侧同样承认临界点难定：「难以确定精确的 $\gamma_d$ 的值」。二分法在非单调段会收敛到错误根</td><td>✅ 本地 notebook §4；检索（knowcat 文）</td></tr>
+<tr><td><strong>B3</strong></td><td>噪声慢变（单帧内统计不变）</td><td><strong>⚠️ 大体成立，但有明确反例</strong></td><td>有利面：地磁背景噪声能量集中在 <strong>&lt;0.05 Hz</strong>，磁通门自身为 1/f（Ørsted：6.2 pT/√Hz @1 Hz，1/f 特性），属慢变。不利面：<strong>磁暴时 0.05–0.2 Hz 分量能量可升 40 dB；车辆干扰影响 0.01–0.15 Hz，H 分量在 0.1 Hz 附近尤甚</strong>；工频及其谐波是确定性快变分量</td><td>检索（GM4 磁通门 PSD 分析, 地震地磁观测与研究 2025, 46(5):132-139；Ørsted fluxgate）</td></tr>
+<tr><td><strong>B4</strong></td><td>观测窗容纳暂态且含多周期</td><td><strong>⚠️ 成立但代价极大</strong></td><td>固定工作点法已需 300–3000 s；PBT 要 6–8 次重放，总时长 ×6–8。极低频信号周期本身以百秒计，一帧就可能十几分钟，冷启动一帧超过 1 小时。<strong>实验室离线可行，任何实时场景不成立</strong></td><td>本地（★[2] 参数：3000 s）+ 检索（耦合系统需「足够长的激励时间」）</td></tr>
+<tr><td><strong>B5</strong></td><td>标定表与当前参数一致</td><td><strong>⚠️ 成立但脆弱</strong></td><td>$C_{trig}$、阻尼、步长、判据阈值、变尺度 $R$ 任一改变都要重标；而标定本身有不确定度（清华论文专门做「判据的时间性能分析，按指定精度确定所需周期数」）。标定误差会直接进入 $\hat\gamma$</td><td>检索（清华学位论文）</td></tr>
+<tr><td><strong>B6</strong></td><td>三路时间对齐</td><td><strong>❌ 当前不成立</strong></td><td>课题尚无硬件平台，三振子同步采样无法验证；分时复用虽可行，但会进一步放大 B4 的时间成本</td><td>本地（无 FPGA、无实测数据）</td></tr>
+</tbody></table>
+<p><strong>小结</strong>：6 条前提中，<strong>1 条成立、2 条部分/有条件成立、2 条成立但代价大、1 条当前不成立</strong>。真正会致命的不是 B1，而是 <strong>B2（单调性）与 B4（时间成本）</strong>。</p>
+<h3>2.2 四条「不适用」情形</h3>
+<table><thead><tr><th>#</th><th>情形</th><th>判定</th><th>理由</th></tr></thead><tbody>
+<tr><td><strong>N1</strong></td><td>宽带/未知频率</td><td><strong>✅ 确实不适用</strong></td><td>文献一致：只能测与内驱同频（或 $\lvert\Delta\omega\rvert$ 极小）的信号；不同频信号按噪声处理。PBT 继承这一限制，无法绕过</td></tr>
+<tr><td><strong>N2</strong></td><td>强非平稳、含突发冲击噪声</td><td><strong>✅ 确实不适用</strong></td><td>滞回环宽测噪假设噪声统计在环内稳定；车辆尖峰、磁暴会使环宽突变。GM4 数据显示磁暴期 0.05–0.2 Hz 能量升 40 dB，足以使边界整体位移</td></tr>
+<tr><td><strong>N3</strong></td><td>单帧极短、容不下暂态</td><td><strong>✅ 确实不适用</strong></td><td>暂态未衰减时判态无意义，二分无从收敛</td></tr>
+<tr><td><strong>N4</strong></td><td>幅值超出标定区间</td><td><strong>✅ 确实不适用</strong></td><td>$\gamma\to C_{trig}$ 时 $\lambda^*\to0$，灵敏度退化；且 $\gamma&gt;C_{trig}$ 时系统恒为周期态，边界消失</td></tr>
+</tbody></table>
+<p><strong>小结</strong>：四条「不适用」判断全部成立，没有一条被高估。这部分原提案是可靠的。</p>
+<hr>
+<h2>三、实际场景适用价值</h2>
+<p>分四个场景判断，不用一个笼统结论糊过去。</p>
+<table><thead><tr><th>场景</th><th>适用价值</th><th>关键理由</th></tr></thead><tbody>
+<tr><td><strong>实验室离线标定 / 论文仿真</strong></td><td><strong>中—高</strong></td><td>时间成本可接受；能把「检测」变成「带 CI 的测量」，指标更好写；三振子反演相位（M3）在这里最有价值</td></tr>
+<tr><td><strong>在线实时监测（极低频磁异常）</strong></td><td><strong>低</strong></td><td>6–8 次重放 × 数百秒 = 小时级延迟，远慢于信号变化；且 1/f 噪声在小时尺度上已非平稳，B3 失效</td></tr>
+<tr><td><strong>嵌入式 / FPGA 实现</strong></td><td><strong>低—中</strong></td><td>串行单核复用确实省资源（比 $M$ 路并行好），但每帧需多次完整积分，实时性难达；需先有平台才能评估</td></tr>
+<tr><td><strong>野外 / 强干扰环境</strong></td><td><strong>不适用</strong></td><td>车辆、磁暴、工频都会破坏 B3；且野外无法保证标定表与实验室一致</td></tr>
+</tbody></table>
+<p><strong>综合判断</strong>：这套方法的适用面是「<strong>离线、可控、慢变</strong>」，而不是「在线、鲁棒、实时」。这与毕设「最终落到嵌入式并给指标」的交付要求存在方向性张力——<strong>越往后走（阶段 5 嵌入式），它的价值越低</strong>。这是比新颖性更实际的问题。</p>
+<hr>
+<h2>四、局限与风险（含量化）</h2>
+<table><thead><tr><th>#</th><th>风险</th><th>量化</th><th>缓解</th></tr></thead><tbody>
+<tr><td><strong>R1</strong></td><td><strong>学术撞车</strong></td><td>已确认 6 处，含 2 项专利</td><td>见第一节：降级定位；引用并明确区分 M1–M3</td></tr>
+<tr><td><strong>R2</strong></td><td><strong>边界抖动吃掉信号位移</strong></td><td>信号引起的位移 $\Delta\lambda^*=\gamma$；若 $\gamma=0.02$ 而噪声致边界抖动 $\sigma_\lambda=0.005$，则 $\hat\gamma$ 相对误差达 <strong>25%</strong>。要达 10% 精度（$\pm0.002$），必须把 $\sigma_\lambda$ 压到 <strong>&lt;0.002</strong>，即在 0.730–0.740 这条 0.01 宽的带内定位到 1/5 带宽</td><td>多帧平均（成本 ×N）；或改用驻留比软量测；或缩短单次积分提高帧率</td></tr>
+<tr><td><strong>R3</strong></td><td><strong>虚假精度</strong></td><td>二分会把噪声决定的伪边界收敛到 $\pm0.002$，看起来精度很高，实则无意义</td><td>二分终止条件必须同时看 $r$ 的显著性，不能只看区间宽度</td></tr>
+<tr><td><strong>R4</strong></td><td><strong>时间预算超支</strong></td><td>冷启动 6–8 次 × 300 s ≈ 30–40 min/帧；100 帧 ROC 需 50–67 小时纯计算</td><td>降 $T$；降帧数；先用无噪验证解析关系，再做小样本含噪</td></tr>
+<tr><td><strong>R5</strong></td><td><strong>相位反演条件数</strong></td><td>三点极差仅 $1.49\gamma\approx0.03$，若每点抖动 0.005，则 $\hat\theta$ 误差可达数十度</td><td>增加振子数（如 4–6 路）或改用加权最小二乘</td></tr>
+<tr><td><strong>R6</strong></td><td><strong>专利风险</strong></td><td>权利要求未核，可能落入 CN111190049 范围</td><td>实现前查权利要求书；优先改走「单次测量+标定反演」（M1）以避开「两次作差」</td></tr>
+<tr><td><strong>R7</strong></td><td><strong>表述风险</strong></td><td>若开题仍按原稿写「无人把边界当观测量」，一旦被指出撞车，可信度受损</td><td>立即更正原提案（本文第一节即为更正依据）</td></tr>
+</tbody></table>
+<p><strong>R2 是这套方法真正的生死线</strong>：它决定了「边界位移」究竟是可观测量，还是被噪声淹没的伪量。这个数必须实测，不能推断。</p>
+<hr>
+<h2>五、需要补充的关键信息（按决定性排序）</h2>
+<table><thead><tr><th>优先级</th><th>缺什么</th><th>决定什么</th><th>怎么拿</th></tr></thead><tbody>
+<tr><td><strong>P0</strong></td><td><strong>CN111190049 / CN102323476B 的权利要求书</strong></td><td>是否构成专利障碍（R6）</td><td>专利全文（Google Patents 有权利要求页）</td></tr>
+<tr><td><strong>P0</strong></td><td><strong>2016 年二分法论文全文</strong>（实验室研究与探索 35(2):86-88）</td><td>我们的二分与其精度/次数差多少（M2 能否成立）</td><td>知网/万方；或校园网</td></tr>
+<tr><td><strong>P0</strong></td><td><strong>噪声下边界抖动的实测值 $\sigma_\lambda$</strong></td><td>R2 生死线：$\sigma_\lambda&lt;0.002$ 才有 10% 精度</td><td>本机仿真 30 分钟可出；<strong>最该先做的一条</strong></td></tr>
+<tr><td><strong>P1</strong></td><td>实测磁场噪声数据</td><td>B3 是否成立、$H_0$ 来源</td><td>向导师索取</td></tr>
+<tr><td><strong>P1</strong></td><td>频率先验精度指标</td><td>B1 的「有条件」到底多严</td><td>由变尺度 $R$ 量化误差反推</td></tr>
+<tr><td><strong>P1</strong></td><td>FPGA 平台与实时性预算</td><td>嵌入式场景是否值得做</td><td>确认型号与资源</td></tr>
+<tr><td><strong>P2</strong></td><td>D2/D3 全文</td><td>判决层（$P_{fa}$/ROC）是否仍为空位</td><td>校园网 / 文献传递</td></tr>
+<tr><td><strong>P2</strong></td><td>导师对「撞车后如何定位」的意见</td><td>是否保留 PBT</td><td>直接问</td></tr>
+</tbody></table>
+<hr>
+<h2>六、建议：三条路，按推荐度排序</h2>
+<p><strong>路线 A（推荐）｜把 PBT 降级为「实现变体」，创新主张退回判决层。</strong><br>保留 M1（单次测量、免基线）、M3（三振子反演相位）、M4（滞回测噪）作为<strong>工程改进</strong>写进方法章；核心创新仍用「$P_d$–$P_{fa}$–SNR 曲面 + 阈值带 + 指标口径统一」，那部分检索未发现撞车（D1 综述明言 MAD 领域无统一 ROC 口径）。这样既不失分，也不冒险。</p>
+<p><strong>路线 B（可选）｜只做 M3，做成一篇小文章级的点。</strong><br>「三振子边界联合反演初相」是检索中唯一没找到同类的工作，且解析干净（$\theta=60°$ 两路相等可作自检）。范围小、可验证、风险低。但它是<strong>方法的一个附件</strong>，撑不起整篇毕设。</p>
+<p><strong>路线 C（不推荐）｜硬推 PBT 为主体。</strong><br>除非 P0 的三项都过关（专利不构成障碍、二分确有量级优势、$\sigma_\lambda&lt;0.002$），否则答辩时「这与 CN111190049 有何区别」一问就会很被动。</p>
+<p><strong>无论走哪条，第一件该做的事都一样</strong>：跑 30 分钟的 $\sigma_\lambda$ 实测。它决定 R2 是否致命，也决定后面所有讨论有没有意义。</p>
+<hr>
+<h2>七、依据来源清单</h2>
+<p><strong>本地（可复核）</strong></p>
+<ul><li><code>解读-主要内容2-混沌振子建模与临界阈值.md</code> §4：阈值带 0.730–0.740、0.734/0.735 非单调</li><li><code>论文精读-阵列Duffing_Sensors2023.md</code> §6.6（Eq.17 病态）、§9（最脆弱假设）</li><li><code>复现-2-混沌振子建模与临界阈值.ipynb</code> §8：$P_d/P_{fa}$ 权衡（57.5%/0%、97.3%/2.5%、98.6%/75%）</li><li><code>阶段1-问题清单.md</code> Q5（MAD 领域 ROC 空位未定）</li></ul>
+<p><strong>检索（2026-11-19）</strong></p>
+<ol><li>专利 CN111190049《主分量分析的混沌系统检测纳伏级微弱正弦信号的方法》— <a href="https://patents.google.com/patent/CN111190049">打开 ↗</a> （S41–S43：$\gamma_d-\gamma_z$ 即幅值）</li><li>专利 CN102323476B《采用谱估计和混沌理论的电力系统谐波和间谐波测量方法》— <a href="https://patents.google.com/patent/CN102323476B/zh">打开 ↗</a> （$\gamma_2-\gamma_1$ 即幅值，最大 Lyapunov 定临界）</li><li>IOP Conf. Ser. 1656 (2020) 012032 — <a href="https://iopscience.iop.org/article/10.1088/1742-6596/1656/1/012032/pdf">打开 ↗</a> （$\gamma_d$ 与 $\gamma_z$ 之差）</li><li>《二分法快速求解 Duffing 混沌阈值的微弱信号检测》，实验室研究与探索, 2016, 35(2): 86-88 — <a href="https://pubnr.napstic.cn/periodicalArticle/010sysyjyts201602023">打开 ↗</a></li><li>《基于耦合混沌振子的微弱信号检测》(2019)，二分逐步逼近算例 — <a href="https://www.fx361.com/page/2019/0323/16759630.shtml">打开 ↗</a></li><li>《基于耦合 Van der Pol-Duffing 系统的微弱信号检测研究》，中国测试, 2018, 44(8): 107-112 — <a href="https://pubnr.napstic.cn/periodicalArticle/010zgcsjs201808020">打开 ↗</a></li><li>清华大学学位论文《混沌振子法在一类缓变微弱信号检测中的应用》— <a href="https://newetds.lib.tsinghua.edu.cn/qh/paper/summary?dbCode=ETDQH&amp;sysId=203605">打开 ↗</a> （二分查频率与相位；相位影响精度；−60 dB 需多次平均）</li><li>王嘉琦. GM4 磁通门磁力仪背景噪声功率谱密度特征分析. 地震地磁观测与研究, 2025, 46(5): 132-139 — <a href="https://opaj.napstic.cn/periodicalArticle/0120260300043667">打开 ↗</a> （&lt;0.05 Hz 主能量；磁暴升 40 dB；车辆 0.01–0.15 Hz）</li><li>Ørsted fluxgate 噪声 6.2 pT/√Hz @1 Hz（1/f）— <a href="https://orbit.dtu.dk/en/publications/8e75ba47-2cd7-4564-bde4-5c20c9620890">打开 ↗</a></li><li>Scheffer M, et al. Early-warning signals for critical transitions. Nature, 2009, 461(7260): 53-59（临界慢化：方差与自相关上升）— <a href="https://explore.psychsafety.com/n/scheffer-et-al-2009/">打开 ↗</a></li></ol>
+<blockquote><p>相关文档：<a href="新方法-相变边界追踪.html">新方法-相变边界追踪</a> · <a href="方案创新点与版本对比.html">方案创新点与版本对比</a> · <a href="../01-阶段一/阶段1-问题清单.html">阶段 1 问题清单</a> · <a href="../01-阶段一/阶段1-信号与噪声模型假设.html">信号与噪声模型假设</a></p></blockquote></main></body></html>

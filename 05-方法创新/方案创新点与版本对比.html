@@ -1,0 +1,154 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>05-方法创新/方案创新点与版本对比.md</title><style>
+:root{--bg:#f6f7f9;--panel:#fff;--line:#e3e7ec;--text:#1b232c;--muted:#63707e;--accent:#2f6fd0;--soft:#eaf1fc}
+@media(prefers-color-scheme:dark){:root{--bg:#14181d;--panel:#1d232a;--line:#303a45;--text:#e7edf3;--muted:#a7b3c0;--accent:#7fb0f5;--soft:#21334d}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.8 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+.bar{position:sticky;top:0;background:var(--panel);border-bottom:1px solid var(--line);padding:9px 24px;font-size:13px;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.bar a{color:var(--accent);text-decoration:none}.bar a:hover{text-decoration:underline}
+.bar .fn{color:var(--muted);margin-left:auto;word-break:break-all}
+main{max-width:980px;margin:0 auto;padding:26px 28px 70px;background:var(--panel);min-height:calc(100vh - 44px);
+  border-left:1px solid var(--line);border-right:1px solid var(--line)}
+h1,h2,h3,h4{line-height:1.4;margin:1.5em 0 .6em;font-weight:650}
+h1{font-size:25px;border-bottom:1px solid var(--line);padding-bottom:10px;margin-top:.4em}
+h2{font-size:20px;border-bottom:1px solid var(--line);padding-bottom:7px}
+h3{font-size:17px}h4{font-size:15px}
+p,li{color:var(--text)}li{margin:.25em 0}
+a{color:var(--accent)}
+code{background:var(--soft);padding:1px 5px;border-radius:4px;font:12.6px ui-monospace,Consolas,monospace}
+pre{background:var(--soft);border:1px solid var(--line);border-radius:8px;padding:14px 16px;overflow:auto}
+pre code{background:none;padding:0}
+blockquote{border-left:3px solid var(--accent);background:var(--soft);margin:12px 0;padding:8px 16px;color:var(--muted)}
+blockquote p{margin:.3em 0}
+.staticnote{max-width:980px;margin:14px auto -8px;padding:9px 14px;border:1px solid var(--line);
+  border-left:3px solid var(--accent);border-radius:0 8px 8px 0;background:var(--soft);
+  font-size:12.6px;color:var(--muted)}
+.staticnote a{color:var(--accent)}
+table{border-collapse:collapse;width:100%;margin:14px 0;font-size:13.4px;display:block;overflow:auto}
+th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top}
+th{background:var(--soft);color:var(--muted);white-space:nowrap}
+tr:nth-child(even) td{background:rgba(127,150,180,.045)}
+hr{border:none;border-top:1px solid var(--line);margin:26px 0}
+strong{font-weight:650}
+</style>
+<script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']]},
+  options:{skipHtmlTags:['script','noscript','style','textarea','pre','code','annotation']}};</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+</head><body>
+<div class="bar"><a href="../index.html">← 返回资料索引</a>
+<a href="方案创新点与版本对比.md">查看 Markdown 源码</a><span class="fn">05-方法创新/方案创新点与版本对比.md</span></div>
+<div class="staticnote">这是 <b>静态排版副本</b>，生成于 2026-11-24 20:12。直接双击 <code>index.html</code> 时看到的就是它；若 Markdown 刚改过，请在工作区运行 <code>py build_static.py</code> 重新生成，或用 <code>start_index.bat</code> 启动本地服务查看实时渲染版。页内公式由 MathJax 渲染，需要联网。</div><main><h1>方案与代码创新点分析：对比现有方案与整理前版本</h1>
+<blockquote><p><strong>分析对象</strong>：本课题当前方案（极低频弱磁信号的混沌振子检测链）与本项目当前工程实现（本地站点 + 可复现实验 + 文献库）。</p><p><strong>成文日期</strong>：2026-11-19</p><p><strong>证据分级</strong>：✅ 已实测/可复算 ｜ ○ 文档与代码可查 ｜ △ 推断或设计态、尚未验证</p><p><strong>一句话</strong>：本方案真正的创新不在「把势函数改得更尖」，而在<strong>判决层</strong>——把单点阈值换成带条件的阈值带、把「检出概率」换成带虚警控制的曲面、把目测相图换成可复算判据；工程侧的改进则全部服务于「可复现、可交付、不返工」。</p></blockquote>
+<hr>
+<h2>零、先划清三条边界</h2>
+<p>这份分析最容易滑向两个错误：一是把「读懂文献」说成「做出创新」，二是把「文档工具链」说成「科研成果」。所以先把边界钉死。</p>
+<p><strong>边界 1：代码层改进不构成学术创新。</strong> <code>tools/</code> 下的三个脚本、静态副本体系、测试补全，改变的是<strong>交付质量与返工成本</strong>，不改变检测方法本身的科学贡献。它们应写进「工程实现」或「工作量说明」，不能写进「创新点」。</p>
+<p><strong>边界 2：借用导师组既有成果不算本课题创新。</strong> E1（磁通门非线性误差建模与补偿）、E3（FPGA 互补滤波融合）是课题组已有的工程底牌，本课题是<strong>使用者</strong>而非完成者。它们的价值是「我的 SNR 天花板在哪有个实测锚点」，不是「我做出了什么」。</p>
+<p><strong>边界 3：设计态 ≠ 已达成。</strong> chaos-CFAR 目前只有完整的<strong>设计论证</strong>（动机、五步流程、最小验证路径），一行代码都没写。它今天能算「研究思路的创新性」，不能算「方案的效果优势」。凡是 △ 标记的条目，本文只陈述「若成立会带来什么」，不陈述「已经带来了什么」。</p>
+<hr>
+<h2>一、对比基准：到底在跟谁比</h2>
+<p>「与之前版本对比」这句话，在方案层和代码层指的是完全不同的东西。本文设三个基准，逐条注明用的是哪个。</p>
+<table><thead><tr><th>基准</th><th>指什么</th><th>证据来源</th><th>可靠性</th></tr></thead><tbody>
+<tr><td><strong>基准 A：文献现有方案</strong></td><td>D1 综述归纳的两派（target-based：OBF/AR 白化；noise-based：熵类/HOC/SR/小波）+ ★[3] 指数势 SR + ★[2] 阵列 Duffing</td><td>本地 PDF 全文、精读文档</td><td>✅ 全文口径</td></tr>
+<tr><td><strong>基准 B：本课题母本 ★[2]</strong></td><td>Yang 等, Sensors 2023, 23(17):7598 的完整方法链</td><td>精读文档 13 节 + notebook 复现</td><td>✅ 已复现</td></tr>
+<tr><td><strong>基准 C：本项目整理前状态</strong></td><td>2026-11-15 整理之前：27 个顶层文件、脚本与缓存混放、362 条引用、<code>1 failed + 26 errors</code></td><td><code>项目结构说明.md</code> 的实测快照</td><td>○ 有记录，<strong>非重新测量</strong></td></tr>
+</tbody></table>
+<blockquote><p>⚠️ <strong>基准 C 的重要限制</strong>：本工作区<strong>不是 git 仓库</strong>（<code>git log</code> 返回 128）。因此「之前版本」无法做逐行 diff，只能依据整理时留下的快照数字。若需要严格的版本对比，得先建仓——这一点写进第五节。</p></blockquote>
+<hr>
+<h2>二、研究方案：逐条「创新点 — 相比之前的变化 — 带来的价值」</h2>
+<h3>2.1 核心思路维度</h3>
+<table><thead><tr><th>#</th><th>创新点</th><th>相比之前的变化</th><th>带来的价值</th><th>证据</th></tr></thead><tbody>
+<tr><td>R1</td><td><strong>创新点落在「判决」，不落在「增强」</strong></td><td>基准 A 的二十年改进集中在三个维度：势函数（双稳→三稳→五次→分数阶）、耦合结构（双耦合/差分/时滞/忆阻）、状态判据（Lyapunov/0-1/多尺度熵）。全部是「把峰做尖」。本方案承认这三条已卷到头，把问题重新定义为：<strong>给定一个已经足够尖的响应，如何做出可复算、可控虚警的判决</strong></td><td>选题不与成熟路线正面撞车；开题时能一句话说清「别人在改振子，我在改判决」，答辩不易被问「你这不就是换个势函数」</td><td>○ 综述第四节、精读第 13 节</td></tr>
+<tr><td>R2</td><td><strong>把「固定工作点」当成待估计量</strong>（chaos-CFAR）</td><td>基准 A 与基准 B 共享一个未言明前提：$\lambda_c$ 是可先标定、后复用的系统常数，检测就是判断有没有越过它。本方案取消这个前提，把 $\lambda$ 变成扫描轴，用同一帧数据构造 $H_0$ 分布，在给定 $P_{fa}$ 下在线选工作点</td><td>同时解三个已确认痛点：噪声诱导伪周期、临界值随条件漂移、SNR 门限不可横向比较。<strong>这是本方案最有分量的一条，但当前是 △ 设计态</strong></td><td>△ 精读第 13 节；无实现</td></tr>
+<tr><td>R3</td><td><strong>指标从「单点」升级为「曲面」</strong></td><td>★[3] 只报 $P_d$（23%/72%/98% @ −20/−15/−10 dB），无 $P_{fa}$、无 ROC、无阈值选择规则；★[2] 报门限（−23 dB 频率 / −21 dB 参数估计）但无 ROC；D1 综述全文无统一 SNR 定义</td><td>把「我的方法更灵敏」从叙述性比较变成可核对的条件命题；直接对应课题交付要求里的「最低可检测 SNR 与参数估计精度」</td><td>○ 卡片④、综述第三节；实验待做</td></tr>
+<tr><td>R4</td><td><strong>阈值报「带」不报「点」</strong></td><td>基准 B 给出 0.72（工作点）/0.73（触发）两个标称值，并称「经大量实验验证」；本方案用 Poincaré 判据在四种步长下重标定，实测跃变落在 <strong>0.730–0.740</strong>，且发现 <strong>0.734 已周期 → 0.735 回混沌 → 0.736 起稳定</strong>，即跃变带内存在间歇混沌与双稳</td><td>避免把经验值当普适常数；面对「你的阈值为什么和论文不一样」的追问，答案是「条件不同，我报的是带」——这句话本身就是方法学素养的体现</td><td>✅ notebook §4、解读文档 §4</td></tr>
+</tbody></table>
+<h3>2.2 实现方式维度</h3>
+<table><thead><tr><th>#</th><th>创新点</th><th>相比之前的变化</th><th>带来的价值</th><th>证据</th></tr></thead><tbody>
+<tr><td>R5</td><td><strong>判据可计算化</strong>：Poincaré 截面离散度 $p_{std}&lt;0.08$ 替代目测相图</td><td>基准 B 用 Simulink Ode4、$h=0.1$、目测相图判态；本方案用 RK4 + $p_{std}$ 阈值，判态结果可被第三方用同一段代码复算</td><td>这是「可复现」的硬门槛。目测判态无法证伪，也无法做批量蒙特卡洛——而 $P_d/P_{fa}$ 实验动辄几百帧，必须自动判态</td><td>✅ notebook 已实跑</td></tr>
+<tr><td>R6</td><td><strong>相位覆盖定量化</strong>：三振子 $0°/±120°$，窗口半宽 $\pm60.69°$</td><td>基准 B 给了阵列结构，但覆盖裕度未量化；本方案由 $\cos(\theta-\beta)\ge0.48958$ 反解出半宽 60.69°，据此算出 120° 间隔下相邻窗口<strong>各重叠 0.69°</strong>，恰无盲区（【推断】此裕度仅 0.69°，噪声下会被压缩，正是 Q7 要实验的地方）</td><td>阵列设计从「照抄三个振子」变成「有据可依」；能回答「为什么是 3 个不是 4 个」，也能说清余量有多薄</td><td>✅ 解读文档 §4.2；△ 噪声下裕度</td></tr>
+<tr><td>R7</td><td><strong>两档噪声可切换 + 实测替换接口</strong></td><td>基准 A 各文各用一套噪声（★[2] 带限白噪、★[3] $1/f$ 色噪、D1 提 4 类），互不可比；本方案在阶段 1 就把噪声模型写成参数化两档（高斯白噪 / $1/f^{\alpha}$，$\alpha=0.5/1/1.2/1.5$），并预留实测数据替换位</td><td>后续所有实验共用一套噪声定义，换噪声只改一个参数；也顺手解释了「为什么 ★[2] 的 −23 dB 不能和 ★[3] 的 −15 dB 比」</td><td>○ 产物 2 文档</td></tr>
+<tr><td>R8</td><td><strong>勘误与口径纠偏</strong>（工程性贡献，非学术创新）</td><td>① 基准 B 的 Eq.(17) 印成 $\gamma=0.73^2-\lambda_1\lambda_2$，漏平方根；按带根号算得 0.01876，与论文 Table 3 的 0.0188 一致，不开放根号得 0.000352，<strong>差 53 倍</strong>。② 基准 B 定义 $n(t)=\sqrt{2D}g(t)$，实际方差 $2D$，但有一处 SNR 反推用 $D$，<strong>口径差 3 dB</strong></td><td>照着原文复现的人会卡死在 Eq.(17)；抄门限的人会莫名差 3 dB。指出这两处，等于把「可复现性」从口号变成证据</td><td>✅ 精读 §6.6、§8</td></tr>
+</tbody></table>
+<h3>2.3 功能效果维度</h3>
+<p>这一维度必须诚实：<strong>当前没有一块板、没有一次实测磁场、没有一张 ROC。</strong> 能拿出的只有复现级证据。</p>
+<table><thead><tr><th>#</th><th>已达成</th><th>相比之前</th><th>价值</th><th>状态</th></tr></thead><tbody>
+<tr><td>R9</td><td>母本方法链在<strong>本机独立复现</strong>：25 个单元、10 张图、参数与论文对齐（$\lambda=0.72$、触发 0.73、$h=0.02$）</td><td>从「读过论文」到「跑出论文的定性结论」</td><td>阶段 2 建模不必从零起；论文数字有了自己的对照基线</td><td>✅</td></tr>
+<tr><td>R10</td><td>工作点权衡关系被实测出来：$\lambda=0.720$ → $P_d\approx57.5\%$、$P_{fa}=0\%$；$0.730$ → $97.3\%$ / $2.5\%$；$0.735$ → $98.6\%$ / <strong>$75\%$</strong>（$T=300$ s，多随机种子重跑趋势一致）</td><td>基准 B 未报 $P_{fa}$，只给「检测门限」；本方案把工作点选择画成一条 $P_d$–$P_{fa}$ 权衡曲线</td><td>这是 R3 的实验雏形：<strong>已经能看到「覆盖率上去了，虚警也上去了」</strong>，说明固定工作点确实无法同时满足两侧要求——这正好是 R2 的立论依据</td><td>✅ notebook §8</td></tr>
+<tr><td>R11</td><td>边界效应被定位：0.735 处噪声本身就把振子推过界（$P_{fa}$ 从 2.5% 跳到 75%）</td><td>文献多报「阈值为 0.72/0.73」，未描述工作点附近的虚警雪崩</td><td>为「阈值带」提供了物理原因，而不只是一个统计描述</td><td>✅</td></tr>
+</tbody></table>
+<h3>2.4 性能效率维度</h3>
+<p><strong>研究侧</strong>没有运行速度可言（离线仿真），能谈的是<strong>判别性能</strong>与<strong>实验成本</strong>：</p>
+<table><thead><tr><th>#</th><th>变化</th><th>价值</th><th>状态</th></tr></thead><tbody>
+<tr><td>R12</td><td>判态自动化后，单个工作点的 $P_d/P_{fa}$ 估计从「人工看相图」变为「批量跑 + 自动判」，才使 300 s × 多工作点 × 多随机种子的实验量可行</td><td>没有这一步，蒙特卡洛实验根本做不动；这是 R3/R10 的前置条件</td><td>✅</td></tr>
+<tr><td>R13</td><td>变尺度把任意频率折算到 $\omega=1$ rad/s，同一套振子参数可覆盖不同频段</td><td>免去「换频率就重标定阈值」的重复劳动（但注意：标定仍随噪声与步长漂移，见 R4）</td><td>○ 母本机制，本方案沿用</td></tr>
+</tbody></table>
+<blockquote><p>明确<strong>不能声称</strong>的：本方案没有比任何文献「快 N 倍」或「省 N% 算力」的实测数据。FPGA 资源、定点位宽、实时性一律未测。</p></blockquote>
+<h3>2.5 可维护性维度（研究方案）</h3>
+<table><thead><tr><th>#</th><th>变化</th><th>价值</th></tr></thead><tbody>
+<tr><td>R14</td><td>参数集中在 notebook 顶部 <code>CONFIG</code>，噪声档位、阈值判据、步长全部显式化</td><td>改一处即可整链重跑；换噪声类型不必翻代码找硬编码</td></tr>
+<tr><td>R15</td><td>结论与条件绑定书写（报阈值带、报 SNR 必带 $P_d/P_{fa}$、dB 不跨口径比较）</td><td>后续换条件重跑时，不会出现「数字变了但文档没改」的静默错误</td></tr>
+</tbody></table>
+<h3>2.6 使用体验维度（对写论文与答辩的人）</h3>
+<table><thead><tr><th>#</th><th>变化</th><th>价值</th></tr></thead><tbody>
+<tr><td>R16</td><td>每条结论都有「能用到哪 / 不能用来干什么」两栏</td><td>写作时不会把 ★[3] 的 −15 dB 拿去和 ★[2] 的 −21 dB 并列，省掉一次返工</td></tr>
+<tr><td>R17</td><td>12 条问题清单，5 条标★为「论文没回答的」</td><td>开题「研究空白」一节直接由这 5 条拼成，不必另编</td></tr>
+</tbody></table>
+<hr>
+<h2>三、工程实现：逐条「改进 — 相比整理前 — 带来的价值」</h2>
+<p>这一节全部对应基准 C。所有「之前」的数字来自 <code>项目结构说明.md</code> 的实测快照。</p>
+<table><thead><tr><th>#</th><th>改进点</th><th>整理前</th><th>现在</th><th>价值</th></tr></thead><tbody>
+<tr><td>C1</td><td><strong>运行链与一次性脚本分离</strong></td><td>3 个运行脚本平铺根目录，与 <code>复现实验-阵列Duffing临界阈值.py</code>、<code>append_sec4_tmp.py</code> 混放，看不出哪个还在用</td><td><code>tools/</code>（serve_index / build_static / run_ipynb，现 5 个脚本，含两份 notebook 生成器）、<code>tests/</code> 独立；早期的 <code>legacy/</code> 退役脚本目录已在后续整理中撤销，功能由 notebook 覆盖</td><td>新人（或三个月后的自己）能一眼分辨「跑哪个、别碰哪个」；退役脚本不再占用目录，指引改指现存 notebook</td></tr>
+<tr><td>C2</td><td><strong>文档双形态：实时渲染 + 静态副本</strong></td><td>只能 <code>py serve_index.py</code> 起服务看排版；直接双击 <code>index.html</code> 时 <code>.md</code> 链接显示源码</td><td>8765 实时渲染（<code>ThreadingHTTPServer</code> + 自研 <code>render_md</code>）+ <code>build_static.py</code> 生成同名 <code>.html</code>，页面脚本自动切链；<code>--check</code> 可查过期</td><td><strong>离线可交付</strong>：打包发给导师、拷进 U 盘、答辩现场没网都能看排版。这是「使用体验」上最实的一处提升</td></tr>
+<tr><td>C3</td><td><strong>链接完整性脚本化</strong></td><td>362 条引用靠人工点，改一次目录就埋一批死链</td><td>全量校验脚本，当前 <strong>765 条 / 0 失效</strong>（整理后 367 → E1/E3 同步后 406 → 五件产物后 488 → 阶段 2 与 Jupyter Book 后 638 → 阶段 3 后 759 → 主题目录重组后 765）</td><td>重构目录不再靠运气；每次交付前一条命令出结论</td></tr>
+<tr><td>C4</td><td><strong>测试从红转绿且有意义</strong></td><td><code>1 failed + 26 errors</code>，原因是硬编码断言随参数调整过期</td><td><code>42 passed</code>，测试改为对不变量断言（单元数、图数、关键数值范围）</td><td>改 notebook 后能立刻知道有没有破坏既有结论，而不是等写论文时发现图不对</td></tr>
+<tr><td>C5</td><td><strong>环境可复现</strong></td><td>依赖系统 <code>py</code> 的全局包，换机器就崩</td><td><code>.venv</code>（Python 3.13.9，numpy 2.4.6 / matplotlib 3.11.0 / pytest 9.2.0 锁在 <code>requirements.txt</code>）+ <code>run_ipynb.bat</code> 无界面重跑写回输出</td><td>「我这跑得通」不再依赖运气；重跑会同时更新 ipynb 与 <code>复现输出/</code>，图与文不脱节</td></tr>
+<tr><td>C6</td><td><strong>归档取代删除</strong></td><td>下载残料 15 个无关 PDF 平铺在 <code>文献/</code>；同名 <code>.caj</code> 副本混在主目录</td><td><code>文献/_archive/</code>（残料）+ <code>_archive/重名caj副本_20261115/</code>（MD5 与 PDF 逐字节相同、实为改名 PDF 的两个 <code>.caj</code>），各带 README 说明来源与判据</td><td>主目录一文献一入口，<strong>零信息损失</strong>；日后有人问「这个 caj 能不能删」，README 里已有答案</td></tr>
+<tr><td>C7</td><td><strong>单页导航成为唯一入口</strong></td><td>无统一入口，靠记文件名</td><td><code>index.html</code>：搜索 + 分类筛选 + 统计条 + PDF 表 + 外部入口表 + 待办状态（已完成/需校园网/失效）+ 版本号</td><td>不用记 17 个文件名；「哪些还没下、哪些链接坏了」在页面上一眼可见</td></tr>
+</tbody></table>
+<blockquote><p><strong>C2 的一个技术细节值得单独记</strong>：静态副本的互链改写有个坑——首次新增文档时，先生成的副本会漏改后生成副本的链接。<code>build_static.py</code> 用 <code>available</code> 参数把这批待生成清单传进去才修掉。这类「只有新增文档时才暴露」的缺陷，正是靠 <code>--check</code> 才能在交付前抓到。</p></blockquote>
+<hr>
+<h2>四、六个维度的整体对照</h2>
+<table><thead><tr><th>维度</th><th>方案侧（对基准 A / B）</th><th>代码侧（对基准 C）</th></tr></thead><tbody>
+<tr><td><strong>核心思路</strong></td><td>从「改振子」转向「改判决」：工作点由常数变为待估计量，指标由单点变为曲面（R1–R3）</td><td>从「能跑就行」转向「可被人接手」：运行链、退役件、归档件各有归属（C1、C6）</td></tr>
+<tr><td><strong>实现方式</strong></td><td>目测 → 可复算判据；单振子 → 定量覆盖的阵列；各文各噪声 → 参数化两档（R5–R8）</td><td>散脚本 → <code>tools/</code>+<code>tests/</code>；单形态 → 双形态；人工点链 → 脚本校验（C1–C3）</td></tr>
+<tr><td><strong>功能效果</strong></td><td>定性结论已复现；$P_d$–$P_{fa}$ 权衡已实测出雏形；虚警雪崩点已定位（R9–R11）</td><td>765 条引用 0 失效（含 notebook、覆盖主题子目录）、42 项测试全绿、26 份副本可离线看（C3–C5）</td></tr>
+<tr><td><strong>性能效率</strong></td><td>判态自动化使蒙特卡洛实验可行（R12）；<strong>无硬件性能数据</strong></td><td>交付前校验从「逐页点」变为一条命令；返工概率下降（C3、C4）</td></tr>
+<tr><td><strong>可维护性</strong></td><td>参数集中、结论与条件绑定（R14、R15）</td><td>脚本 <code>ROOT</code> 上跳一级、<code>.bat</code> 用 <code>%~dp0</code> 锚定，移动目录不断链（C1）</td></tr>
+<tr><td><strong>使用体验</strong></td><td>每条结论带「不能用来干什么」，防误用（R16）；问题清单可直接拼成研究空白（R17）</td><td>双击即看排版、搜索即定位、待办状态可见（C2、C7）</td></tr>
+</tbody></table>
+<hr>
+<h2>五、对比假设与信息不足</h2>
+<p>以下六条是本文结论的<strong>成立前提</strong>。任一条被推翻，对应结论要下调。</p>
+<p><strong>H1｜「之前版本」是文档快照，不是可 diff 的版本库。</strong><br>本工作区无 git 历史，<code>git log</code> 直接报 128。全部「整理前」数字来自 <code>项目结构说明.md</code> 于 2026-11-15 的实测记录（78 文件 / 27 顶层 / 362 引用 / 1 failed + 26 errors），<strong>本次未重新测量</strong>。<br>→ 若要严格版本对比，需先 <code>git init</code> 并补一次基线提交，之后才能做 <code>git diff</code> 级别的对比。这属于工程改进项，不影响当前结论方向。</p>
+<p><strong>H2｜「现有方案」的对比范围限于已入库文献。</strong><br>基准 A 由 D1（综述）、★[2]（阵列 Duffing）、★[3]（指数势 SR）、B1（多尺度熵阈值）、A5（SR 综述）构成。<strong>D2、D3 两篇订阅制文献尚未取得</strong>（Q5 悬置）。若有更近的工作已经给出 MAD 场景的完整 ROC，则 R3「补 ROC」的新颖性会被削弱，R1 的措辞也要从「空位」降为「补充」。<br>→ 这是<strong>唯一可能推翻核心创新点</strong>的信息缺口，优先级最高。</p>
+<p><strong>H3｜性能效率维度无实测支撑。</strong><br>当前所有「效果」均为仿真与文档级，无 FPGA、无实测磁场、无实时性测试。因此本文不出现任何「加速比」「资源占用」「时延」类结论；C1–C7 的「效率」仅指<strong>人工校验成本与返工概率</strong>，不含运行时性能。</p>
+<p><strong>H4｜chaos-CFAR 是设计态。</strong><br>R2 的全部价值表述都是条件句（「若成立则……」）。它当前的可交付物只有论证与验证路径（100 帧含信号 + 100 帧纯噪声 → 同 $P_{fa}$ 下比 $P_d$）。在跑出第一张 ROC 之前，<strong>不应写进开题报告的「预期创新」以外的任何位置</strong>。</p>
+<p><strong>H5｜E1 / E3 属于借用平台。</strong><br>两篇均为导师组既有成果（E1 非线性误差 100 nT → 20 nT；E3 10 kHz / 0.113 mV/nT / 峰峰 0.5 nT），本课题只取其「前端能做到什么水平」作为 SNR 天花板参照，不计入创新点。另注意 E3 摘要写 0.5 nT、表 2 实测 0.56 nT，属取整差，且为<strong>峰峰值</strong>，不可与 D5 的 pT/√Hz 直接换算。</p>
+<p><strong>H6｜代码侧改进的科学贡献为零。</strong><br>C1–C7 提升的是交付质量。若评审要求「创新点」，只能报 R1–R8（其中 R8 严格说是勘误），不能把静态副本体系或测试补全算进去。</p>
+<hr>
+<h2>六、需要补充的信息（按对结论的影响排序）</h2>
+<table><thead><tr><th>优先级</th><th>缺什么</th><th>影响哪条结论</th><th>怎么补</th></tr></thead><tbody>
+<tr><td><strong>P0</strong></td><td>D2 / D3 全文（MAD 领域是否已有完整 ROC）</td><td>R1、R3 的新颖性基础</td><td>校园网或文献传递；先查其摘要与引用它的后续工作</td></tr>
+<tr><td><strong>P0</strong></td><td>chaos-CFAR 最小验证结果</td><td>R2 从 △ 升 ✅ 的唯一途径</td><td>在 <code>复现-2-混沌振子建模与临界阈值.ipynb</code> 的 RK4 内核外套循环，各 100 帧，画 ROC</td></tr>
+<tr><td><strong>P1</strong></td><td>实测磁场噪声数据</td><td>R7 的「$H_0$ 来源」是真数据还是相位随机化代理</td><td>向导师索取；决定 chaos-CFAR 的可信度</td></tr>
+<tr><td><strong>P1</strong></td><td>硬件平台与资源预算</td><td>第四节「性能效率」目前只能定性</td><td>确认 FPGA 型号与可用资源，阶段 5 前补</td></tr>
+<tr><td><strong>P2</strong></td><td>导师对创新点边界的确认</td><td>R2 能否作为方法章主体</td><td>直接问：CFAR 框架算方法创新还是算工程改良</td></tr>
+<tr><td><strong>P2</strong></td><td>git 基线</td><td>H1 的对比严谨性</td><td><code>git init</code> + 基线提交，此后可做真实 diff</td></tr>
+</tbody></table>
+<hr>
+<h2>七、一页速查</h2>
+<table><thead><tr><th>#</th><th>创新点</th><th>层级</th><th>状态</th><th>一句话价值</th></tr></thead><tbody>
+<tr><td>R1</td><td>创新落在判决层，不在增强层</td><td>方案·思路</td><td>○</td><td>不与成熟路线撞车，选题能一句话说清</td></tr>
+<tr><td>R2</td><td>工作点由常数变为待估计量（chaos-CFAR）</td><td>方案·思路</td><td>△</td><td>一条设计同时解三个痛点，<strong>未实现</strong></td></tr>
+<tr><td>R3</td><td>指标从单点升级为 $P_d$–$P_{fa}$–SNR 曲面</td><td>方案·指标</td><td>△</td><td>让「更灵敏」变成可核对的条件命题</td></tr>
+<tr><td>R4</td><td>阈值报「带」不报「点」（0.730–0.740）</td><td>方案·实现</td><td>✅</td><td>抗追问，且解释了间歇混沌</td></tr>
+<tr><td>R5</td><td>Poincaré 判据替代目测相图</td><td>方案·实现</td><td>✅</td><td>可复算，使批量蒙特卡洛可行</td></tr>
+<tr><td>R6</td><td>三振子覆盖定量化（±60.69°，重叠 0.69°）</td><td>方案·实现</td><td>✅</td><td>阵列设计有据，能答「为何是 3 个」</td></tr>
+<tr><td>R7</td><td>噪声两档参数化 + 实测替换接口</td><td>方案·实现</td><td>○</td><td>全链共用一套噪声定义</td></tr>
+<tr><td>R8</td><td>Eq.17 勘误 + 3 dB 口径纠偏</td><td>方案·工程</td><td>✅</td><td>把可复现性变成证据（53 倍 / 3 dB）</td></tr>
+<tr><td>R9–R11</td><td>母本复现、$P_d$–$P_{fa}$ 权衡、虚警雪崩点</td><td>方案·效果</td><td>✅</td><td>已能看到「覆盖率与虚警不可兼得」</td></tr>
+<tr><td>C1–C7</td><td>运行链分离 / 双形态 / 链接校验 / 测试 / 环境 / 归档 / 导航</td><td>工程</td><td>✅</td><td>可离线交付、可被接手、不返工（<strong>非学术创新</strong>）</td></tr>
+</tbody></table>
+<blockquote><p>相关文档：<a href="../01-阶段一/阶段1-文献解读与过关清单.html">阶段 1 文献解读与过关清单</a> · <a href="../01-阶段一/阶段1-问题清单.html">阶段 1 问题清单</a> · <a href="../04-论文精读/论文精读-阵列Duffing_Sensors2023.html">阵列 Duffing 精读</a> · <a href="../00-总览/项目结构说明.html">项目结构说明</a> · <a href="../01-阶段一/阶段1-现状综述草稿.html">现状综述草稿</a></p></blockquote></main></body></html>

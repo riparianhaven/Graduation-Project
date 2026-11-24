@@ -1,0 +1,22 @@
+# 虚拟环境（含绝对路径，不可移植，按 requirements.txt 重建）
+.venv/
+
+# Python 缓存
+__pycache__/
+*.pyc
+.pytest_cache/
+.ipynb_checkpoints/
+
+# 工具内置的临时工作区（脚本、探针、旧版备份，仅本机留档）
+.workbuddy/tmp/
+.workbuddy/backup/
+
+# 文献残料（重名副本、格式转换中间件），正文引用的 PDF 照常入库
+文献/_archive/
+
+# 编辑器 / 系统杂项
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini
+~$*

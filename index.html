@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>毕设资料索引 · 极低频磁场混沌振子微弱信号检测</title>
+<style>
+:root{
+  --bg:#f6f7f9; --panel:#ffffff; --panel-2:#fbfcfd; --line:#e3e7ec;
+  --text:#1b232c; --muted:#63707e; --faint:#8b97a4;
+  --accent:#2f6fd0; --accent-soft:#eaf1fc;
+  --ok:#1a8a5a; --ok-soft:#e7f6ee; --warn:#b7791f; --warn-soft:#fdf4e3;
+  --lock:#7a6bb5; --lock-soft:#f0edfa;
+  --shadow:0 1px 2px rgba(20,35,55,.05), 0 8px 24px rgba(20,35,55,.05);
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#14181d; --panel:#1d232a; --panel-2:#222a32; --line:#303a45;
+    --text:#e7edf3; --muted:#a7b3c0; --faint:#7e8b99;
+    --accent:#7fb0f5; --accent-soft:#21334d;
+    --ok:#5cc79a; --ok-soft:#17352a; --warn:#e0b668; --warn-soft:#3a3020;
+    --lock:#b8a7ef; --lock-soft:#302a46;
+    --shadow:0 1px 2px rgba(0,0,0,.2), 0 8px 24px rgba(0,0,0,.22);
+  }
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei","Hiragino Sans GB",sans-serif;
+  font-size:15px;line-height:1.7;-webkit-font-smoothing:antialiased}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+.wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+
+header{background:linear-gradient(135deg,#1f3b63 0%,#2f6fd0 60%,#3f8ad6 100%);color:#fff;padding:38px 0 30px}
+header h1{margin:0 0 6px;font-size:27px;letter-spacing:.4px;font-weight:650}
+header .sub{opacity:.9;font-size:14.5px;margin-bottom:20px}
+.stats{display:flex;flex-wrap:wrap;gap:10px}
+.stat{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);
+  border-radius:8px;padding:7px 14px;font-size:13px;backdrop-filter:blur(4px)}
+.stat b{font-size:17px;margin-right:5px;font-weight:650}
+
+nav{position:sticky;top:0;z-index:20;background:var(--panel);border-bottom:1px solid var(--line);
+  box-shadow:0 2px 10px rgba(20,35,55,.04)}
+nav .wrap{display:flex;align-items:center;gap:4px;flex-wrap:wrap;padding-top:9px;padding-bottom:9px}
+nav a{color:var(--muted);font-size:13.5px;padding:5px 11px;border-radius:6px;white-space:nowrap}
+nav a:hover{background:var(--accent-soft);color:var(--accent);text-decoration:none}
+.search{margin-left:auto;position:relative}
+.search input{width:210px;padding:6px 11px 6px 30px;border:1px solid var(--line);border-radius:7px;
+  background:var(--panel-2);color:var(--text);font-size:13px;outline:none}
+.search input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.search::before{content:"⌕";position:absolute;left:10px;top:4px;color:var(--faint);font-size:17px}
+
+main{padding:30px 0 60px}
+section{margin-bottom:42px;scroll-margin-top:64px}
+h2{font-size:19px;margin:0 0 6px;font-weight:650;display:flex;align-items:center;gap:9px}
+h2 .num{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;
+  border-radius:6px;background:var(--accent-soft);color:var(--accent);font-size:12.5px;font-weight:700}
+.lead{color:var(--muted);font-size:13.5px;margin:0 0 18px}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(325px,1fr));gap:14px}
+.card{display:block;background:var(--panel);border:1px solid var(--line);border-radius:11px;
+  padding:17px 18px;box-shadow:var(--shadow);transition:transform .15s,border-color .15s;position:relative}
+.card:hover{transform:translateY(-2px);border-color:var(--accent);text-decoration:none}
+.card .kicker{font-size:11.5px;letter-spacing:.6px;color:var(--faint);text-transform:uppercase;margin-bottom:5px}
+.card h3{margin:0 0 7px;font-size:15.5px;font-weight:650;color:var(--text)}
+.card p{margin:0 0 12px;color:var(--muted);font-size:13.2px;line-height:1.65}
+.card .foot{display:flex;align-items:center;justify-content:space-between;gap:8px;
+  border-top:1px solid var(--line);padding-top:10px;font-size:12px;color:var(--faint)}
+.card .go{color:var(--accent);font-weight:600}
+.card code{font-size:11.5px;color:var(--faint);word-break:break-all}
+
+.tag{display:inline-block;font-size:11px;padding:1px 7px;border-radius:5px;font-weight:600;white-space:nowrap}
+.t-star{background:#fdecec;color:#c0392b} .t-a{background:var(--accent-soft);color:var(--accent)}
+.t-b{background:var(--lock-soft);color:var(--lock)} .t-c{background:var(--warn-soft);color:var(--warn)}
+.t-d{background:var(--ok-soft);color:var(--ok)} .t-f{background:#e5f4f6;color:#1b7f8c}
+.t-g{background:#eef0f2;color:#6b7683} .t-x{background:#efeafa;color:#6b4bb5}
+@media (prefers-color-scheme: dark){
+  .t-star{background:#46272a;color:#f2a09a} .t-f{background:#1d3a40;color:#79c6d0}
+  .t-g{background:#2b323a;color:#a9b4c0} .t-x{background:#332a48;color:#c0a6f0}
+}
+
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:11px;box-shadow:var(--shadow);overflow:hidden}
+table{border-collapse:collapse;width:100%;font-size:13.3px}
+th,td{padding:10px 13px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:var(--panel-2);color:var(--muted);font-weight:600;font-size:12.5px;white-space:nowrap}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover{background:var(--panel-2)}
+td .path{display:block;color:var(--faint);font-size:11.3px;margin-top:2px;word-break:break-all}
+.pill{font-size:11.5px;padding:2px 8px;border-radius:20px;font-weight:600;white-space:nowrap}
+.p-ok{background:var(--ok-soft);color:var(--ok)} .p-warn{background:var(--warn-soft);color:var(--warn)}
+.p-lock{background:var(--lock-soft);color:var(--lock)}
+.mono{font-family:ui-monospace,SFMono-Regular,Consolas,"Courier New",monospace;font-size:12.4px}
+
+.filters{display:flex;gap:7px;flex-wrap:wrap;margin:0 0 14px}
+.filters button{border:1px solid var(--line);background:var(--panel);color:var(--muted);
+  border-radius:20px;padding:4px 13px;font-size:12.5px;cursor:pointer;font-family:inherit}
+.filters button:hover{border-color:var(--accent);color:var(--accent)}
+.filters button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+
+.note{background:var(--warn-soft);border-left:3px solid var(--warn);border-radius:0 8px 8px 0;
+  padding:12px 16px;font-size:13.2px;color:var(--text);margin:14px 0}
+.note.blue{background:var(--accent-soft);border-left-color:var(--accent)}
+.note.green{background:var(--ok-soft);border-left-color:var(--ok)}
+.note b{font-weight:650}
+
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:780px){.two{grid-template-columns:1fr}.search{margin-left:0;width:100%}.search input{width:100%}}
+ul.tight{margin:8px 0 0;padding-left:20px;color:var(--muted);font-size:13.3px}
+ul.tight li{margin-bottom:5px}
+
+kbd{background:var(--panel-2);border:1px solid var(--line);border-radius:4px;padding:1px 5px;font-size:11.5px;font-family:inherit}
+footer{border-top:1px solid var(--line);padding:20px 0 34px;color:var(--faint);font-size:12.5px}
+
+.briefs{display:grid;grid-template-columns:1fr;gap:12px}
+.brief{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--accent);
+  border-radius:0 11px 11px 0;box-shadow:var(--shadow);padding:17px 20px 18px;
+  display:grid;grid-template-columns:152px 1fr;gap:20px;align-items:start}
+.brief.b2{border-left-color:var(--ok)} .brief.b3{border-left-color:var(--warn)}
+.brief .bh{display:block;margin:0;padding-top:1px}
+.brief .bh h3{margin:8px 0 0;font-size:16px;font-weight:650;color:var(--text);letter-spacing:.2px}
+.brief .btag{display:inline-flex;align-items:center;justify-content:center;width:23px;height:23px;
+  border-radius:6px;background:var(--accent-soft);color:var(--accent);font-size:12px;font-weight:700}
+.brief.b2 .btag{background:var(--ok-soft);color:var(--ok)}
+.brief.b3 .btag{background:var(--warn-soft);color:var(--warn)}
+.brief .bmap{display:block;margin-top:8px;font-size:11.3px;color:var(--faint);line-height:1.5}
+.brief .bsegs p{margin:0 0 10px;padding-left:26px;position:relative;color:var(--muted);
+  font-size:13.6px;line-height:1.85}
+.brief .bsegs p:last-child{margin-bottom:0}
+.brief .bno{position:absolute;left:0;top:4px;display:inline-flex;align-items:center;justify-content:center;
+  width:18px;height:18px;border-radius:5px;background:var(--panel-2);border:1px solid var(--line);
+  color:var(--faint);font-size:10.5px;font-weight:700;font-variant-numeric:tabular-nums}
+.brief strong{color:var(--text);font-weight:650}
+.brief strong.key{background:var(--accent-soft);color:var(--accent);border-radius:4px;padding:1px 4px}
+.brief.b2 strong.key{background:var(--ok-soft);color:var(--ok)}
+.brief.b3 strong.key{background:var(--warn-soft);color:var(--warn)}
+@media(max-width:780px){
+  .brief{grid-template-columns:1fr;gap:10px;padding:15px 16px 16px}
+  .brief .bh{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+  .brief .bh h3{margin:0}
+  .brief .bmap{margin:0 0 0 auto;width:auto}
+}
+
+.hide{display:none !important}
+
+.envbar{display:none;background:var(--warn-soft);border-bottom:1px solid var(--warn);color:var(--text);font-size:13.2px}
+.envbar.show{display:block}
+.envbar.filebar{background:var(--accent-soft);border-bottom-color:var(--accent)}
+.envbar .wrap{padding:10px 0;line-height:1.75}
+.envbar b{font-weight:650}
+.envbar a.btn{display:inline-block;background:var(--accent);color:#fff;padding:3px 11px;
+  border-radius:6px;text-decoration:none;font-weight:600;margin:0 3px}
+.envbar a.btn:hover{filter:brightness(1.08)}
+.envok{font-size:11.5px;color:var(--ok);white-space:nowrap;margin-left:14px;font-weight:600}
+@media(max-width:780px){.envok{display:none !important}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <h1>毕设资料索引</h1>
+    <div class="sub">基于混沌振子的极低频磁场微弱信号检测 · 华中科技大学 · 指导教师 欧阳君 · 执行学期 1–16 周</div>
+    <div class="stats">
+      <div class="stat"><b>17</b> 篇题录内全文 + <b>2</b> 篇后续研究</div>
+      <div class="stat"><b>18</b> 份 Markdown + <b>1</b> 个实跑 notebook</div>
+      <div class="stat"><b>1</b> 本 Jupyter Book（6 章 · 已实跑）</div>
+      <div class="stat"><b>2</b> 张技术路线图（SVG）</div>
+      <div class="stat"><b>30</b> 条 BibTeX 题录</div>
+      <div class="stat"><b>1</b> 个主复现 notebook + <b>1</b> 个归档脚本</div>
+      <div class="stat"><b>10</b> 张实跑图纸 · <b>71</b> MB 全文</div>
+      <div class="stat"><b>1</b> 个已装好依赖的 Python 虚拟环境</div>
+    </div>
+  </div>
+</header>
+
+<nav><div class="wrap">
+  <a href="#brief">课题要求</a>
+  <a href="#docs">核心文档</a>
+  <a href="#papers">文献全文</a>
+  <a href="#route">阅读路线</a>
+  <a href="#findings">复现与结论</a>
+  <a href="#links">外部链接</a>
+  <a href="#todo">待办</a>
+  <div class="search"><input id="q" type="search" placeholder="过滤本页条目…" aria-label="过滤本页条目"></div>
+</div></nav>
+
+<div class="envbar" id="envbar"><div class="wrap" id="envbar-text"></div></div>
+
+<main class="wrap">
+
+
+<section id="brief" class="item" data-search="课题要求 目的要求 主要内容 预期目标 极低频磁场 微弱信号 混沌振子 相变 临界阈值 嵌入式 最低可检测信噪比 参数估计精度 毕业论文">
+  <h2><span class="num">1</span> 课题要求</h2>
+  <p class="lead">以下三段据教务处「查看课题信息」页面截图逐字转录（2026-11-13 录入），个别字迹以教务系统原文为准。它们是资料清单、阅读路线与实验设计的验收口径。<b>按原文分号与语义断点分行，文字和标点均未改动</b>；加粗部分只是阅读重点，不属于原文。</p>
+  <div class="briefs">
+
+    <div class="brief b1">
+      <div class="bh"><span class="btag">①</span><h3>目的要求</h3><span class="bmap">能力目标<br>A / B / F 组</span></div>
+      <div class="bsegs">
+        <p><span class="bno">1</span>本课题旨在使学生掌握<strong>混沌振子检测微弱周期信号的基本原理与方法</strong>，理解系统由<strong>混沌态向大尺度周期态相变</strong>对弱信号敏感、对噪声免疫的特性；</p>
+        <p><span class="bno">2</span>学会<strong>动力学建模、数值求解与嵌入式实现</strong>，培养学生查阅文献、综合运用非线性信号处理知识解决<strong>极低频弱磁信号检测实际问题</strong>的能力。</p>
+      </div>
+    </div>
+
+    <div class="brief b2">
+      <div class="bh"><span class="btag">②</span><h3>主要内容</h3><span class="bmap">第 1–15 周<br>五道工序</span></div>
+      <div class="bsegs">
+        <p><span class="bno">1</span>调研<strong>极低频磁场信号检测的背景与国内外研究现状</strong>；</p>
+        <p><span class="bno">2</span>建立<strong>混沌振子检测模型</strong>，分析其相轨迹演变规律并确定<strong>混沌到周期态转变的临界阈值</strong>；</p>
+        <p><span class="bno">3</span>将含噪极低频磁信号引入振子，依据<strong>相变判别信号的有无</strong>并<strong>估计幅值参数</strong>；</p>
+        <p><span class="bno">4</span>通过<strong>嵌入式系统</strong>考察<strong>不同噪声强度和信噪比下的检测性能</strong>。</p>
+      </div>
+    </div>
+
+    <div class="brief b3">
+      <div class="bh"><span class="btag">③</span><h3>预期目标</h3><span class="bmap">第 16 周<br>交付物</span></div>
+      <div class="bsegs">
+        <p><span class="bno">1</span>形成一套完整的<strong>基于混沌振子的极低频磁场信号检测系统与可运行程序</strong>，</p>
+        <p><span class="bno">2</span>实现<strong>在低信噪比下对极低频弱磁周期信号的有效检测</strong>，给出<strong class="key">可检测的最低信噪比</strong>及<strong class="key">参数估计精度</strong>等性能指标；</p>
+        <p><span class="bno">3</span>按要求完成<strong>毕业论文一篇</strong>。</p>
+      </div>
+    </div>
+
+  </div>
+  <div class="note blue" style="margin-top:14px">三段要求与 <a href="00-总览/参考资料-极低频磁场混沌振子微弱信号检测.md" target="_blank">主清单第一节「课题要求 → 技术环节拆解」</a>、<a href="00-总览/阅读路线.md" target="_blank">六阶段过关产出</a> 一一对应：背景调研 → 建模与阈值 → 含噪判别与估幅 → 嵌入式性能 → 指标与论文。<b>写论文时以这三段原文为验收口径</b>，尤其是「最低可检测信噪比」与「参数估计精度」两项指标，须注明实验条件。<br><b>「主要内容」第 2 条</b>的逐句解读见 <a href="02-阶段二/解读-主要内容2-混沌振子建模与临界阈值.md" target="_blank">「2」的解读</a>，可执行复现见 <a href="复现-2-混沌振子建模与临界阈值.html" target="_blank">notebook 实跑预览</a>。<br>开题报告「技术路线」可直接取用 <a href="00-总览/第0步-技术路线方框图.md" target="_blank">第 0 步方框图</a>（<a href="assets/第0步-技术路线方框图.svg" target="_blank">SVG 原图</a>）：六环节 + 指标反馈 + 嵌入式实现层，每框标注文献分组。</div>
+</section>
+
+<section id="docs">
+  <h2><span class="num">2</span> 核心文档</h2>
+  <p class="lead">主文档按「有什么文献 → 按什么顺序读 → 母本讲什么 → 全文取到哪」分工；<b>阶段 1 五篇的逐篇解读已交付，E1 / E3 全文入库并完成全项目记录同步；另新增方案创新点对比、两份方法提案（后者为<b>阈值位移符号判别</b>，附本机实测数据），以及一份含撞车更正的边界条件评估</b>。还有全项目结构整理、D1《磁异常检测综述》详细精读、可一键启动的 Python 虚拟环境、第 0 步技术路线方框图、「主要内容 2」的逐句解读与 notebook 实跑复现。点卡片即可打开。</p>
+  <div class="grid">
+
+    <a class="card item" data-search="阶段1 文献解读 D1 D5 A5 Sun2025 E1 E3 磁通门 噪声底 随机共振 过关产物 下载链接 现状综述 噪声模型" href="01-阶段一/阶段1-文献解读与过关清单.md" target="_blank">
+      <div class="kicker">新增 · 阶段 1 过关交付</div>
+      <h3>阶段 1：文献解读与过关清单</h3>
+      <p>五篇逐篇拆成「核心内容 / 关键结论 / 参考价值 / 边界」：<b>D1</b> 两派分类与四条硬限制、<b>D5</b> 五类传感器噪声底（SQUID→OPM→NV→磁通门 1 pT/√Hz）、<b>A5</b> SR 三要素与「SNR 在 D→0 发散」、<b>★[3]</b> 指数势 SR 的 −15 dB/72% 检出率与「无虚警率」空位、<b>E1/E3</b> 本组磁通门的精度（非线性误差 100→20 nT）与宽带融合（10 kHz / 峰峰 0.5 nT），两篇均已读到全文。附 E1/E3 来源与获取路径，以及五项过关产物的可打勾标准。</p>
+      <div class="foot"><span>Markdown · 阶段 1 交卷清单</span><span class="go">打开 →</span></div>
+    </a>
+
+    <a class="card item" data-search="阶段1 过关产物 现状综述 草稿 800字 开题报告 国内外研究现状 四段结构 引文 两派之外 定位" href="01-阶段一/阶段1-现状综述草稿.md" target="_blank">
+      <div class="kicker">阶段 1 产物 1 / 5</div>
+      <h3>现状综述草稿（约 1100 字）</h3>
+      <p>开题报告「国内外研究现状」第一小节的直接底稿，四段结构：<b>领域困难</b>（信号比噪声小一到两个数量级）→ <b>两派方法</b>（以「能否预设波形」划线）→ <b>第三条路线</b>（从增强到相变）→ <b>本课题定位</b>（两派之外，补「判决」这一环）。附 8 条引文的逐条出处与阅读深度、六项自查打勾、以及「还需要补的三处」。</p>
+      <div class="foot"><span>Markdown · 产物 1 · 开题直接可用</span><span class="go">打开 →</span></div>
+    </a>
+
+    <a class="card item" data-search="阶段1 过关产物 信号与噪声模型 假设 s(t) 伽马 cos 两档 高斯白噪 1/f alpha H0 H1 SNR 定义 参数表 待实测替换" href="01-阶段一/阶段1-信号与噪声模型假设.md" target="_blank">
+      <div class="kicker">阶段 1 产物 2 / 5</div>
+      <h3>信号与噪声模型假设</h3>
+      <p>阶段 2 建模的输入、阶段 4 指标的基准。<b>s(t)=γcos(ωt+θ)</b>，三个参数谁已知谁未知写得死死的；噪声两档可切换（高斯白噪 + <b>1/f^α，α=0.5/1/1.2/1.5</b>）并预留实测替换接口；参数表逐行标「依据 + 状态」，SNR 写死主口径并说清与 ★[2]/★[3] 的换算，附 H₀/H₁ 与阈值标定纪律。</p>
+      <div class="foot"><span>Markdown · 产物 2 · 待实测替换</span><span class="go">打开 →</span></div>
+    </a>
+
+    <a class="card item" data-search="阶段1 过关产物 文献卡片 5张 D1 D5 A5 Sun2025 E1 E3 一句话结论 三个数字 局限 不能用来干什么" href="01-阶段一/阶段1-文献卡片.md" target="_blank">
+      <div class="kicker">阶段 1 产物 3 / 5</div>
+      <h3>文献卡片（5 张）</h3>
+      <p>写作时免二次通读：每张卡 = GB/T 7714 题录 + 一句话结论 + <b>3 个带条件的数字</b> + 1 条局限 + 「我能用在哪」+ 「<b>这篇不能用来干什么</b>」。D1 / D5 / A5 / ★[3] / E1+E3 合并卡齐全，附 60 秒口述自测表。</p>
+      <div class="foot"><span>Markdown · 产物 3 · 5 张卡</span><span class="go">打开 →</span></div>
+    </a>
+
+    <a class="card item" data-search="阶段1 过关产物 E1 E3 获取记录 来源 URL 访问日期 层级 权限 馆藏号 caj 异常 归档 引用纪律" href="01-阶段一/阶段1-E1E3获取记录.md" target="_blank">
+      <div class="kicker">阶段 1 产物 4 / 5</div>
+      <h3>E1 / E3 获取记录</h3>
+      <p>答辩被问「你怎么拿到的」时直接翻这页：逐条登记来源 URL、访问日期、可得层级、是否需权限；E1 的 NSTL 馆藏号、E1 的 DOI、E3「版面无 DOI」都写清。<b>四类异常单独成节</b>——同名 .caj 实为 PDF 改名（MD5 一致）、命名不合约定、摘要取整 vs 表格实测、两篇无公开全文；末附五条引用纪律。</p>
+      <div class="foot"><span>Markdown · 产物 4 · 引用依据</span><span class="go">打开 →</span></div>
+    </a>
+
+    <a class="card item" data-search="阶段1 过关产物 问题清单 12条 论文没回答 空白 Pd Pfa ROC SNR 发散 阈值带 变尺度 混叠 极低频 频段" href="01-阶段一/阶段1-问题清单.md" target="_blank">
+      <div class="kicker">阶段 1 产物 5 / 5</div>
+      <h3>问题清单（12 条，5 条是空位）</h3>
+      <p>不是「读完有疑问」，而是每条都能指向某篇文献某一处或某次待做实验：<b>为什么只报 P_d 不报 P_fa</b>、峰峰值怎么换成噪声密度、非线性残差在温漂下剩多少、SNR 会发散那该报什么、MAD 领域到底有没有完整 ROC……另附「论文没回答的五条」汇总表，直接当开题「研究空白」的骨架。</p>
+      <div class="foot"><span>Markdown · 产物 5 · 驱动阶段 2</span><span class="go">打开 →</span></div>
+    </a>
+
+    <a class="card item" data-search="阶段1 销账 结清 12条 虚警概率 ROC 2011 2016 噪声密度 峰峰值 温漂 相位覆盖 60.69 变尺度 混叠 多数表决 OR 换算 口径" href="01-阶段一/阶段1-问题销账.md" target="_blank">
+      <div class="kicker">阶段 1 收尾 · 12 条逐条结清</div>
+      <h3>问题销账：7 条结清 · 3 条部分 · 2 条待导师</h3>
+      <p>把阶段 1 的 12 条问题全部落地：<b>峰峰值换噪声密度差的是 √B 不是 6</b>（同一 0.5 nT 可折成 118 或 0.8 pT/√Hz）；<b>±60.69° 不是几何常数</b>，而是 γ=0.02、λ=0.72 的取值，全相位覆盖要求 γ≥0.0196；<b>变尺度对白噪 +10lgR、对 1/f 只 +0.5 dB</b>，故实验必须用色噪；多数表决比 OR 高 43–58 pp。<b>另有两条不利结论</b>：P_fa 早在 2011/2016 就有人给过，「补 ROC」不能再当创新点。</p>
+      <div class="foot"><span>Markdown · 含 3 条新增文献 · 已核实题录</span><span class="go">打开 →</span></div>
+    </a>
+
+    <a class="card item" data-search="阶段2 建模 相变 问题回答 RK4 相图 临界阈值 阈值带 步长 变尺度 伪相变 参数表 过关产出" href="02-阶段二/阶段2-建模与相变-问题回答.md" target="_blank">
+      <div class="kicker">新增 · 阶段 2 交卷</div>
+      <h3>阶段 2：建模与相变 · 问题回答</h3>
+      <p>逐条回答阅读路线阶段 2 的五问：方程各项含义、参数怎么取、<b>RK4 步长取多少才稳定</b>、相轨迹如何从混沌跃到大周期态、变尺度为何能处理极低频。附实跑阈值带 <b>0.734–0.736</b>（稳定起点 ≥0.736）、四种步长的跃变一致性、以及<b>锁频伪相变反例</b>（R=8/9/9.5/12/13 也出现低 pstd）。配套 <a href="learn/2.ipynb" target="_blank">notebook</a> 已实跑。</p>
+      <p style="margin-top:8px;padding:8px 10px;background:#fdf6e3;border-left:3px solid #c9a227;font-size:13px"><b>2026-11-24 更正</b>：阈值带 0.734–0.736 里约一半是 Poincaré 采样伪迹（h 不整除 2π 时相位漂移）；改用精确 2π 插值后 <b>λ<sub>c</sub>=0.733</b>、周期态 pstd 精确为 0。所谓「锁频伪相变」主要是工作点 0.73 太贴近阈值所致，λ=0.72 时不出现。详见 <a href="02-阶段二/变尺度中ν与R的辨析.md" target="_blank">ν 与 R 的辨析</a>。</p>
+      <div class="foot"><span>Markdown · 阶段 2 · 含实跑数字 · 已加更正块</span><span class="go">打开 →</span></div>
+    </a>
+
+    <a class="card item" data-search="变尺度 nu R omega 频率未知 盲测 扫R 频率分辨率 多重检验 采样伪迹 0.733 Poincaré 插值 论文2" href="02-阶段二/变尺度中ν与R的辨析.md" target="_blank">
+      <div class="kicker">专题 · 一个被符号卡住的问题</div>
+      <h3>变尺度里的 ν：不是输入，是 ω/R 的别名</h3>
+      <p>回答三问：扫 R 时 ν 有没有问题、待测 ω 未知时 ν 怎么定、代价是什么。结论：<b>ν 不需要预设</b>，扫 R 到相变点，<b>R = ω</b>；解析写法 <span class="mono">nu=omega/R</span> 只是"验证模式"，真检测必须用采样序列盲测（本书代码里不含 ω，三个真值 10 / 7.3 / 3.7 定位误差 ≤0.14%）。另记三条代价：<b>ν 容差仅 ±0.5%</b>、扫 R 是多重复检验（N=41 时总虚警 88%）、压缩时间轴会抬高噪声 PSD（同 SNR 下 pstd 高一个量级）。附论文表 2 与步骤 3 的数值不自洽（R=10 → 每周期 6.28 步，RK4 发散）。</p>
+      <div class="foot"><span>Markdown · 含实测表与盲测协议</span><span class="go">打开 →</span></div>
+    </a>
+
+    <a class="card item" data-search="阶段2 过关产出 结果 验收 交卷 RK4 相图 时序 参数表 阈值带 步长敏感性 变尺度 图片 PNG 实跑" href="02-阶段二/阶段2-过关产出结果.md" target="_blank">
+      <div class="kicker">新增 · 阶段 2 过关验收页</div>
+      <h3>阶段 2：过关产出结果</h3>
+      <p>把阅读路线阶段 2 的过关要求<b>逐条打勾</b>：RK4 程序、混沌/周期两幅并列相图、x(t) 时序、可复现参数表，外加阈值曲线与步长敏感性。<b>五张图纸直接内嵌</b>（已修复白图问题），每项结果都指向 <a href="learn/2.ipynb" target="_blank">实跑 notebook</a> 与 <a href="复现输出/阶段2-建模与阈值汇总.json" target="_blank">机器可读汇总</a>。结论：阶段 2 过关，附阈值带 0.734–0.736 与变尺度边界声明。</p>
+      <div class="foot"><span>Markdown · 阶段 2 过关产出 · 含内嵌图</span><span class="go">打开 →</span></div>
+    </a>
+
+    <a class="card item" data-search="阶段3 判据 盲区 问题回答 相图分割 二分法 Lyapunov 多尺度熵 0-1 test K gamma扫描 临界点 判态伪代码 初相位 阵列 变尺度 真频率" href="03-阶段三/阶段3-判据与盲区-问题回答.md" target="_blank">
+      <div class="kicker">新增 · 阶段 3 交卷</div>
+      <h3>阶段 3：判据与盲区 · 问题回答</h3>
+      <p>逐条回答阅读路线阶段 3 四问：三种传统判据的局限、<b>为什么用多尺度熵</b>、0-1 test 的 K 含噪怎么修、同频初相位为何漏检。核心翻案：<b>0-1 test 的方向反转是带符号中位数的实现 bug，逐 c 取绝对值后次序恢复（混沌 |K|=0.0316 &gt; 周期 0.0083，Δ|K| 五档全正）</b>；但幅度小、带内非单调，推荐 pstd 主 + MsEn 副 + 0-1 第三票。附 γ_c=0.0100/0.0196、盲区 ±60.69°、变尺度真频率 ρ 判据。配套 <a href="learn/3.ipynb" target="_blank">notebook</a> 已实跑。</p>
+      <div class="foot"><span>Markdown · 阶段 3 · 含实跑数字</span><span class="go">打开 →</span></div>
+    </a>
+
+    <a class="card item" data-search="阶段3 过关产出 结果 验收 交卷 gamma扫描 临界点 判态伪代码 初相位盲区 60.69 噪声退化 三判据 含噪漂移 内嵌图 PNG" href="03-阶段三/阶段3-过关产出结果.md" target="_blank">
+      <div class="kicker">新增 · 阶段 3 过关验收页</div>
+      <h3>阶段 3：过关产出结果</h3>
+      <p>把阅读路线阶段 3 的过关要求<b>逐条打勾</b>：γ 扫描曲线（标 γ_c）+ 判态伪代码（x(t)→0/1）+ 盲区初相位区间，外加判据全景与 0-1 test 实现 bug 修正记录。<b>五张实跑图直接内嵌</b>，每项指向 <a href="learn/3.ipynb" target="_blank">实跑 notebook</a> 与 <a href="复现输出/阶段3-判据与盲区汇总.json" target="_blank">机器可读汇总</a>。结论：阶段 3 过关，附三处口径边界声明。</p>
+      <div class="foot"><span>Markdown · 阶段 3 过关产出 · 含内嵌图</span><span class="go">打开 →</span></div>
+    </a>
+
+    <a class="card item" data-search="阶段4 检测与估计 问题回答 最低可检测信噪比 Pd Pfa ROC 蒙特卡洛 幅值估计 差分估计器 参数估计精度 SNR S曲线 固定噪声扫信号 阵列融合 OR 多数表决" href="06-阶段四/阶段4-检测与估计-问题回答.md" target="_blank">
+      <div class="kicker">新增 · 阶段 4 交卷</div>
+      <h3>阶段 4：检测与估计 · 问题回答</h3>
+      <p>逐条回答阅读路线阶段 4 四问，直接兑现课题两项指标。核心方法学：检测实验须<b>固定噪声扫信号</b>（固定 γ 扫噪声只会得到高位平坦假曲线）、门限从 H0 反解不用 H1 调、T=400 s 保证瞬态收敛。结果：<b>最低可检测 SNR = −11.0 dB</b>（Pfa≤0.05、Pd≥0.9），幅值估计相对误差白噪 4.2–5.0% / 1/f 色噪 7.4–8.8%；随机初相下 OR 覆盖优先（0.32→0.53/0.64）。配套 <a href="learn/4.ipynb" target="_blank">notebook</a> 已实跑。</p>
+      <div class="foot"><span>Markdown · 阶段 4 · 含实跑数字</span><span class="go">打开 →</span></div>
+    </a>
+
+    <a class="card item" data-search="阶段4 过关产出 结果 验收 Pd-SNR S曲线 ROC 误差SNR 融合 最低可检测信噪比 -11dB 参数估计精度 内嵌图 PNG 两项指标" href="06-阶段四/阶段4-过关产出结果.md" target="_blank">
+      <div class="kicker">新增 · 阶段 4 过关验收页</div>
+      <h3>阶段 4：过关产出结果</h3>
+      <p>把阅读路线阶段 4 的过关要求<b>逐条打勾</b>：Pd/Pfa 蒙特卡洛表（8 SNR 点 × 双噪声 × 每点 100 次）、幅值估计误差表、Pd–SNR 与误差–SNR 曲线，外加 ROC 与融合对照。<b>四张实跑图直接内嵌</b>，每项指向 <a href="learn/4.ipynb" target="_blank">实跑 notebook</a> 与 <a href="复现输出/阶段4-检测性能与参数估计汇总.json" target="_blank">机器可读汇总</a>。结论：阶段 4 过关，两项指标带完整条件抄录。</p>
+      <div class="foot"><span>Markdown · 阶段 4 过关产出 · 含内嵌图</span><span class="go">打开 →</span></div>
+    </a>
+
+    <a class="card item" data-search="阶段5 嵌入式实现 问题回答 定点化 位宽 Q格式 等效阈值 工作点重标定 相变漂移 资源时序 TDM FIFO 流水线 F2 FPGA" href="07-阶段五/阶段5-嵌入式实现-问题回答.md" target="_blank">
+      <div class="kicker">新增 · 阶段 5 交卷</div>
+      <h3>阶段 5：嵌入式实现 · 问题回答</h3>
+      <p>逐条回答阅读路线阶段 5 四问（位宽 / 时钟 / 阵列 / 判态位置）。<b>最重要发现：定点化改的是等效阈值，不是精度</b>——把浮点工作点 λ0=0.72 直接烧录 Pd 掉到 0.05，重标定到 0.76 恢复 0.93。字长甜点区 F=10–12，F=4/6/8 三种失效模式（塌缩/无相变/伪回弹）。单步 ≈1008 ns ≈ 252 时钟 @250 MHz（F2 工艺换算），一帧 20–60 ms ≪ 400 s 物理窗，故计算不是瓶颈、选 TDM 单核。诚实边界：无板级实测。</p>
+      <div class="foot"><span>Markdown · 阶段 5 · 含实跑数字</span><span class="go">打开 →</span></div>
+    </a>
+
+    <a class="card item" data-search="阶段5 过关产出 结果 验收 定点位宽扫描 阈值漂移 工作点重标定 资源时序 时序仿真 数据流 FIFO 内嵌图 与阶段4对照" href="07-阶段五/阶段5-过关产出结果.md" target="_blank">
+      <div class="kicker">新增 · 阶段 5 过关验收页</div>
+      <h3>阶段 5：过关产出结果</h3>
+      <p>把阅读路线阶段 5 的过关要求<b>逐条打勾</b>：定点化位宽分析（8 档 F 扫描 + 三种失效模式）、资源/时序估算（op 数→252 时钟、并行 vs TDM 对照）、时序仿真图（三级流水 + FIFO 分离）、与阶段 4 五项对照。<b>四张实跑图直接内嵌</b>，每项指向 <a href="learn/5.ipynb" target="_blank">实跑 notebook</a> 与 <a href="复现输出/阶段5-定点化与资源时序汇总.json" target="_blank">机器可读汇总</a>。以「时序仿真 + 工艺换算」口径过关，板级实测边界写明。</p>
+      <div class="foot"><span>Markdown · 阶段 5 过关产出 · 含内嵌图</span><span class="go">打开 →</span></div>
+    </a>
+
+    <a class="card item" data-search="创新点 对比 现有方案 之前版本 核心思路 实现方式 功能效果 性能效率 可维护性 使用体验 chaos-CFAR 恒虚警 阈值带 判据 工程改进" href="05-方法创新/方案创新点与版本对比.md" target="_blank">
+      <div class="kicker">新增 · 创新点与版本对比</div>
+      <h3>方案创新点与版本对比</h3>
+      <p>把「已实测 / 仅构想 / 借用他人」三类分开说：研究侧 <b>8 条创新点</b>（判决层定位、工作点变为待估计量、指标曲面化、阈值报带、判据可计算、覆盖定量化、噪声参数化、Eq.17 勘误）逐条对基准 A/B，工程侧 <b>7 条改进</b>对整理前快照；并按<b>六个维度</b>归纳。附 6 条对比假设与 6 项待补信息（P0 两项）。</p>
+      <div class="foot"><span>Markdown · 创新点 · 含待验证标注</span><span class="go">打开 →</span></div>
+    </a>
+
+    <a class="card item" data-search="新方法 提案 相变边界追踪 PBT lambda星 边界位移 二分搜索 驻留比 滞回 三振子 反演 幅值 初相 新颖性 对标 CFAR 混沌雷达 临界慢化" href="05-方法创新/新方法-相变边界追踪.md" target="_blank">
+      <div class="kicker">新增 · 新方法提案</div>
+      <h3>相变边界追踪法（PBT）</h3>
+      <p>不在固定工作点问「过没过」，而是<b>测边界被信号推到了哪</b>：由合成幅值判据解出 λ*(γ,Δ) = −γcosΔ + √(0.73² − γ²sin²Δ)，同相时<b>边界位移 / 幅值 = 1.000</b>。三振子边界联立反演幅值与初相，滞回环宽当内嵌噪声计。附与 6 个最接近公开方法（含 CFAR、混沌雷达、临界慢化）的逐一对标、5 条可证伪预测、一周验证路径。</p>
+      <div class="foot"><span>Markdown · 新方法 · 含流程对比图</span><span class="go">打开 →</span></div>
+    </a>
+
+    <a class="card item" data-search="方法评估 边界条件 适用性 撞车 专利 CN111190049 CN102323476B 二分法 阈值之差 幅值 单调 噪声慢变 时间成本 风险 路线建议" href="05-方法创新/新方法-边界条件与场景适用性.md" target="_blank">
+      <div class="kicker">新增 · 方法评估（重要更正）</div>
+      <h3>边界条件与场景适用性评估</h3>
+      <p>检索查出 <b>6 处撞车</b>：两项中国专利（CN111190049、CN102323476B）与 IOP 1656(2020) 已公开「<b>两次临界阈值之差 = 信号幅值</b>」，2016 年《实验室研究与探索》已发表「二分法快速定位阈值」，故 <b>PBT 核心机制不构成创新</b>。6 条前提逐项判定（1 成立 / 2 有条件 / 2 代价大 / 1 不成立），4 条「不适用」全部成立；给出 <b>σ_λ &lt; 0.002 才有 10% 精度</b>这条生死线与三条路线建议。</p>
+      <div class="foot"><span>Markdown · 评估 · 含撞车清单</span><span class="go">打开 →</span></div>
+    </a>
+
+    <a class="card item" data-search="新方法 STS 阈值位移 符号 判别 信号向下推 噪声向上推 双偏置 两个振子 幅值 偏置扣除 虚警 撞车 CN107066740B 阵列计数 失败记录 AUC" href="05-方法创新/新方法-阈值位移符号判别.md" target="_blank">
+      <div class="kicker">新增 · 新方法（含实测证据）</div>
+      <h3>阈值位移符号判别法 STS</h3>
+      <p>换个观测量：不问「翻没翻」，问「<b>阈值被推向哪一边</b>」。实测（k=0.5）：信号使阈值 <b>0.734→0.724（位移精确 = −γ）</b>，噪声使阈值 <b>0.734→0.738（反向）</b>。位移的<b>符号</b>即判据，<b>两个振子</b>放在阈值两侧比较翻转方向即可，不需二分重放。含撞车定级（<b>中偏弱</b>）、<b>5 条失败想法</b>的实测数据与 5 条可证伪预测。</p>
+      <div class="foot"><span>Markdown · 新方法 · 有实测数据</span><span class="go">打开 →</span></div>
+    </a>
+
+    <a class="card item" data-search="★2 阵列 Duffing 完整复现 Jupyter Book Yang Sensors 2023 变尺度 nu R 频率未知 盲测 扫R 临界阈值 0.733 Poincaré 采样伪迹 三振子 全相位 图5消融 参数估计 Eq17 灾难性相消 井斜" href="s2-jupyterbook/_build/html/index.html" target="_blank">
+      <div class="kicker">新增 · 母本论文完整复现（Jupyter Book）</div>
+      <h3>★[2] 完整复现：扫 R 时 ν 到底是什么</h3>
+      <p>Yang 等（<i>Sensors</i> 2023, 23(17): 7598）的 8 章复现。<b>核心回答：ν 不是要预设的参数，它是 ω/R 的别名</b>——频率未知时扫 R，相变那一点的 R 就是 ω。本书用<b>完全盲测</b>（代码里没有 ω）复现 ω=10 / 7.3 / 3.7 三个真值的定位，误差 ≤0.14%。另修一处方法学缺陷：Poincaré 采样若按「每 N 步采一次」，h 不整除 2π 会造出 <b>0.1 量级的伪离散度</b>，把周期态误判成混沌；改用精确 2π 插值后，<b>λ<sub>c</sub>=0.733</b>（0.734 处 pstd 精确为 0）。图 5 四幅消融、−23 dB 门限相图、三路 λ 反解 γ/θ 均逐项重算，并指出「相变只由合成幅值决定」是近似（三路等效阈值极差 0.0086 → γ 低估 31%）。</p>
+      <div class="foot"><span>Jupyter Book · 8 章 · 11 图 · 全实跑 · 含盲测协议</span><span class="go">打开 →</span></div>
+    </a>
+
+    <a class="card item" data-search="C2 完整复现 Jupyter Book 强耦合 Duffing 脉冲 曹保锋 物理学报 2019 双振子 阱内失同步 位移差 速度差 限带 反演 130kHz 检测门限 幅值估计 宽度估计 噪声带宽 分岔 相态 Lyapunov" href="c2-jupyterbook/_build/html/index.html" target="_blank">
+      <div class="kicker">新增 · 文献完整复现（Jupyter Book）</div>
+      <h3>C2 完整复现：11 图 5 表逐项重算</h3>
+      <p>把曹保锋等（<i>物理学报</i> 2019, 68(8): 080501）拆成 <b>8 章可执行 notebook</b>，原文 <b>11 张图、5 张表</b>逐项重算并标注复现程度。<b>最大增量：反演出原文没写的一个参数</b>——表 3 的 <b>r 列与 Pd 列独立反演出同一个输出限带带宽（133 kHz 与 130 kHz）</b>，补上后 −20 dB 处 r 由 0.28 回到 <b>0.84</b>（原文 0.85）、Pd 34%（原文 37.5%），表 3/表 4 从「未复现」变为「同曲线、右移 2–4 dB」。另含 Lyapunov 指数独立验证四段相态（混沌区 77% 为正）、<b>k<sub>c</sub>=1/(2ξ)=0.714</b> 的解析门限、输出量必须是位移差（r≈0.99，速度差 r≈0）的机理证明。</p>
+      <div class="foot"><span>Jupyter Book · 8 章 · 12 图 · 全实跑 · 中文图字已修</span><span class="go">打开 →</span></div>
+    </a>
+
+    <a class="card item" data-search="C2 精读 强耦合 Duffing 曹保锋 物理学报 2019 共模抑制 差模 线性化 耦合比 带宽 阻尼比 失效边界 位移差 速度差 5σ 虚警 13 节 差分读出" href="04-论文精读/论文精读-C2_强耦合Duffing_物理学报2019.md" target="_blank">
+      <div class="kicker">新增 · 13 节论文精读</div>
+      <h3>C2 精读：强耦合 Duffing 的差分读出</h3>
+      <p>从「阱间失同步」走到「<b>共模抑制</b>」：把式 (4) 拆成共模 / 差模，<b>差模阻尼比 0.08 → 2.87</b>（振铃变跟随，这才是能还原波形的原因）。两条闭式预测解释论文两整节的经验曲线：<b>失效边界 k<sub>c</sub> = 1/(2ξ) ≈ 0.714</b>（对上「k&lt;1 失效」）、<b>带宽上限 B → ωξ/2π ≈ 557 kHz</b>（对上「k&gt;10 饱和」）。另含输出量图文矛盾的机理证明（位移差 r=0.9955 / 速度差 r=0.0876）、ode45 刚性误述、5σ 判据的独立样本数漏洞。</p>
+      <div class="foot"><span>Markdown · 13 节 · 含可复算的线性化推导</span><span class="go">打开 →</span></div>
+    </a>
+
+    <a class="card item" data-search="C1 精读 Wang 王冠宇 SignalProcessing 2002 幅相估计 Floquet 指数 初值敏感性 SDIC 延时扫描 复合幅值 临界慢化 CRLB 匹配滤波 连续读出 13 节" href="04-论文精读/论文精读-C1_混沌振子幅相估计_SignalProcessing2002.md" target="_blank">
+      <div class="kicker">新增 · 13 节论文精读</div>
+      <h3>C1 精读：用回归速率当指针的幅相估计</h3>
+      <p>这条路线的源头（2002，比 ★[2] 早 21 年）：<b>不判「变没变」，而是读「回来得多快」</b>——把信号幅值映射成 Floquet 指数 Φ。复算对上了两处硬数字：<b>Φ(0.84)=0.1269（原文 0.1271）、斜率 7.04（原文 6.83）</b>。给出论文没写的三件事：<b>Φ 与相位无关是时间平移不变性（精确，非近似）</b>、<b>闭式估计 a=(Φ<sub>max</sub>−Φ<sub>min</sub>)/2k</b>、<b>它能用是因为系统并不混沌，起作用的是临界慢化</b>。另有一条硬质疑：<b>宣称比 ML 准 4 倍，低于 CRLB 同样倍数，无偏估计量做不到</b>。</p>
+      <div class="foot"><span>Markdown · 13 节 · 含 Floquet 复算</span><span class="go">打开 →</span></div>
+    </a>
+
+    <a class="card item" data-search="项目结构 目录 整理 分类 tools tests assets learn 文献 命名规范 依赖 校验 引用 清理 版本更新" href="00-总览/项目结构说明.md" target="_blank">
+      <div class="kicker">更新 2026-11-23 晚 · 主题目录重组</div>
+      <h3>项目结构说明</h3>
+      <p>24 份文档按主题归入 <span class="mono">00-总览</span> / <span class="mono">01-阶段一</span> / <span class="mono">02-阶段二</span> / <span class="mono">03-阶段三</span> / <span class="mono">04-论文精读</span> / <span class="mono">05-方法创新</span> 六个目录；代码与数据继续按职责分层（<span class="mono">tools/</span> <span class="mono">tests/</span> <span class="mono">assets/</span> <span class="mono">learn/</span> <span class="mono">复现输出/</span> <span class="mono">c2-jupyterbook/</span> <span class="mono">文献/</span>）。<b>543 处引用批量改写、765 条校验 0 失效、根目录顶层从 47 降到 7 个文件</b>；含回滚备份位置与关键路径锚点。早期 <span class="mono">legacy/</span> 已撤销。</p>
+      <div class="foot"><span>Markdown · 主题分层 · 2026-11-23 晚更新</span><span class="go">打开 →</span></div>
+    </a>
+
+    <a class="card item" data-search="第0步 零步 方框图 技术路线 开题报告 六个环节 文献分组 指标反馈 嵌入式 学到什么程度 验收标准 暂不深入" href="00-总览/第0步-技术路线方框图.md" target="_blank">
+      <div class="kicker">新增 · 阅读路线第 0 步过关产出</div>
+      <h3>第 0 步：技术路线方框图</h3>
+      <p>一页纸画清「含噪极低频磁信号 → 变尺度 → Duffing 阵列 → 相变判据 → 幅值/相位估计 → 指标」六个环节，每框标注 A–G 文献分组；补上指标反馈回路与嵌入式实现层。<b>第零节明确本步「学到什么程度」</b>：核心目标、必备概念与能力、打勾式验收标准、衔接边界、暂不深入清单。另附半天只读三篇的读法与文献 PDF 入口。</p>
+      <div class="foot"><span>Markdown · 内嵌矢量图</span><span class="go">打开 →</span></div>
+    </a>
+
+    <a class="card item" data-search="SVG 矢量 方框图 技术路线 插入论文 Word 打印 开题报告 原图" href="assets/第0步-技术路线方框图.svg" target="_blank">
+      <div class="kicker">矢量原图 · 可插入开题报告</div>
+      <h3>技术路线方框图 .svg</h3>
+      <p>680 × 506 白底矢量图，放大不糊，可直接拖进 Word / 打印成 PDF。六环节、五条主数据流箭头、一条阈值重标定反馈虚线、一条 FPGA 实现载体灰条。</p>
+      <div class="foot"><span>SVG · 矢量 · 可无损缩放</span><span class="go">打开原图 →</span></div>
+    </a>
+
+    <a class="card item" data-search="2 解读 主要内容 建模 相轨迹 临界阈值 逐句解读 阶段2 参数表 坑清单" href="02-阶段二/解读-主要内容2-混沌振子建模与临界阈值.md" target="_blank">
+      <div class="kicker">新增 · 「2」的解读</div>
+      <h3>「主要内容 2」逐句解读</h3>
+      <p>把「建立混沌振子模型 / 分析相轨迹演变 / 确定临界阈值」拆成三个交付物：方程与参数表、可计算判据、阈值标定流程。含 Eq.(8) 相量合成、Eq.(17) 勘误、11 条坑清单与可抄进论文的示范段落，严格区分【原文】【文献】【推断】【猜测】。</p>
+      <div class="foot"><span>Markdown · 逐句拆解</span><span class="go">打开 →</span></div>
+    </a>
+
+    <a class="card item" data-search="ipynb notebook 复现 实跑 相图 Poincaré RK4 变尺度 阵列 ROC 预览 图纸" href="复现-2-混沌振子建模与临界阈值.html" target="_blank">
+      <div class="kicker">新增 · 已实跑 · 25 单元 / 10 图</div>
+      <h3>notebook 复现（网页预览）</h3>
+      <p>11 节逐节复现：势函数 → RK4 + 相量合成 → 两态相图 → 阈值扫描与步长敏感性 → 判态陷阱 → 变尺度 → 阵列覆盖 → 工作点权衡 → Eq.(17) → P<sub>d</sub>–SNR / ROC。单元输出与 10 张图已内嵌，打开即看，无需装 Jupyter。</p>
+      <div class="foot"><span>HTML · 1.4 MB 内嵌图</span><span class="go">打开 →</span></div>
+    </a>
+
+    <a class="card item" data-search="ipynb 源文件 Jupyter VS Code 下载 重跑 RunAll" href="复现-2-混沌振子建模与临界阈值.ipynb" target="_blank">
+      <div class="kicker">notebook 源文件</div>
+      <h3>复现-2-….ipynb</h3>
+      <p>用 Jupyter / VS Code 打开可重新 Run All（Kernel: Python 3，约 40 秒）。<b>推荐用工作区里已装好依赖的 .venv</b>；顶部 CONFIG 集中全部参数，改完重跑即得新曲线，图纸另存于「复现输出」文件夹。</p>
+      <div class="foot"><span>IPython Notebook · 可编辑</span><span class="go">获取文件 →</span></div>
+    </a>
+
+    <a class="card item" data-search="虚拟环境 venv 环境说明 JupyterLab kernel 一键启动 requirements 依赖 numpy matplotlib pip" href="00-总览/环境说明-跑ipynb.md" target="_blank">
+      <div class="kicker">新增 · 已装好依赖 · 实跑验证通过</div>
+      <h3>Python 虚拟环境（跑 ipynb）</h3>
+      <p>.venv 已装 numpy / matplotlib / ipykernel / nbclient / JupyterLab，版本与交付 notebook 逐一对齐。双击 <span class="mono">start_notebook.bat</span> 开浏览器跑 Run All，或双击 <span class="mono">run_ipynb.bat</span> 无界面重跑写回；附 requirements.txt、VS Code 用法与重建步骤。</p>
+      <div class="foot"><span>Markdown · 两个一键脚本</span><span class="go">打开 →</span></div>
+    </a>
+
+    <a class="card item" data-search="参考资料 主清单 30条 GB/T 7714 文献综述 检索式 阅读路线" href="00-总览/参考资料-极低频磁场混沌振子微弱信号检测.md" target="_blank">
+      <div class="kicker">总清单 · 30 条</div>
+      <h3>参考资料主清单</h3>
+      <p>课题自带 3 条 + 扩展 27 条，分 A–G 七组，全部按 GB/T 7714—2015 著录，附 DOI、核查说明、检索式与速览表。写开题报告参考文献时从这里抄。</p>
+      <div class="foot"><span>16.4 KB · Markdown</span><span class="go">打开 →</span></div>
+    </a>
+
+    <a class="card item" data-search="阅读路线 六阶段 精读卡 捷径 过关产出 周次" href="00-总览/阅读路线.md" target="_blank">
+      <div class="kicker">执行路线 · 1–16 周</div>
+      <h3>阅读路线</h3>
+      <p>不按 A→G 编号读，按问题链排成六阶段，每阶段一面「过关旗」。含 ★[2] 两遍法、三级阅读深度、9 篇精读卡、三条捷径与 Zotero 卡片模板。</p>
+      <div class="foot"><span>13.1 KB · Markdown</span><span class="go">打开 →</span></div>
+    </a>
+
+    <a class="card item" data-search="D1 Zhao MST 2021 磁异常检测 综述 精读 两派分类 判据 OBF 正交基 AR白化 最小熵 高阶过零 HOC 随机共振 小波 限制条件 国内外研究现状" href="04-论文精读/论文精读-D1_磁异常检测综述_MST2021.md" target="_blank">
+      <div class="kicker">新增 · 综述精读 · 现状骨架</div>
+      <h3>精读 D1：磁异常检测综述 (MST 2021)</h3>
+      <p>逐节拆开 Zhao 等的 Topical Review：两派分类的唯一判据、地磁场远大于目标场（T ≫ B）下的偶极子与 CPA 模型、OBF 3/5/4 基与 AR 白化（<b>基函数也必须白化</b>）、最小熵 / HOC / 随机共振 / 小波四种方法，附逐法限制条件总表与 §4 四条瓶颈。<b>核实结论</b>：D1 全文 0 次 Duffing / chaos，也未见 AI 派，只能当背景板。</p>
+      <div class="foot"><span>Markdown · 公式 (1)–(34) 全核对</span><span class="go">打开 →</span></div>
+    </a>
+
+    <a class="card item" data-search="论文精读 阵列Duffing Sensors2023 13节 数学推导 Eq17 勘误 follow-up chaos-CFAR" href="04-论文精读/论文精读-阵列Duffing_Sensors2023.md" target="_blank">
+      <div class="kicker">深度精读 · 母本论文</div>
+      <h3>论文精读：阵列 Duffing (Sensors 2023)</h3>
+      <p>按 13 个环节拆解 ★[2]：问题与价值、前人不足、作者思路重建、Intuition、完整 pipeline、从零数学推导、实验设计、takeaways、脆弱假设、一周复现、反例、后续研究与 follow-up idea。每条论断标【原文】【文献】【推断】【猜测】。</p>
+      <div class="foot"><span>57.2 KB · 最长的一份</span><span class="go">打开 →</span></div>
+    </a>
+
+    <a class="card item" data-search="下载索引 状态 OA 订阅 校园网 入口 Zotero" href="文献/00-下载索引.md" target="_blank">
+      <div class="kicker">取证台账</div>
+      <h3>文献下载索引</h3>
+      <p>30 条逐条登记：✅ 已下 / ❌ 链接失效 / 🔒 需校园网 / 📚 纸本，附全部状态、失败原因与导入 Zotero 的步骤。</p>
+      <div class="foot"><span>8.3 KB · Markdown</span><span class="go">打开 →</span></div>
+    </a>
+
+    <a class="card item" data-search="BibTeX 题录 参考文献.bib Zotero EndNote NoteExpress" href="文献/参考文献.bib" target="_blank">
+      <div class="kicker">题录数据</div>
+      <h3>参考文献.bib</h3>
+      <p>30 条 BibTeX，UTF-8，note 字段标注本地全文文件名与分组。一次导入 Zotero / EndNote / NoteExpress 即可成型。</p>
+      <div class="foot"><span>12.1 KB · BibTeX</span><span class="go">打开 →</span></div>
+    </a>
+
+    <a class="card item" data-search="复现输出 结果 pstd 扫描数据 repro-out" href="复现输出/repro-out.txt" target="_blank">
+      <div class="kicker">实验记录</div>
+      <h3>复现脚本的一次完整输出</h3>
+      <p>2026-11-13 运行日志：λ 从 0.600 到 0.840 的 Poincaré 离散度、检出相位窗口、三振子覆盖率 65.8%、五档噪声强度下的虚警率。</p>
+      <div class="foot"><span>2.9 KB · 纯文本</span><span class="go">打开 →</span></div>
+    </a>
+
+    <a class="card item" data-search="启动 服务 serve_index.py 预览 Markdown 自动排版 一键 本地" href="tools/serve_index.py" target="_blank">
+      <div class="kicker">打开方式</div>
+      <h3>serve_index.py · 一键启动本地预览</h3>
+      <p>运行 <span class="mono">py tools/serve_index.py</span> 后访问 <span class="mono">127.0.0.1:8765</span>：本页所有链接生效，Markdown 自动排版成网页，PDF 在浏览器内直接阅读。只绑定本机。</p>
+      <div class="foot"><span>5.5 KB · Python</span><span class="go">查看脚本 →</span></div>
+    </a>
+
+  </div>
+</section>
+
+<section id="papers">
+  <h2><span class="num">3</span> 文献全文 PDF</h2>
+  <p class="lead">19 个 PDF，全部校验过 <span class="mono">%PDF-</span> 文件头：17 篇对应 30 条题录，另 2 篇为精读文档第 12 节的后续研究全文。点「打开」在新标签直接看 PDF；文件名也可复制后在资源管理器定位。</p>
+  <div class="filters" id="filters">
+    <button class="on" data-f="all">全部 19</button>
+    <button data-f="star">★ 课题自带</button>
+    <button data-f="b">阈值与判据</button>
+    <button data-f="c">参数估计</button>
+    <button data-f="d">磁场背景</button>
+    <button data-f="a">理论源头</button>
+    <button data-f="g">标准规范</button>
+    <button data-f="f">嵌入式实现</button>
+    <button data-f="x">后续研究</button>
+  </div>
+  <div class="panel"><table>
+    <thead><tr><th>编号</th><th>文献</th><th>为什么留着</th><th>大小</th><th></th></tr></thead>
+    <tbody id="paper-body">
+
+    <tr class="item prow" data-f="star" data-search="01 李远芳 改进强耦合振子 物理学报 2024 040503 课题自带 脉冲">
+      <td><span class="tag t-star">★[1]</span></td>
+      <td><a href="文献/01_李远芳_改进强耦合振子_物理学报2024.pdf" target="_blank">基于改进强耦合振子的微弱脉冲信号检测方法</a><span class="path">李远芳, 姜园, 赵磊 · 物理学报, 2024, 73(4): 040503 · 文献/01_…pdf</span></td>
+      <td>课题自带。耦合项设计 + 变迭代步长扫频，可对照 ★[2] 的变尺度方案。</td><td>2.2 MB</td>
+      <td><a href="文献/01_李远芳_改进强耦合振子_物理学报2024.pdf" target="_blank">打开 ↗</a></td></tr>
+
+    <tr class="item prow" data-f="star" data-search="02 Yang 阵列Duffing MWD Sensors 2023 7598 母本 变尺度 全相位 估幅估相 21dB">
+      <td><span class="tag t-star">★[2]</span></td>
+      <td><a href="文献/02_Yang_阵列Duffing_MWD_Sensors2023.pdf" target="_blank">Chaotic effect-based array Duffing systems in dynamic MWD</a><span class="path">YANG Y, et al. · Sensors, 2023, 23(17): 7598 · 文献/02_…pdf</span></td>
+      <td><b>本课题母本。</b>改进恢复力 (−x³+x⁵)、变尺度、三振子全相位覆盖、阈值同步估幅估相、−21 dB 指标，一条龙。</td><td>5.7 MB</td>
+      <td><a href="文献/02_Yang_阵列Duffing_MWD_Sensors2023.pdf" target="_blank">打开 ↗</a></td></tr>
+
+    <tr class="item prow" data-f="star" data-search="03 Sun 矢量磁传感器 微弱异常信号增强 IEEE Sensors Journal 2025 课题自带 已补齐">
+      <td><span class="tag t-star">★[3]</span></td>
+      <td><a href="文献/A_Weak_Anomaly_Signal_Enhancement_Method_Based_on_Vector_Magnetic_Sensor.pdf" target="_blank">A weak anomaly signal enhancement method based on vector magnetic sensor</a><span class="path">SUN H, et al. · IEEE Sensors J., 2025, 25(12): 22479-22487 · 文献/A_Weak_…pdf</span></td>
+      <td><b>课题自带第三条，已由用户经校园网补齐。</b>负责磁场侧背景，与 ★[2] 的振子检测形成对照。</td><td>3.2 MB</td>
+      <td><a href="文献/A_Weak_Anomaly_Signal_Enhancement_Method_Based_on_Vector_Magnetic_Sensor.pdf" target="_blank">打开 ↗</a></td></tr>
+
+    <tr class="item prow" data-f="b" data-search="B1 黄泽徽 多尺度熵 Duffing 阈值 物理学报 2020 160501 判据综述">
+      <td><span class="tag t-b">B1</span></td>
+      <td><a href="文献/B1_黄泽徽_多尺度熵阈值_物理学报2020.pdf" target="_blank">基于多尺度熵的 Duffing 混沌系统阈值确定方法</a><span class="path">黄泽徽, 李亚安, 陈哲, 等 · 物理学报, 2020, 69(16): 160501 · 文献/B1_…pdf</span></td>
+      <td>引言等于一篇判据小综述（相图分割 / 二分 / 0-1 / Poincaré / Lyapunov），正文自动定阈值。</td><td>1.5 MB</td>
+      <td><a href="文献/B1_黄泽徽_多尺度熵阈值_物理学报2020.pdf" target="_blank">打开 ↗</a></td></tr>
+
+    <tr class="item prow" data-f="b" data-search="B2 赖志慧 冷永刚 变尺度 极低频 任意频率 物理学报 2012 050503 已补齐">
+      <td><span class="tag t-b">B2</span></td>
+      <td><a href="文献/B2_基于Duffing振子的变尺度微弱特征信号检测方法研究.pdf" target="_blank">基于 Duffing 振子的变尺度微弱特征信号检测方法研究</a><span class="path">赖志慧, 冷永刚, 孙建桥, 等 · 物理学报, 2012, 61(5): 050503 · 文献/B2_…pdf</span></td>
+      <td><b>「极低频」限定词的关键支撑</b>，已手动补齐全文。没有变尺度，振子固有频率与极低频信号对不上。</td><td>0.59 MB</td>
+      <td><a href="文献/B2_基于Duffing振子的变尺度微弱特征信号检测方法研究.pdf" target="_blank">打开 ↗</a></td></tr>
+
+    <tr class="item prow" data-f="b" data-search="B3 Gottwald Melbourne 0-1 test chaos 混沌检验 arXiv 自动判态 嵌入式">
+      <td><span class="tag t-b">B3</span></td>
+      <td><a href="文献/B3_Gottwald_0-1混沌检验_2004.pdf" target="_blank">A new test for chaos in deterministic systems</a><span class="path">GOTTWALD G A, MELBOURNE I · Proc. R. Soc. A, 2004 · arXiv nlin/0208033 预印本 · 文献/B3_…pdf</span></td>
+      <td>直接吃时间序列输出 0/1，无需相空间重构，嵌入式自动判态最省事。</td><td>0.17 MB</td>
+      <td><a href="文献/B3_Gottwald_0-1混沌检验_2004.pdf" target="_blank">打开 ↗</a></td></tr>
+
+    <tr class="item prow" data-f="c" data-search="C1 Wang Zheng He 幅值 相位估计 Signal Processing 2002 初值敏感 已补齐">
+      <td><span class="tag t-c">C1</span></td>
+      <td><a href="文献/C1_Wang_混沌振子幅相估计_SignalProcessing2002.pdf" target="_blank">Estimation of amplitude and phase of a weak signal … nonlinear oscillator</a><span class="path">WANG G, ZHENG W, HE S · Signal Processing, 2002, 82(1): 103-115 · 文献/C1_…pdf</span></td>
+      <td><b>估幅估相的理论源头。</b>用户 ScienceDirect 批量下载中的单篇，已取到主目录；第 9–11 周对着 ★[2] 的 Eq.(17) 读。</td><td>0.27 MB</td>
+      <td><a href="文献/C1_Wang_混沌振子幅相估计_SignalProcessing2002.pdf" target="_blank">打开 ↗</a></td></tr>
+
+    <tr class="item prow" data-f="c" data-search="C2 曹保锋 强耦合 Duffing 参数估计 物理学报 2019 080501 参数表 复现蓝本 SNRI">
+      <td><span class="tag t-c">C2</span></td>
+      <td><a href="文献/C2_曹保锋_强耦合Duffing参数估计_物理学报2019.pdf" target="_blank">基于强耦合 Duffing 振子的微弱脉冲信号检测与参数估计</a><span class="path">曹保锋, 李鹏, 等 · 物理学报, 2019, 68(8): 080501 · 文献/C2_…pdf</span></td>
+      <td><b>复现蓝本。</b>中文、参数扫描表最全，一组能直接抄进代码的参数 + 指标定义写法。</td><td>3.1 MB</td>
+      <td><a href="文献/C2_曹保锋_强耦合Duffing参数估计_物理学报2019.pdf" target="_blank">打开 ↗</a></td></tr>
+
+    <tr class="item prow" data-f="d" data-search="D1 Zhao 磁异常检测 综述 MAD Measurement Science Technology 2021 现状骨架">
+      <td><span class="tag t-d">D1</span></td>
+      <td><a href="文献/D1_Zhao_磁异常检测综述_MST2021.pdf" target="_blank">A brief review of magnetic anomaly detection</a><span class="path">ZHAO Y, et al. · Meas. Sci. Technol., 2021, 32(4): 042002 · 文献/D1_…pdf</span></td>
+      <td>「国内外研究现状」的分类骨架，两派方法的对比表可直接当小标题用。</td><td>2.4 MB</td>
+      <td><a href="文献/D1_Zhao_磁异常检测综述_MST2021.pdf" target="_blank">打开 ↗</a></td></tr>
+
+    <tr class="item prow" data-f="d" data-search="D5 Murzin 超灵敏 磁场传感器 综述 Sensors 2020 1/f 噪声 极低频为何难测">
+      <td><span class="tag t-d">D5</span></td>
+      <td><a href="文献/D5_Murzin_超灵敏磁场传感器综述_Sensors2020.pdf" target="_blank">Ultrasensitive magnetic field sensors for biomedical applications</a><span class="path">MURZIN D, et al. · Sensors, 2020, 20(6): 1569 · 文献/D5_…pdf</span></td>
+      <td>解释极低频为何难测：1/f 噪声与 dB/dt 灵敏度的物理约束。</td><td>0.87 MB</td>
+      <td><a href="文献/D5_Murzin_超灵敏磁场传感器综述_Sensors2020.pdf" target="_blank">打开 ↗</a></td></tr>
+
+    <tr class="item prow" data-f="d" data-search="E1 韩维维 环形磁通门 非线性误差 补偿 电子测量技术 2013 导师组 100nT 20nT 已下载完成">
+      <td><span class="tag t-d">E1</span></td>
+      <td><a href="文献/E1_韩维维_环形磁通门非线性误差_电子测量技术2013.pdf" target="_blank">环形磁通门的非线性误差及补偿技术</a><span class="path">韩维维, 杨晓非, 欧阳君, 陈实 · 电子测量技术, 2013, 36(3): 98-101 · 文献/E1_…pdf</span></td>
+      <td>✅ 全文已入库。导师组「传感器怎么准」：多项式拟合磁化曲线建模，±0.5 Gs 内非线性误差 100 → 20 nT。</td><td>0.32 MB</td>
+      <td><a href="文献/E1_韩维维_环形磁通门非线性误差_电子测量技术2013.pdf" target="_blank">打开 ↗</a></td></tr>
+
+    <tr class="item prow" data-f="d" data-search="E3 许朋博 磁通门 TMR 混合宽带 互补滤波 FPGA 仪表技术与传感器 2021 10kHz 0.113mV/nT 0.5nT 已下载完成">
+      <td><span class="tag t-d">E3</span></td>
+      <td><a href="文献/E3_许朋博_磁通门磁阻混合宽带传感器_仪表技术与传感器2021.pdf" target="_blank">基于磁通门和磁阻传感器的混合宽带磁传感器的研究与设计</a><span class="path">许朋博, 王鲜然, 欧阳君, 杨晓非 · 仪表技术与传感器, 2021(4): 14-19 · 文献/E3_…pdf</span></td>
+      <td>✅ 全文已入库。导师组「多个器件怎么宽」：FPGA 互补滤波 + 残差判据拼接，10 kHz / 0.113 mV/nT / 峰峰 0.5 nT。</td><td>1.59 MB</td>
+      <td><a href="文献/E3_许朋博_磁通门磁阻混合宽带传感器_仪表技术与传感器2021.pdf" target="_blank">打开 ↗</a></td></tr>
+
+    <tr class="item prow" data-f="a" data-search="A5 Gammaitoni 随机共振 Stochastic resonance Rev Mod Phys 1998 机理对照">
+      <td><span class="tag t-a">A5</span></td>
+      <td><a href="文献/A5_Gammaitoni_随机共振_RMP1998.pdf" target="_blank">Stochastic resonance</a><span class="path">GAMMAITONI L, HÄNGGI P, JUNG P, MARCIESONI F · Rev. Mod. Phys., 1998, 70(1): 223-287 · 文献/A5_…pdf</span></td>
+      <td>「以噪制噪」平行路线的理论参照，写机理对比时必提。</td><td>1.0 MB</td>
+      <td><a href="文献/A5_Gammaitoni_随机共振_RMP1998.pdf" target="_blank">打开 ↗</a></td></tr>
+
+    <tr class="item prow" data-f="g" data-search="G2 GB/T 7714-2015 参考文献著录规则 国家标准 扫描版 已取回">
+      <td><span class="tag t-g">G2</span></td>
+      <td><a href="文献/G2_GBT7714-2015_参考文献著录规则.pdf" target="_blank">GB/T 7714—2015 信息与文献 参考文献著录规则</a><span class="path">国家标准 · 高校图书馆公开附件 · 26 页扫描版 · 文献/G2_…pdf</span></td>
+      <td>第 16 周成文时核对全部 30 条著录格式；扫描版无文字层，按页查阅即可。</td><td>35.2 MB</td>
+      <td><a href="文献/G2_GBT7714-2015_参考文献著录规则.pdf" target="_blank">打开 ↗</a></td></tr>
+
+    <tr class="item prow" data-f="b" data-search="B4 牛德智 Duffing 盲区消除 检测统计量 物理学报 2015 060503 已下载完成">
+      <td><span class="tag t-b">B4</span></td>
+      <td><a href="文献/aps.64.060503.pdf" target="_blank">Duffing振子微弱信号检测盲区消除及检测统计量构造</a><span class="path">牛德智, 等 · 物理学报, 2015, 64(6): 060503 · 文献/aps.64.060503.pdf</span></td>
+      <td>✅ 已下载完成。初相位盲区与检测统计量，第 6–8 周判据那一环。</td><td>0.66 MB</td>
+      <td><a href="文献/aps.64.060503.pdf" target="_blank">打开 ↗</a></td></tr>
+
+    <tr class="item prow" data-f="d" data-search="E4 Qin 磁矩方向估计 全磁梯度正交基函数 AIP Advances 2022 035035 已下载完成">
+      <td><span class="tag t-d">E4</span></td>
+      <td><a href="文献/035035_1_online.pdf" target="_blank">Target magnetic moment orientation estimation method …</a><span class="path">QIN Y, LI M, LI K, et al. · AIP Advances, 2022, 12(3): 035035 · 文献/035035_1_online.pdf</span></td>
+      <td>✅ 已下载完成。导师组方向相关，磁场侧背景补充。</td><td>6.1 MB</td>
+      <td><a href="文献/035035_1_online.pdf" target="_blank">打开 ↗</a></td></tr>
+
+    <tr class="item prow" data-f="f" data-search="F2 曹保锋 微弱电磁脉冲 低失真 实时检测 FPGA 电子学报 2019 18dB 已下载完成">
+      <td><span class="tag t-f">F2</span></td>
+      <td><a href="文献/微弱电磁脉冲信号低失真度实时检测的FPGA实现_NormalPdf.pdf" target="_blank">微弱电磁脉冲信号低失真度实时检测的FPGA实现</a><span class="path">曹保锋, 郑毅, 李鹏, 等 · 电子学报, 2019, 47(8): 1797-1802 · 文献/微弱电磁脉冲…pdf</span></td>
+      <td>✅ 已下载完成。第 12–15 周嵌入式章节的直接蓝本，实测 −18 dB。</td><td>1.35 MB</td>
+      <td><a href="文献/微弱电磁脉冲信号低失真度实时检测的FPGA实现_NormalPdf.pdf" target="_blank">打开 ↗</a></td></tr>
+
+    <tr class="item prow" data-f="x" data-search="后续研究 杨一 钻具姿态 阵列三稳混沌系统 仪器仪表学报 2025 已下载完成">
+      <td><span class="tag t-x">后续</span></td>
+      <td><a href="文献/钻具姿态动态测量信号的阵列三稳混沌系统检测_杨一.pdf" target="_blank">钻具姿态动态测量信号的阵列三稳混沌系统检测</a><span class="path">杨一, 等 · 仪器仪表学报, 2025, 46(10): 218-229 · 文献/钻具姿态…pdf</span></td>
+      <td>✅ 已下载完成。作者 2025 自我修正，精读文档第 12 节。</td><td>3.5 MB</td>
+      <td><a href="文献/钻具姿态动态测量信号的阵列三稳混沌系统检测_杨一.pdf" target="_blank">打开 ↗</a></td></tr>
+
+    <tr class="item prow" data-f="x" data-search="后续研究 KG-Duffing 噪声 伪周期 虚警 EURASIP JASP 2025 已下载完成">
+      <td><span class="tag t-x">后续</span></td>
+      <td><a href="文献/s13634-025-01279-8.pdf" target="_blank">KG-Duffing：纯噪声伪周期响应与虚警</a><span class="path">EURASIP Journal on Advances in Signal Processing, 2025 · DOI 10.1186/s13634-025-01279-8 · 文献/s13634-025-01279-8.pdf</span></td>
+      <td>✅ 已下载完成。纯噪声虚警的理论证据，精读文档第 12 节。</td><td>2.5 MB</td>
+      <td><a href="文献/s13634-025-01279-8.pdf" target="_blank">打开 ↗</a></td></tr>
+    </tbody>
+  </table></div>
+  <div class="note blue">课题自带 <b>★[1] ★[2] ★[3] 三条已全部到手</b>。原 4 条手动下载入口中，<b>F2 / B4 / E4 已全部下载完成</b>；<b>F1 链接无效且无法打开</b>，已标记为失效、不提供替代链接，状态见下方<a href="#todo">待办</a>。各文献报告的 SNR 门限（−21 / −26 / −18 / −15 dB）实验条件不同，<b>不可直接横向比较</b>。</div>
+</section>
+
+<section id="route">
+  <h2><span class="num">4</span> 阅读路线速览</h2>
+  <p class="lead">详细版（含每张精读卡、三条捷径、卡片模板）见 <a href="00-总览/阅读路线.md" target="_blank">阅读路线.md</a>。</p>
+  <div class="panel"><table>
+    <thead><tr><th>阶段</th><th>周次</th><th>主线</th><th>过关产出</th></tr></thead>
+    <tbody>
+      <tr><td>0</td><td>第 1 周初 · 半天</td><td>★[2] 速读 → B1 引言 → D1 摘要</td><td><b>已交付</b>：<a href="00-总览/第0步-技术路线方框图.md" target="_blank">一页纸技术路线方框图</a>（<a href="assets/第0步-技术路线方框图.svg" target="_blank">SVG 原图</a>），六环节均标文献分组；<a href="00-总览/第0步-技术路线方框图.md" target="_blank">第零节「学到什么程度」</a>给出目标、能力、打勾式验收标准与暂不深入清单</td></tr>
+      <tr><td>1</td><td>1–2</td><td>D1 → D5 → A5 → ★[3] → E1/E3</td><td>「国内外研究现状」第一小节 + 噪声模型假设</td></tr>
+      <tr><td>2</td><td>3–5</td><td>C2 → ★[1] → A1 → ★[2] 第一遍 → A2</td><td>单振子 RK4 仿真 + 两幅相图 + 参数表</td></tr>
+      <tr><td>3</td><td>6–8</td><td>B1 正文 → <b>B2 ✅ 已入库</b> → B3 → B4</td><td>γ 扫描曲线与临界阈值 γ_c、判态伪代码</td></tr>
+      <tr><td>4</td><td>9–11</td><td>★[2] 第二遍 → C2 指标 → C1 → D3 → G1</td><td><b>已交付</b>：<a href="06-阶段四/阶段4-过关产出结果.md" target="_blank">Pd–SNR 曲线、幅值估计误差表</a>（最低 SNR −11.0 dB，γ 误差 4.2–8.8%）</td></tr>
+      <tr><td>5</td><td>12–15</td><td>F1（链接失效）→ <b>F2 ✅</b> → F3 → E5/E4 → F4</td><td><b>已交付</b>：<a href="07-阶段五/阶段5-过关产出结果.md" target="_blank">定点位宽分析、资源时序估算、时序仿真</a>（F=10–12 甜点区；工作点须重标定 0.72→0.76；无板级实测）</td></tr>
+      <tr><td>6</td><td>16</td><td>G2 + 参考文献.bib</td><td>合规参考文献表、统一 SNR 条件说明</td></tr>
+    </tbody>
+  </table></div>
+  <div class="two" style="margin-top:16px">
+    <div class="note green" style="margin:0"><b>三条原则</b><ul class="tight">
+      <li>按问题链读，不按 A→G 编号读。</li>
+      <li>★[2] 读两遍：第 1 周建地图，第 9 周带仿真踩过的坑回来逐式推导。</li>
+      <li>精读 ★[2] / C2 / B1 / ★[1]；速读 D1 / D5 / B3 / A5；其余按需查。</li>
+    </ul></div>
+    <div class="note" style="margin:0"><b>三条捷径</b><ul class="tight">
+      <li>只有一周撑组会：★[2] 速读 → C2 参数表 → B1 引言，约 2 小时。</li>
+      <li>公式推不动：回 C2 中文参数表，先跑出相图，直觉先于推导。</li>
+      <li>被极低频卡住：直接读 B2，本地 PDF 已就位。</li>
+    </ul></div>
+  </div>
+</section>
+
+<section id="findings">
+  <h2><span class="num">5</span> 精读与复现的关键结论</h2>
+  <p class="lead">完整论证见 <a href="04-论文精读/论文精读-阵列Duffing_Sensors2023.md" target="_blank">精读文档</a>，原始数字见 <a href=".workbuddy/tmp/sensors2023/repro-out.txt" target="_blank">复现输出</a>。</p>
+
+  <div class="two">
+    <div class="panel" style="padding:16px 18px">
+      <h3 style="margin:0 0 8px;font-size:15px">① Eq.(17) 印刷错误</h3>
+      <p style="margin:0;color:var(--muted);font-size:13.3px">正确形式为 <span class="mono">γ = √(0.73² − λ₁λ₂)</span>，论文漏了平方根，Eq.(11)/(14) 的 0.73 也应平方。用论文自身数据 λ₁=0.7414、λ₂=0.7183 验算得 0.01876，正是它报的 0.0188；反解相位 −128° 亦吻合。照原文复现会卡死在这一步。</p>
+    </div>
+    <div class="panel" style="padding:16px 18px">
+      <h3 style="margin:0 0 8px;font-size:15px">② 分岔位置实测偏高 0.01</h3>
+      <p style="margin:0;color:var(--muted);font-size:13.3px">以 Poincaré 截面离散度判态（周期态 ≈0.015，混沌态 ≥0.16），步长 0.1 / 0.05 / 0.02 / 0.01 四种一致：λ=0.73 仍混沌，0.74 跳到大尺度周期态；精扫发现 <b>0.734–0.740 是跃变带</b>（0.734 周期 / 0.735 混沌 / 0.736 起稳定，带内间歇混沌与双稳），阈值应报「带」而非一个点。论文取 0.72 并认为合成幅值 0.73 触发相变。</p>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:16px;padding:16px 18px">
+    <h3 style="margin:0 0 10px;font-size:15px">③ 工作点权衡：全相位覆盖与噪声免疫不可兼得</h3>
+    <table style="font-size:13px">
+      <thead><tr><th>λ</th><th>三振子相位覆盖率</th><th>纯噪声虚警率（σ=0.20）</th><th>判读</th></tr></thead>
+      <tbody>
+        <tr><td>0.700</td><td>0%</td><td>0%</td><td>保守，几乎检不到</td></tr>
+        <tr><td>0.720</td><td>约 65%</td><td>0%</td><td>论文工作点：零虚警但覆盖不全</td></tr>
+        <tr><td>0.730</td><td>100%</td><td>10%</td><td>覆盖达标，开始虚警</td></tr>
+        <tr><td>0.735</td><td>100%</td><td>90%</td><td>噪声本身就把振子推过界</td></tr>
+      </tbody>
+    </table>
+    <p style="margin:10px 0 0;color:var(--muted);font-size:13.2px">另一个细节：第一次用「稳态振幅 &gt;1.2」判态时，所有情况都被判成周期态，虚警 100%；换成 Poincaré 才分开。所谓「观察输出状态」，换一个可观测量结论就塌了。</p>
+    <p style="margin:8px 0 0;color:var(--muted);font-size:13.2px">上表来自精读文档第 9 节的一次独立运行（T=400 s）。<a href="复现-2-混沌振子建模与临界阈值.html" target="_blank">notebook §8</a> 用 T=300 s、独立种子重跑，得 0.720: 57.5% / 0%，0.730: 97.3% / 2.5%，0.735: 98.6% / 75%，<b>趋势一致，绝对值随仿真时长与种子波动</b>。</p>
+  </div>
+
+  <div class="note green" style="margin-top:16px"><b>新增 · 「主要内容 2」已用 notebook 完整复现：</b>
+    <a href="02-阶段二/解读-主要内容2-混沌振子建模与临界阈值.md" target="_blank">逐句解读</a> ·
+    <a href="复现-2-混沌振子建模与临界阈值.html" target="_blank">实跑预览（25 单元 / 10 图）</a> ·
+    <a href="复现-2-混沌振子建模与临界阈值.ipynb" target="_blank">.ipynb 源文件</a> ·
+    <a href="复现输出/结果汇总.json" target="_blank">结果汇总</a>。
+    除上面三条外，实跑还暴露三点：<b>变尺度扫 R 存在锁频伪相变</b>（R=8/9/9.5/12/13 也触发，内驱分量占比与 R=10 的 0.995 分不开）、<b>P<sub>d</sub>–SNR 非单调，故不报单一最低门限</b>、<b>阈值带内有间歇混沌</b>。图纸见「复现输出」文件夹，例如
+    <a href="复现输出/fig03_临界阈值扫描.png" target="_blank">阈值扫描</a> / <a href="复现输出/fig10_Pd-SNR与ROC.png" target="_blank">ROC</a>。</div>
+
+  <div class="note" style="margin-top:16px"><b>边界必须说清：</b>以上所有与论文不一致的数字都来自自己的数值复现，条件是 h=0.02、T=400 s、Poincaré 判据、无变尺度，与论文的 Simulink Ode4、含噪、目测相图不同。它们检验的是 claim 的敏感性与可复现性，<b>不能当成「证明论文错了」</b>。论文数据与代码未公开，第三方目前无法完全裁定。</div>
+
+  <div class="note blue" style="margin-top:12px"><b>作者自己 2025 年修正了这个方向：</b>杨一等《钻具姿态动态测量信号的阵列三稳混沌系统检测》，仪器仪表学报, 2025, 46(10): 218-229，把双稳换成三稳势函数，摘要直说双稳「相位覆盖不全导致检测偏差」，报 −18 dB、井斜角误差 &lt;1°。同时 2025 年 KG-Duffing 工作证明纯噪声经双势阱滤波会产生伪周期轨迹并抬高虚警。<a href="#links">后续研究链接见下</a>。</div>
+</section>
+
+<section id="links">
+  <h2><span class="num">6</span> 外部链接（DOI / 官网 / 后续研究）</h2>
+  <p class="lead">打开即跳出版商页面。订阅制条目需要校园网或图书馆 VPN；标 ✅ 的全文已在本地；F1 链接失效且无法打开，不再提供入口。</p>
+
+  <div class="two">
+    <div class="panel" style="padding:6px 0">
+      <table>
+        <thead><tr><th>课题自带与核心文献</th><th></th></tr></thead>
+        <tbody>
+          <tr><td>★[1] 物理学报 2024, 73(4): 040503</td><td><a href="https://doi.org/10.7498/aps.73.20231343" target="_blank">DOI ↗</a></td></tr>
+          <tr><td>★[2] Sensors 2023, 23(17): 7598（PMC 全文）</td><td><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10490661/" target="_blank">PMC ↗</a> · <a href="https://doi.org/10.3390/s23177598" target="_blank">DOI ↗</a></td></tr>
+          <tr><td>★[3] IEEE Sensors J 2025, 25(12) ✅ 已下</td><td><a href="https://doi.org/10.1109/JSEN.2025.3567707" target="_blank">DOI ↗</a></td></tr>
+          <tr><td>A1 Wang 1999, IEEE TIE 46(2): 440-444 🔒</td><td><a href="https://doi.org/10.1109/41.753783" target="_blank">DOI ↗</a></td></tr>
+          <tr><td>B2 物理学报 2012, 61(5): 050503 ✅ 已下</td><td><a href="https://doi.org/10.7498/aps.61.050503" target="_blank">DOI ↗</a></td></tr>
+          <tr><td>B4 物理学报 2015, 64(6): 060503 ✅ 已下</td><td><a href="https://doi.org/10.7498/aps.64.060503" target="_blank">DOI ↗</a></td></tr>
+          <tr><td>C1 Signal Processing 2002, 82(1) ✅ 已下</td><td><a href="https://doi.org/10.1016/S0165-1684(01)00166-9" target="_blank">DOI ↗</a></td></tr>
+          <tr><td>E1 电子测量技术 2013, 36(3): 98-101（导师组）✅ 已下</td><td><a href="文献/E1_韩维维_环形磁通门非线性误差_电子测量技术2013.pdf" target="_blank">本地 PDF ↗</a> · <a href="https://doi.org/10.19651/j.cnki.emt.2013.03.022" target="_blank">DOI ↗</a> · <a href="http://dianda.cqvip.com/Qikan/Article/Detail?id=45322882" target="_blank">维普 ↗</a></td></tr>
+          <tr><td>E3 仪表技术与传感器 2021(4): 14-19（导师组）✅ 已下</td><td><a href="文献/E3_许朋博_磁通门磁阻混合宽带传感器_仪表技术与传感器2021.pdf" target="_blank">本地 PDF ↗</a> · <a href="https://wap.cnki.net/touch/web/Journal/Article/YBJS202104004.html" target="_blank">知网 ↗</a>（版面未印 DOI）</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="panel" style="padding:6px 0">
+      <table>
+        <thead><tr><th>后续研究 / 待补入口</th><th></th></tr></thead>
+        <tbody>
+          <tr><td>作者 2025 自我修正：阵列三稳混沌系统 ✅ 已下</td><td><a href="https://doi.org/10.19650/j.cnki.cjsi.J2514021" target="_blank">DOI ↗</a> · <a href="文献/钻具姿态动态测量信号的阵列三稳混沌系统检测_杨一.pdf" target="_blank">本地 PDF ↗</a></td></tr>
+          <tr><td>KG-Duffing：噪声伪周期虚警, EURASIP JASP 2025 ✅ 已下</td><td><a href="https://doi.org/10.1186/s13634-025-01279-8" target="_blank">DOI ↗</a> · <a href="文献/s13634-025-01279-8.pdf" target="_blank">本地 PDF ↗</a></td></tr>
+          <tr><td>Sensors 2026, 26(17): 5545（轴频磁场，与毕设最贴近）</td><td><a href="https://www.mdpi.com/1424-8220/26/17/5545" target="_blank">全文 ↗</a></td></tr>
+          <tr><td>E4 AIP Advances 2022, 12(3): 035035 ✅ 已下</td><td><a href="https://doi.org/10.1063/9.0000282" target="_blank">DOI ↗</a></td></tr>
+          <tr><td>F1 重庆邮电大学学报 2016, 28(3) ❌ 链接失效、无法打开</td><td><s>期刊入口（已失效）</s><br>不提供替代链接</td></tr>
+          <tr><td>F2 电子学报 2019, 47(8) ✅ 已下</td><td><a href="https://www.ejournal.org.cn/zh/article/doi/10.3969/j.issn.0372-2112.2019.08.025" target="_blank">全文页 ↗</a></td></tr>
+          <tr><td>G2 GB/T 7714—2015 ✅ 已下</td><td><a href="http://openstd.samr.gov.cn" target="_blank">国标公开系统 ↗</a></td></tr>
+          <tr><td>OpenAlex：★[2] 的引用与后续工作</td><td><a href="https://api.openalex.org/works/https://doi.org/10.3390/s23177598" target="_blank">元数据 ↗</a></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <p style="color:var(--muted);font-size:13px;margin-top:12px">完整 30 条的题名、DOI 与获取入口见 <a href="00-总览/参考资料-极低频磁场混沌振子微弱信号检测.md" target="_blank">主清单</a> 与 <a href="文献/00-下载索引.md" target="_blank">下载索引</a>。所有下载均来自出版商官网、arXiv 或开放获取平台，未使用绕付费墙的第三方站点。</p>
+</section>
+
+<section id="todo">
+  <h2><span class="num">7</span> 状态与待办</h2>
+  <div class="panel"><table>
+    <thead><tr><th>状态</th><th>条目</th><th>下一步</th></tr></thead>
+    <tbody>
+      <tr><td><span class="pill p-ok">已完成</span></td><td><b>B2 变尺度法全文</b></td><td>已入库（0.59 MB，<span class="mono">%PDF-</span> 校验通过）。第 6–8 周的「极低频」闭环不再卡住，<a href="文献/B2_基于Duffing振子的变尺度微弱特征信号检测方法研究.pdf" target="_blank">直接读</a>。</td></tr>
+      <tr><td><span class="pill p-ok">已完成</span></td><td><b>★[3] / C1 / G2</b></td><td>★[3]、C1 由用户经校园网补齐，G2 由高校图书馆公开附件自动取回。<b>课题自带 3 条全齐，17 篇题录内全文 + 2 篇后续研究，约 71 MB。</b></td></tr>
+      <tr><td><span class="pill p-ok">已完成</span></td><td><b>F2 / B4 / E4（3 条）</b></td><td>原手动下载入口中的三条已全部下载完成，文件头均已校验：<a href="文献/微弱电磁脉冲信号低失真度实时检测的FPGA实现_NormalPdf.pdf" target="_blank">F2 ↗</a> · <a href="文献/aps.64.060503.pdf" target="_blank">B4 ↗</a> · <a href="文献/035035_1_online.pdf" target="_blank">E4 ↗</a>。第 6–8 周判据与第 12–15 周嵌入式两章材料闭合。</td></tr>
+      <tr><td><span class="pill p-warn">链接失效</span></td><td><b>F1 重庆邮电大学学报 2016, 28(3)</b></td><td><b>链接无效且无法打开</b>（2026-11-13 用户反馈；此前命令行复核返回 412 门禁）。已标记为失效，<b>不提供替代链接</b>；全文未到手，本地无对应 PDF。阶段 5 先用已到手的 F2。</td></tr>
+      <tr><td><span class="pill p-ok">已完成</span></td><td><b>新方法边界条件评估 + 撞车更正（2026-11-19）</b></td><td>检索确认 PBT 核心机制已被 <b>2 项中国专利 + 1 篇 IOP 会议论文</b>公开（「两次临界阈值之差 = 幅值」），「二分法定位阈值」亦有 2016 年专文，<b>原「无人把 λ* 当观测量」的断言已就地更正</b>。6 条前提逐项判定、4 条不适用全部成立、7 项风险量化（含 σ_λ&lt;0.002 的精度生死线）、三条路线建议。见 <a href="05-方法创新/新方法-边界条件与场景适用性.md" target="_blank">评估报告</a>。</td></tr>
+      <tr><td><span class="pill p-ok">已完成</span></td><td><b>★[2] 完整复现：Jupyter Book 八章 · 11 图（2026-11-24）</b></td><td>Yang 等 <i>Sensors</i> 2023, 23(17):7598 的逐项复现。<b>核心结论：变尺度里的 ν 是 ω/R 的别名，不是待设参数</b>——频率未知时扫 R，相变点的 R 即 ω；用代码中不含 ω 的盲测复现 10 / 7.3 / 3.7 rad/s 三个真值，误差 ≤0.14%。<b>修正一处判据缺陷</b>：Poincaré「每 N 步采一次」在 h 不整除 2π 时造出 0.1 量级伪 pstd，改用精确 2π 插值后 <b>λ<sub>c</sub>=0.733</b>、周期态 pstd 精确为 0。<b>指出表 2（f<sub>s</sub>=10 Hz）与步骤 3（T<sub>1</sub>=R/f<sub>s</sub>）不自洽</b>：R=10 时步长 1 s、每周期 6.28 步，RK4 实测发散。图 5 四幅消融与 −23 dB 门限相图均复现；三路 λ 反解 γ 偏 −31%，根因是「相变只由合成幅值决定」的近似（等效阈值极差 0.0086）。<a href="s2-jupyterbook/_build/html/index.html" target="_blank">打开书</a>。</td></tr>
+      <tr><td><span class="pill p-ok">已完成</span></td><td><b>C2 完整复现：Jupyter Book 八章 · 11 图 5 表（2026-11-23 晚）</b></td><td>曹保锋等《物理学报》2019, 68(8):080501 的逐项复现：分岔四段区间 0.467/0.504/1.142 与原文一致，<b>另用 Lyapunov 指数独立验证（混沌区 77% 为正、周期区 0%）</b>；<b>反演出原文未写的输出限带带宽</b>——表 3 的 r 列与 Pd 列分别给出 133 kHz 与 130 kHz，补上后 −20 dB 处 r 从 0.28 回到 0.84（原文 0.85），表 3/表 4 由「未复现」变为「同曲线、右移 2–4 dB」；<b>k<sub>c</sub>=1/(2ξ)=0.714</b> 解释「k&lt;1 失效」；输出量须取位移差（r≈0.99），速度差是其微分（r≈0）。四条边界已列明。<a href="c2-jupyterbook/_build/html/index.html" target="_blank">打开书</a>。</td></tr>
+      <tr><td><span class="pill p-ok">已完成</span></td><td><b>新方法提案：相变边界追踪（2026-11-19）</b></td><td>把混沌振子从「二值检测器」改为「边界位移传感器」：二分搜索 λ* 而非固定 0.72，同相时位移/幅值 <b>1.000</b>（已实算），三振子边界联立反演 (γ, θ)，滞回环宽当噪声计。含 6 个最接近公开方法的对标、5 条可证伪预测、一周验证路径与 8 条局限。<b>核心机制后被检索证伪为已有，新颖性主张降级</b>。见 <a href="05-方法创新/新方法-相变边界追踪.md" target="_blank">PBT 提案</a> · <a href="assets/相变边界追踪-流程对比.svg" target="_blank">流程对比图</a>。</td></tr>
+      <tr><td><span class="pill p-ok">已完成</span></td><td><b>方案创新点与版本对比（2026-11-19）</b></td><td>研究侧 <b>8 条创新点</b>对现有方案（基准 A/B），工程侧 <b>7 条改进</b>对整理前快照（基准 C），逐条「创新点 — 相比之前的变化 — 带来的价值」，并按核心思路 / 实现方式 / 功能效果 / 性能效率 / 可维护性 / 使用体验六维归纳。<b>已实测与设计态严格分开</b>：chaos-CFAR 标 △（未实现），代码改进明确声明不构成学术创新。见 <a href="05-方法创新/方案创新点与版本对比.md" target="_blank">创新点分析</a>。</td></tr>
+      <tr><td><span class="pill p-ok">已完成</span></td><td><b>阶段 1 五件过关产物（2026-11-19）</b></td><td>① <a href="01-阶段一/阶段1-现状综述草稿.md" target="_blank">现状综述草稿</a>（约 1100 字，四段结构，8 条引文）；② <a href="01-阶段一/阶段1-信号与噪声模型假设.md" target="_blank">信号与噪声模型假设</a>（两档噪声、参数表、SNR 主口径、H₀/H₁）；③ <a href="01-阶段一/阶段1-文献卡片.md" target="_blank">文献卡片 5 张</a>；④ <a href="01-阶段一/阶段1-E1E3获取记录.md" target="_blank">E1/E3 获取记录</a>；⑤ <a href="01-阶段一/阶段1-问题清单.md" target="_blank">问题清单 12 条</a>（5 条是「论文没回答的」）；⑥ <a href="01-阶段一/阶段1-问题销账.md" target="_blank">问题销账</a>（2026-11-23 补，7 条结清 / 3 条部分 / 2 条待导师，并更正了 Q1、Q5 的创新点表述）。<b>第 1–2 周交卷材料齐备。</b></td></tr>
+      <tr><td><span class="pill p-ok">已完成</span></td><td><b>阶段 1 文献解读（D1 / D5 / A5 / ★[3] / E1-E3）</b></td><td>五篇逐篇拆「核心内容 / 关键结论 / 参考价值 / 边界」，附 E1/E3 的来源与获取路径、五项过关产物的完成标准。<b>2026-11-15 起五篇均为全文口径</b>（E1/E3 已入库）。见 <a href="01-阶段一/阶段1-文献解读与过关清单.md" target="_blank">阶段 1 清单</a>。</td></tr>
+      <tr><td><span class="pill p-ok">已完成</span></td><td><b>E1 / E3 全文入库 + 记录同步（2026-11-15）</b></td><td>两篇导师组磁通门论文全文到手并按编号改名：<a href="文献/E1_韩维维_环形磁通门非线性误差_电子测量技术2013.pdf" target="_blank">E1 ↗</a>、<a href="文献/E3_许朋博_磁通门磁阻混合宽带传感器_仪表技术与传感器2021.pdf" target="_blank">E3 ↗</a>。<b>下载索引 / 阶段 1 清单 / 主清单 / 阅读路线 / .bib / 本页统计六处已同步</b>：E1 补 DOI 与非线误差 100 → 20 nT，E3 补页码 14-19 与 10 kHz / 0.113 mV/nT / 峰峰 0.5 nT，「仅摘要级」标注全部撤销。同名 <span class="mono">.caj</span> 副本（实为 PDF 改名、MD5 相同）已归档并于 2026-11-19 清理，见 <a href="文献/_archive/重名caj副本_20261115/README.md" target="_blank">归档说明</a>。</td></tr>
+      <tr><td><span class="pill p-lock">需校园网</span></td><td>A1、D2、D3、D4、E2、F3、E5（7 条）</td><td>走图书馆 VPN 或文献传递。<b>E1 / E3 已于 2026-11-15 全文到手、移出本组</b>；E5 是导师组硕士论文，直接向课题组索取通常比下载快。</td></tr>
+      <tr><td><span class="pill p-lock">纸本</span></td><td>A2、A3、A4、F4、G1（5 条）</td><td>教材与专著，只能图书馆借阅 / 购买，无需下载。</td></tr>
+      <tr><td><span class="pill p-warn">建议尽早</span></td><td>向导师要组内实测磁场噪声数据</td><td>比公开文献里的仿真高斯白噪声更贴合「结合科研」，也是 chaos-CFAR 那个 follow-up idea 的落地数据。</td></tr>
+      <tr><td><span class="pill p-ok">已完成</span></td><td><b>阶段 3 过关产出验收页（2026-11-23）</b></td><td><a href="03-阶段三/阶段3-过关产出结果.md" target="_blank">过关产出结果</a>逐条对照阅读路线打勾：γ 扫描曲线（γ_c 0.0100/0.0196）、判态伪代码（x(t)→0/1）、初相位盲区（Δmax 60.69°） —— <b>三项全绿</b>，五张实跑图直接内嵌。程序 <a href="learn/3.ipynb" target="_blank">learn/3.ipynb</a>（26 单元 / 5 图 / 0 报错），数字 <a href="复现输出/阶段3-判据与盲区汇总.json" target="_blank">JSON</a>。<b>翻案记录：0-1 test 的方向反转系带符号中位数的实现 bug，逐 c 取绝对值后次序恢复（混沌 |K|=0.0316 &gt; 周期 0.0083、Δ|K| 五档全正）</b>，但幅度小、带内非单调，仍以 pstd + MsEn 为主；盲区实测低于解析值已标注口径差异。逐问回答见 <a href="03-阶段三/阶段3-判据与盲区-问题回答.md" target="_blank">问题回答</a>。</td></tr>
+      <tr><td><span class="pill p-ok">已完成</span></td><td><b>阶段 4 过关产出验收页（2026-11-23）</b></td><td><a href="06-阶段四/阶段4-过关产出结果.md" target="_blank">过关产出结果</a>逐条对照阅读路线打勾：Pd/Pfa 蒙特卡洛表（8 SNR 点 × 双噪声 × 每点 100 次）、幅值估计误差表、Pd–SNR 与误差–SNR 曲线 —— <b>六项全绿</b>，四张实跑图直接内嵌。程序 <a href="learn/4.ipynb" target="_blank">learn/4.ipynb</a>（22 单元 / 4 图 / 0 报错 / 237 s），数字 <a href="复现输出/阶段4-检测性能与参数估计汇总.json" target="_blank">JSON</a>。<b>两项指标兑现</b>：最低可检测 SNR = −11.0 dB（Pfa≤0.05、Pd≥0.9），γ 相对误差白噪 4.2–5.0% / 1/f 色噪 7.4–8.8%。方法学要点：固定噪声扫信号、H0 反解门限、T=400 s 收敛；随机初相下 OR 覆盖优先。逐问回答见 <a href="06-阶段四/阶段4-检测与估计-问题回答.md" target="_blank">问题回答</a>。</td></tr>
+      <tr><td><span class="pill p-ok">已完成</span></td><td><b>阶段 5 过关产出验收页（2026-11-23）</b></td><td><a href="07-阶段五/阶段5-过关产出结果.md" target="_blank">过关产出结果</a>逐条对照阅读路线打勾：定点化位宽分析（8 档 F 扫描）、资源/时序估算、时序仿真、与阶段 4 对照 —— <b>五项全绿</b>，四张实跑图直接内嵌。程序 <a href="learn/5.ipynb" target="_blank">learn/5.ipynb</a>（25 单元 / 4 图 / 0 报错 / 347 s），数字 <a href="复现输出/阶段5-定点化与资源时序汇总.json" target="_blank">JSON</a>。<b>最重要发现：定点化改的是等效阈值不是精度</b>——浮点工作点 λ0=0.72 烧录后 Pd=0.05，重标定到 0.76 恢复 0.93；字长甜点区 F=10–12，F=4/6/8 三种失效模式。单步 ≈1008 ns ≈ 252 时钟（F2 工艺换算），帧计算 ≪ 400 s 物理窗，选 TDM 单核。<b>诚实边界：无 FPGA 板、无综合报告，以时序仿真口径过关</b>。逐问回答见 <a href="07-阶段五/阶段5-嵌入式实现-问题回答.md" target="_blank">问题回答</a>。</td></tr>
+      <tr><td><span class="pill p-ok">已完成</span></td><td><b>阶段 2 过关产出验收页（2026-11-23）</b></td><td><a href="02-阶段二/阶段2-过关产出结果.md" target="_blank">过关产出结果</a>逐条对照阅读路线打勾：RK4 程序、混沌/周期并列相图、x(t) 时序、可复现参数表、阈值曲线、步长敏感性 —— <b>六项全绿</b>，五张实跑图直接内嵌（白图问题已修复）。跑通程序 <a href="learn/2.ipynb" target="_blank">learn/2.ipynb</a>（17 单元 / 6 张内嵌图 / 0 报错），数字 <a href="复现输出/阶段2-建模与阈值汇总.json" target="_blank">JSON</a>。阈值带 0.734–0.736、四种步长跃变 0.730–0.740。逐问回答见 <a href="02-阶段二/阶段2-建模与相变-问题回答.md" target="_blank">问题回答</a>。</td></tr>
+      <tr><td><span class="pill p-ok">已完成</span></td><td><b>「主要内容 2」的解读 + notebook 复现</b></td><td>25 单元实跑、10 张图。见 <a href="02-阶段二/解读-主要内容2-混沌振子建模与临界阈值.md" target="_blank">解读</a> / <a href="复现-2-混沌振子建模与临界阈值.html" target="_blank">预览</a> / <a href="复现-2-混沌振子建模与临界阈值.ipynb" target="_blank">源文件</a>。阶段 2 的过关产出（RK4 程序、两幅相图、参数表、阈值曲线）已齐。</td></tr>
+      <tr><td><span class="pill p-ok">已完成</span></td><td><b>D1 综述精读（MST 2021）</b></td><td><a href="04-论文精读/论文精读-D1_磁异常检测综述_MST2021.md" target="_blank">精读文档</a>逐节核对公式 (1)–(34)、图 1–16、表 1–2 与 §4，给出两派分类判据、九种方法的原理与<b>逐法限制条件总表</b>。关键定位：D1 未覆盖混沌振子与 AI 方法，作「国内外研究现状」骨架使用，不作方法归属。</td></tr>
+      <tr><td><span class="pill p-ok">已完成</span></td><td><b>Python 虚拟环境（跑 ipynb）</b></td><td><span class="mono">.venv</span> 已装齐 7 个顶层依赖（含 JupyterLab），Kernel 指向虚拟环境；实跑 notebook 副本 39.8 s / 13 单元 / 10 图 / 0 报错。双击 <span class="mono">start_notebook.bat</span>（浏览器）或 <span class="mono">run_ipynb.bat</span>（无界面写回），详见 <a href="00-总览/环境说明-跑ipynb.md" target="_blank">环境说明</a>。</td></tr>
+      <tr><td><span class="pill p-warn">下一步</span></td><td>把指标从仿真噪声换成实测噪声</td><td><a href="06-阶段四/阶段4-过关产出结果.md" target="_blank">阶段 4</a> 已用仿真白噪 + 1/f 色噪、H<sub>0</sub> 反解门限、每点 100 次蒙特卡洛报出带条件的「最低可检测 SNR = −11.0 dB」与估计精度；但 H<sub>0</sub> 仍是仿真源。下一步需用导师组实测磁场噪声作 H<sub>0</sub> 重标全部指标（C 档替换），这才是正式 chaos-CFAR 与「结合科研」的落点。</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+</main>
+
+<footer><div class="wrap">
+  索引更新：2026-11-23（第 19 次更新 · C2 复现：Jupyter Book 六章（含可复现性分析））· 位置 <span class="mono">C:\Users\22902\WorkBuddy\毕设\index.html</span><br>
+  <b>方式 A · 实时（推荐）</b>：双击 <span class="mono">start_index.bat</span>，它自动重建静态副本、启动服务并打开 <span class="mono">http://127.0.0.1:8765/index.html</span>。点 <span class="mono">.md</span> 链接由服务端实时排版，PDF 内嵌阅读，<span class="mono">?raw=1</span> 看源码；<span class="mono">Ctrl+C</span> 停止。手工等价命令 <span class="mono">py tools/serve_index.py 8765</span>。<br>
+  <b>方式 B · 免服务（离线）</b>：直接双击 <span class="mono">index.html</span>。页面会自动把 <span class="mono">.md</span> 链接指向 <span class="mono">tools/build_static.py</span> 生成的同名 <span class="mono">.html</span> 排版副本，PDF 也可点开；Markdown 改动后运行 <span class="mono">py tools/build_static.py</span> 重新生成即可。<br>
+  <b>notebook 复现</b>：直接打开 <span class="mono">复现-2-混沌振子建模与临界阈值.html</span> 看已实跑预览（25 单元 / 10 张内嵌图）；用 Jupyter / VS Code 打开同名 <span class="mono">.ipynb</span> 可重新 Run All（Kernel: Python 3，约 40 秒），图纸与结果汇总写在 <span class="mono">复现输出\</span>。<b>重跑请用 <span class="mono">.venv</span></b>：双击 <span class="mono">start_notebook.bat</span>（JupyterLab）或 <span class="mono">run_ipynb.bat</span>（无界面写回），详见 <a href="00-总览/环境说明-跑ipynb.md" target="_blank">环境说明</a>。<br>
+  <b>单文件预览面板</b>只映射 HTML 自身，相对资源一律 404，顶部提示条会自动识别并给出切回排版模式的入口。<br>
+  本页所有本地链接均为相对路径，请保持它与 <span class="mono">文献\</span> 文件夹、各 Markdown 文件的相对位置不变。顶部搜索框可过滤本页卡片与表格行，<kbd>Esc</kbd> 清空。
+</div></footer>
+
+<script>
+(function(){
+  var q=document.getElementById('q'), items=[].slice.call(document.querySelectorAll('.item')),
+      btns=[].slice.call(document.querySelectorAll('#filters button')),
+      rows=[].slice.call(document.querySelectorAll('.prow')), filter='all';
+  function apply(){
+    var s=(q.value||'').trim().toLowerCase();
+    items.forEach(function(el){
+      var hay=((el.dataset.search||'')+' '+el.textContent).toLowerCase();
+      var okText=!s||hay.indexOf(s)>=0;
+      var okFilter=!el.classList.contains('prow')||filter==='all'||el.dataset.f===filter;
+      el.classList.toggle('hide',!(okText&&okFilter));
+    });
+  }
+  q.addEventListener('input',apply);
+  q.addEventListener('keydown',function(e){if(e.key==='Escape'){q.value='';apply();}});
+  btns.forEach(function(b){b.addEventListener('click',function(){
+    btns.forEach(function(x){x.classList.remove('on')});b.classList.add('on');
+    filter=b.dataset.f;apply();
+  })});
+})();
+
+/* 三种打开方式，决定 .md 链接指向哪里：
+   1) 8765 本地服务  -> 直接请求 .md，服务端实时渲染成排版 HTML（永远最新）
+   2) file:// 双击   -> 浏览器不认识 md，改指向 tools/build_static.py 生成的同名 .html 副本
+   3) 单文件静态预览 -> 相对资源本就不可达，给出切到 8765 的明确入口            */
+(function(){
+  var isService = location.protocol === 'http:' &&
+      (location.hostname === '127.0.0.1' || location.hostname === 'localhost') &&
+      location.port === '8765';
+  var isFile = location.protocol === 'file:';
+  var bar = document.getElementById('envbar');
+  var txt = document.getElementById('envbar-text');
+
+  if(isService){
+    var tag = document.createElement('span');
+    tag.className = 'envok';
+    tag.textContent = 'Markdown 实时排版已启用';
+    document.querySelector('nav .wrap').appendChild(tag);
+    return;
+  }
+
+  // 非服务模式：把 .md / .md#anchor 链接切到同名静态副本
+  document.querySelectorAll('a[href]').forEach(function(a){
+    var h = a.getAttribute('href') || '';
+    if(/^(https?:|mailto:|#)/.test(h)) return;
+    if(/\.md(#.*)?$/.test(h)) a.setAttribute('href', h.replace(/\.md(#.*)?$/, '.html$1'));
+  });
+
+  bar.classList.add('show');
+  if(isFile){
+    bar.classList.add('filebar');
+    txt.innerHTML = '<b>本地双击模式</b>：Markdown 链接已自动指向同名排版副本，点开即可看到带标题、表格、代码块的页面。' +
+      '副本由 <span class="mono">tools/build_static.py</span> 生成，Markdown 改动后重跑一次即可更新；' +
+      '想看实时渲染或 <span class="mono">?raw=1</span> 源码，双击 <span class="mono">start_index.bat</span>。';
+  }else{
+    txt.innerHTML = '<b>当前是单文件 / 静态预览，本页的相对资源无法加载。</b>' +
+      '请切到排版模式：<a class="btn" href="http://127.0.0.1:8765/index.html" target="_blank">打开排版版索引</a>' +
+      '若提示无法访问，先双击工作区里的 <span class="mono">start_index.bat</span>，' +
+      '或运行 <span class="mono">py tools/serve_index.py</span>。也可以直接双击本地 <span class="mono">index.html</span> 使用静态副本。';
+  }
+})();
+</script>
+</body>
+</html>

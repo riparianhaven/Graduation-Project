@@ -1,0 +1,92 @@
+{
+  "stage": 3,
+  "criteria": {
+    "pstd_threshold": 0.08,
+    "zero_one_K": {
+      "definition": "median_c |corr(n, M_c(n))| (per-c absolute value)",
+      "chaos_l070": 0.03156859399270569,
+      "periodic_l076": 0.00834135019769329,
+      "theory": "K≈0 periodic / K≈1 chaotic",
+      "note": "逐c取绝对值后两态次序符合理论、含噪ΔK全档为正；幅度远小于1须本机定分界，带内非单调故作第三票参考。早先带符号中位数的\"方向反转/弃用\"结论系实现bug，已修正。"
+    },
+    "msen": {
+      "chaos_l070": 0.635371311730921,
+      "periodic_l076": 0.03651497555484305,
+      "taus": [
+        1,
+        2,
+        4,
+        8
+      ],
+      "r": 0.2,
+      "note": "熵值大小须配合平稳性；容差选错会塌成 0"
+    }
+  },
+  "gamma_scan": {
+    "gamma_c_trigger_analytic": 0.01,
+    "gamma_c_fullcover_analytic": 0.0196,
+    "pstd_first_flip": 0.0175,
+    "condition": "λ=0.72, 同相, σ=0, h=0.02, T=200.0"
+  },
+  "blind_zone": {
+    "lambda": 0.72,
+    "gamma": 0.02,
+    "delta_max_deg": 60.69,
+    "theory_cover_single_pct": 33.7,
+    "theory_cover_triple_pct": 100.0,
+    "noise_sweep": {
+      "0.0": {
+        "single_detected": 2,
+        "triple_or_detected": 13,
+        "total": 36
+      },
+      "0.05": {
+        "single_detected": 2,
+        "triple_or_detected": 14,
+        "total": 36
+      },
+      "0.15": {
+        "single_detected": 5,
+        "triple_or_detected": 17,
+        "total": 36
+      }
+    }
+  },
+  "rescale_true_frequency": [
+    {
+      "R": 8.0,
+      "pstd": 0.4606,
+      "signal_peak_ratio": 0.0
+    },
+    {
+      "R": 9.0,
+      "pstd": 0.231,
+      "signal_peak_ratio": 0.0
+    },
+    {
+      "R": 9.5,
+      "pstd": 0.5263,
+      "signal_peak_ratio": 0.0001
+    },
+    {
+      "R": 10.0,
+      "pstd": 0.0034,
+      "signal_peak_ratio": 0.0012
+    },
+    {
+      "R": 12.0,
+      "pstd": 0.0617,
+      "signal_peak_ratio": 0.0003
+    },
+    {
+      "R": 13.0,
+      "pstd": 0.1272,
+      "signal_peak_ratio": 0.0
+    }
+  ],
+  "stage1_questions": {
+    "Q7": "盲区解析式 + 噪声退化已量化",
+    "Q11": "多数表决优于 OR（销账已答），本号给出伪代码融合"
+  },
+  "runtime_s": 191.5
+}

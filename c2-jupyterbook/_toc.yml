@@ -1,0 +1,19 @@
+format: jb-book
+root: 00-复现总览
+parts:
+  - caption: 模型
+    chapters:
+      - file: 01-模型与方程
+      - file: 02-分岔与相态
+  - caption: 机理
+    chapters:
+      - file: 03-检测原理
+      - file: 04-信号链与限带
+  - caption: 结果
+    chapters:
+      - file: 05-参数影响
+      - file: 06-检测门限
+      - file: 07-参数估计
+  - caption: 收尾
+    chapters:
+      - file: 08-结论与边界

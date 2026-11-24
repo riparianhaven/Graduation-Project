@@ -1,0 +1,171 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>02-阶段二/解读-主要内容2-混沌振子建模与临界阈值.md</title><style>
+:root{--bg:#f6f7f9;--panel:#fff;--line:#e3e7ec;--text:#1b232c;--muted:#63707e;--accent:#2f6fd0;--soft:#eaf1fc}
+@media(prefers-color-scheme:dark){:root{--bg:#14181d;--panel:#1d232a;--line:#303a45;--text:#e7edf3;--muted:#a7b3c0;--accent:#7fb0f5;--soft:#21334d}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.8 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+.bar{position:sticky;top:0;background:var(--panel);border-bottom:1px solid var(--line);padding:9px 24px;font-size:13px;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.bar a{color:var(--accent);text-decoration:none}.bar a:hover{text-decoration:underline}
+.bar .fn{color:var(--muted);margin-left:auto;word-break:break-all}
+main{max-width:980px;margin:0 auto;padding:26px 28px 70px;background:var(--panel);min-height:calc(100vh - 44px);
+  border-left:1px solid var(--line);border-right:1px solid var(--line)}
+h1,h2,h3,h4{line-height:1.4;margin:1.5em 0 .6em;font-weight:650}
+h1{font-size:25px;border-bottom:1px solid var(--line);padding-bottom:10px;margin-top:.4em}
+h2{font-size:20px;border-bottom:1px solid var(--line);padding-bottom:7px}
+h3{font-size:17px}h4{font-size:15px}
+p,li{color:var(--text)}li{margin:.25em 0}
+a{color:var(--accent)}
+code{background:var(--soft);padding:1px 5px;border-radius:4px;font:12.6px ui-monospace,Consolas,monospace}
+pre{background:var(--soft);border:1px solid var(--line);border-radius:8px;padding:14px 16px;overflow:auto}
+pre code{background:none;padding:0}
+blockquote{border-left:3px solid var(--accent);background:var(--soft);margin:12px 0;padding:8px 16px;color:var(--muted)}
+blockquote p{margin:.3em 0}
+.staticnote{max-width:980px;margin:14px auto -8px;padding:9px 14px;border:1px solid var(--line);
+  border-left:3px solid var(--accent);border-radius:0 8px 8px 0;background:var(--soft);
+  font-size:12.6px;color:var(--muted)}
+.staticnote a{color:var(--accent)}
+table{border-collapse:collapse;width:100%;margin:14px 0;font-size:13.4px;display:block;overflow:auto}
+th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top}
+th{background:var(--soft);color:var(--muted);white-space:nowrap}
+tr:nth-child(even) td{background:rgba(127,150,180,.045)}
+hr{border:none;border-top:1px solid var(--line);margin:26px 0}
+strong{font-weight:650}
+</style>
+<script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']]},
+  options:{skipHtmlTags:['script','noscript','style','textarea','pre','code','annotation']}};</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+</head><body>
+<div class="bar"><a href="../index.html">← 返回资料索引</a>
+<a href="解读-主要内容2-混沌振子建模与临界阈值.md">查看 Markdown 源码</a><span class="fn">02-阶段二/解读-主要内容2-混沌振子建模与临界阈值.md</span></div>
+<div class="staticnote">这是 <b>静态排版副本</b>，生成于 2026-11-24 20:12。直接双击 <code>index.html</code> 时看到的就是它；若 Markdown 刚改过，请在工作区运行 <code>py build_static.py</code> 重新生成，或用 <code>start_index.bat</code> 启动本地服务查看实时渲染版。页内公式由 MathJax 渲染，需要联网。</div><main><h1>「2」的解读：建立混沌振子模型 · 相轨迹演变 · 临界阈值</h1>
+<blockquote><p><strong>先说清「2」指什么。</strong> 索引页里带编号 2 的地方不止一处，而它们其实指向同一件事，本文按三条线的交集来写：</p><p></p><p>| 你可能说的「2」 | 原文 / 内容 | 本文怎么处理 |</p><p>|---|---|---|</p><p>| <strong>index 第 1 节「主要内容」第 2 条</strong>（最贴近「给出 2 的解读」） | 建立混沌振子检测模型，分析其相轨迹演变规律并确定混沌到周期态转变的临界阈值 | <strong>本文主线</strong>，逐字拆成三个动词、三个交付物 |</p><p>| <strong>阅读路线「阶段 2」</strong>（第 3–5 周，建模与相变） | 过关产出 = 单振子 RK4 仿真 + 混沌态/大周期态两幅相图 + 一张可复现参数表 | 第 5 节给出逐项验收对照 |</p><p>| <strong>★[2] Yang et al., Sensors 2023, 23(17):7598</strong>（课题自带第 2 篇，母本论文） | 提供上面这条所需的全部方程、参数与实验设计 | 全文作为实现蓝本，<a href="../复现-2-混沌振子建模与临界阈值.ipynb">notebook</a> 逐节复现 |</p><p></p><p>三条线在这里重合：<strong>「主要内容 2」是要做的事，「阶段 2」是排期与验收，「★[2]」是照着做的样板。</strong> 如果你指的是别的编号（例如 index 第 2 节「核心文档」或某张图的编号），告诉我，我按那个编号重写一份。</p></blockquote>
+<p>配套文件：<a href="../复现-2-混沌振子建模与临界阈值.ipynb">解读的 notebook 复现</a> · <a href="../复现-2-混沌振子建模与临界阈值.html">notebook 网页预览</a> · <a href="../04-论文精读/论文精读-阵列Duffing_Sensors2023.html">13 节论文精读</a> · <a href="../04-论文精读/论文精读-C2_强耦合Duffing_物理学报2019.html">C2 精读（强耦合差分读出）</a> · <a href="../文献/02_Yang_阵列Duffing_MWD_Sensors2023.pdf">母本 PDF</a> · <a href="../00-总览/阅读路线.html">阅读路线</a></p>
+<hr>
+<h2>0. 一句话版本</h2>
+<p><strong>【推断】</strong> 这一条要你亲手造一个「放在悬崖边上的非线性比较器」：先写出方程并数值跑通，再找到那个让输出从乱跳变成整圈绕行的临界推力，最后把这条边界当成后面所有检测与参数估计的标尺。<strong>没有这一步，第 3 条「依据相变判别信号有无」就没有判别依据，第 4 条的信噪比曲线也没有横坐标。</strong></p>
+<p>直觉先于公式：把振子想成一个在双势阱里被周期性推搡的小球。推力小，它在两个谷之间无规则地翻来翻去（混沌态）；推力越过某个值，它开始跟着外力一步一拍地绕大圈（大尺度周期态）。待测的微弱周期信号，就是最后那一点点推力。所以「检测」在物理上不是把信号放大，而是<strong>让系统跨过一条分界线</strong>——这条线的位置必须自己标定出来。</p>
+<hr>
+<h2>1. 原文逐句拆解</h2>
+<p><strong>【原文】</strong>（教务处课题信息页截图，2026-11-13 逐字转录）</p>
+<blockquote><p>建立混沌振子检测模型，分析其相轨迹演变规律并确定混沌到周期态转变的临界阈值；</p></blockquote>
+<p>一句话里塞了三个动词，各自对应一件必须能拿给别人看的产物：</p>
+<table><thead><tr><th>动词</th><th>要回答的问题</th><th>看得见的产物</th><th>最容易糊弄过去的地方</th></tr></thead><tbody>
+<tr><td><strong>建立……模型</strong></td><td>方程长什么样、每一项什么意思、参数取多少</td><td>一条写清楚的微分方程 + 一张参数表 + 一个能跑的 RK4 积分器</td><td>直接抄论文 Figures 的相图，但自己没有求解器</td></tr>
+<tr><td><strong>分析……演变规律</strong></td><td>参数从小到大时，轨迹怎么变、用什么量描述「变了」</td><td>混沌态 / 大尺度周期态两幅并列相图 + x(t) 时序 + 一个可计算判据</td><td>用眼睛看相图当判据，换个人看结论就变</td></tr>
+<tr><td><strong>确定……临界阈值</strong></td><td>分岔点究竟在哪个数值上、对什么条件敏感</td><td>阈值扫描曲线、标定流程、步长/初值/噪声敏感性说明</td><td>直接引用论文的 0.72，不说明它是经验值且依赖仿真设置</td></tr>
+</tbody></table>
+<p><strong>【推断】</strong> 学校把这三件事压成一条，是有用意的：它们分别对应<strong>可复现的代码</strong>、<strong>可量化的判据</strong>、<strong>可复用的刻度</strong>。毕设后面所有数字（最低可检测信噪比、幅值估计精度）都建立在这三样东西上，所以第 3–5 周的地基必须夯死。</p>
+<hr>
+<h2>2. 第一件事：建立模型</h2>
+<h3>2.1 方程与每一项的物理含义</h3>
+<p><strong>【原文】</strong> 标准 Holmes–Duffing（★[2] Eq.1）：</p>
+<p>$$\ddot{x}+k\dot{x}-x+x^3=\lambda\cos(\omega t)$$</p>
+<p><strong>【原文】</strong> 母本改用五次恢复力（★[2] Eq.2、Eq.3）：</p>
+<p>$$\ddot{x}+0.5\dot{x}-x^3+x^5=\underbrace{0.72\cos(t+\beta)}_{\text{内置参考策动力}}+\underbrace{\gamma\cos(t+\theta)}_{\text{待测弱信号}}+n(t)$$</p>
+<table><thead><tr><th>项</th><th>名字</th><th>作用</th><th>取值</th></tr></thead><tbody>
+<tr><td>$\ddot x$</td><td>惯性</td><td>状态变量 $x$ 是「位移」，$\dot x=y$ 是速度，二阶方程写成两个一阶方程才能积分</td><td>—</td></tr>
+<tr><td>$0.5\dot x$</td><td>阻尼</td><td>耗散，没有它系统不会收敛到吸引子</td><td>$k=0.5$【原文】</td></tr>
+<tr><td>$-x^3+x^5$</td><td>改进恢复力</td><td>对应势函数 $V(x)=-\tfrac14 x^4+\tfrac16 x^6$，双阱、阱壁比标准 Duffing 更「陡」</td><td>【原文】论文理由是标准 Duffing 对正弦弱信号响应不敏感</td></tr>
+<tr><td>$0.72\cos(t+\beta)$</td><td>内驱 / 参考</td><td>提供已知频率（$\omega=1$ rad/s）与已知相位 $\beta$ 的相干参考</td><td>$\lambda_c=0.72$，初值 $x(0)=\dot x(0)=0$【原文】</td></tr>
+<tr><td>$\gamma\cos(t+\theta)+n(t)$</td><td>待测信号 + 噪声</td><td>只有与内驱同频的分量才能相干叠加</td><td>$\gamma\ll\lambda$，$\theta$ 随机</td></tr>
+</tbody></table>
+<p><strong>【原文】</strong> 论文说 0.72 是「经大量实验验证」的经验值，并宣称合成幅值达到 0.73 就触发相变。<strong>【推断】</strong> 这句话本身就是这一条课题要你补的洞：既然是经验值，就该由你自己的数值实验重新标定一次，并写清标定条件（步长、时长、初值、判据、噪声有无）。精读文档第 6.2 节说明，这个方向的阈值没有现成的 Melnikov 解析式可用，数值标定不是偷懒，而是唯一可行的路。</p>
+<h3>2.2 一个省事又关键的代数技巧</h3>
+<p><strong>【原文】</strong> 两个同频余弦可以按 Eq.(8) 合成相量：</p>
+<p>$$\lambda\cos(t+\beta)+\gamma\cos(t+\theta)=A\cos t-B\sin t,\quad<br>\begin{cases}A=\lambda\cos\beta+\gamma\cos\theta\\ B=\lambda\sin\beta+\gamma\sin\theta\end{cases}$$</p>
+<p>$$C^2=\lambda^2+\gamma^2+2\lambda\gamma\cos(\theta-\beta)$$</p>
+<p><strong>【推断】</strong> 这一行是全文枢纽，也是 notebook 里最值得亲手验证的一行：它把「会不会相变」从一个动力学问题，变成一个只要比大小的不等式 $C\gtrsim 0.73$。往正方向用得到相位窗口与阵列设计，往反方向用得到参数估计方程。<strong>写代码时把两路余弦合成 A、B 再积分，比直接算两个 cos 更快，也顺带检验了推导。</strong></p>
+<h3>2.3 参数表（notebook 顶部 <code>CONFIG</code>，可直接抄进论文）</h3>
+<table><thead><tr><th>参数</th><th>值</th><th>来源 / 备注</th></tr></thead><tbody>
+<tr><td>阻尼 $k$</td><td>0.5</td><td>【原文】★[2] Eq.2</td></tr>
+<tr><td>内驱角频率 $\omega$</td><td>1 rad/s</td><td>【原文】；极低频靠变尺度折算到这里</td></tr>
+<tr><td>内驱幅值预置 $\lambda$</td><td>0.72</td><td>【原文】经验值，本课题重新标定</td></tr>
+<tr><td>触发幅值</td><td>0.73</td><td>【原文】经验值</td></tr>
+<tr><td>积分器 / 步长</td><td>四阶 RK4 / $h=0.02$ s</td><td>【推断 / 复现条件】论文用 Simulink Ode4、$h=0.1$ s；这里取更细并做步长敏感性检验</td></tr>
+<tr><td>仿真时长 / 瞬态丢弃</td><td>400 s / 前 200 s</td><td>【复现条件】保证吸引子稳定；快速扫描用 200 s / 100 s</td></tr>
+<tr><td>初值</td><td>$x(0)=\dot x(0)=0$</td><td>【原文】</td></tr>
+<tr><td>噪声离散</td><td>$\sigma\sqrt{h}\,N(0,1)$</td><td>【复现条件】$\sigma$ 为连续时间噪声强度</td></tr>
+<tr><td>判态量</td><td>Poincaré 截面 $x(2\pi n)$ 后半段标准差 $p_{std}$</td><td>【复现条件】周期态 ≈0.015，混沌态 &gt;0.16；阈值取 0.08</td></tr>
+</tbody></table>
+<hr>
+<h2>3. 第二件事：相轨迹演变规律</h2>
+<p><strong>【文献】</strong> 判别状态的可观测量不止一种：相图目测、Lyapunov 指数、0-1 test（B3）、多尺度熵（B1）、Poincaré 截面离散度。课题原文只说「分析相轨迹演变规律」，没规定用哪种，这正是自由度，也是坑。</p>
+<p><strong>【推断 + 复现数据】</strong> 在 notebook 第 3、5 节会看到同一批数据被两种判据处理：</p>
+<table><thead><tr><th>判据</th><th>结果</th><th>结论</th></tr></thead><tbody>
+<tr><td>稳态段 $\max\lvert x\rvert&gt;1.2$ 判为周期态</td><td>所有 $\lambda$、所有相位、所有噪声强度<strong>全部</strong>判成周期态，虚警 100%</td><td>不可用。混沌轨道本来就偶尔跑得很远</td></tr>
+<tr><td>Poincaré 截面后半段 $p_{std}&lt;0.08$</td><td>周期态 ≈0.015，混沌态 0.16–0.63，分离度一个数量级以上</td><td>可用，且完全自动、可写进代码</td></tr>
+</tbody></table>
+<p><strong>这条失败值得单独记进毕设</strong>：论文里「观察输出状态」这四个字，换一个可观测量结论就塌了。<strong>判态必须是可计算统计量，不能靠眼睛。</strong></p>
+<p><strong>【推断】</strong> 「演变规律」要写清三层，别只贴两张图：</p>
+<ol><li>小 $\lambda$：轨道在两个势阱间不规则跳跃，Poincaré 点散成一片 → 混沌态；</li><li>越过临界 $\lambda_c$：轨道被内驱锁定，绕两阱外侧做整圈运动，Poincaré 点收敛到一个点 → 大尺度周期态；</li><li>跃变是<strong>突变</strong>而非渐变：$p_{std}$ 从 0.59 掉到 0.015，中间没有平滑过渡（notebook 第 4 节曲线）。这个「悬崖」正是检测器灵敏度的来源，也是阈值必须标定的原因。</li></ol>
+<hr>
+<h2>4. 第三件事：临界阈值</h2>
+<h3>4.1 定义要写死</h3>
+<p><strong>【推断】</strong> 「临界阈值」在本课题里至少有三种含义，论文里混着用，写毕设时必须先声明你用哪个：</p>
+<table><thead><tr><th>记号</th><th>含义</th><th>数值</th></tr></thead><tbody>
+<tr><td>$\lambda_c$</td><td>无待测信号时，内驱幅值使系统跳到大尺度周期态的分岔点</td><td>论文 0.72 / 0.73；<strong>本复现实测 0.735–0.740</strong></td></tr>
+<tr><td>工作点 $\lambda_0$</td><td>实际检测时预置的内驱幅值，取略小于 $\lambda_c$</td><td>论文 0.72</td></tr>
+<tr><td>触发合成幅值 $C_{trig}$</td><td>内驱 + 待测信号相量合成后，刚好越过边界的总幅值</td><td>论文 0.73</td></tr>
+</tbody></table>
+<p><strong>【原文】</strong> 相变边界写成 $C^2\ge 0.73^2$（Eq.11 印成 $\ge0.73$，Eq.12 反推应带平方）。代入 $\gamma=0.02$ 得相位窗口半宽</p>
+<p>$$\cos(\theta-\beta)\ \ge\ \frac{0.73^2-0.72^2-0.02^2}{2\times0.72\times0.02}=0.48958<br>\ \Longrightarrow\ |\theta-\beta|\le 60.69^\circ$$</p>
+<p>这正是三振子（$\beta=0^\circ,\pm120^\circ$）「全相位覆盖」设计的全部依据。</p>
+<h3>4.2 标定流程（notebook 第 4 节照此执行）</h3>
+<ol><li>固定 $k,\omega,h,T,$ 初值、无噪声、$\gamma=0$；</li><li>在 $\lambda\in[0.60,0.85]$ 上以 0.005 扫描，每次独立积分；</li><li>用 $p_{std}$ 判态，找<strong>连续三点</strong>首次进入周期态的位置 → 粗阈值；</li><li>在粗阈值附近加密到 0.001 精扫；</li><li>换 $h=0.1/0.05/0.02/0.01$ 重做，确认跃变位置不随步长漂移；</li><li>加噪声重做，说明阈值是否还是同一个。</li></ol>
+<p><strong>【复现数据】</strong> 四种步长（0.1 / 0.05 / 0.02 / 0.01 s）下跃变都落在 <strong>0.730–0.740</strong> 这 0.01 宽的窗口内，具体边界随步长与吸引域有 ±0.005 抖动。以 0.001 精扫：$0.734$ 已是周期态、$0.735$ 又回混沌、$0.736$ 起才稳定进入周期态——<strong>跃变带内存在间歇混沌与双稳，阈值应报一个「带」而不是一个点</strong>。稳定起点约 0.736，比论文 0.72 / 0.73 高约 0.01。这不是「论文错了」，而是<strong>经验阈值依赖仿真条件</strong>：论文用 Ode4、$h=0.1$ s、含噪、目测相图，本复现用 RK4、$h=0.02$ s、无噪、Poincaré 判据。<strong>写论文时把自己标定的阈值和论文值并列，注明条件，不要只抄一个数。</strong></p>
+<h3>4.3 阈值一偏，后面全偏</h3>
+<p><strong>【推断 + 复现数据】</strong> 工作点离分岔多远，直接决定两个互相拉扯的指标（notebook 第 8 节）：</p>
+<table><thead><tr><th>$\lambda_0$</th><th>三振子相位覆盖率（$\gamma=0.02$）</th><th>纯噪声虚警率（$\sigma=0.20$）</th><th>判读</th></tr></thead><tbody>
+<tr><td>0.700</td><td>≈0%</td><td>0%</td><td>太保守，几乎检不到</td></tr>
+<tr><td>0.720</td><td>≈65%</td><td>0%</td><td>论文工作点：零虚警但覆盖不全</td></tr>
+<tr><td>0.730</td><td>≈100%</td><td>10%</td><td>覆盖达标，开始虚警</td></tr>
+<tr><td>0.735</td><td>≈100%</td><td>90%</td><td>噪声本身就把振子推过界</td></tr>
+</tbody></table>
+<blockquote><p><strong>【复现数据】</strong> notebook §8 用 $T=300$ s、独立随机种子重跑同一实验，得到 0.720: 57.5% / 0%，0.730: 97.3% / 2.5%，0.735: 98.6% / 75%，<strong>趋势完全一致，绝对值随仿真时长与随机种子波动</strong>。写论文时以你自己那一次运行的数字为准，并注明 $T$、帧数与噪声口径。</p></blockquote>
+<p><strong>【推断】</strong> 所谓「对噪声免疫」不是系统性质，而是「工作点离分岔够远」的性质，代价是灵敏度。这两个 claim 是同一条曲线上不可兼得的两端——这也是精读文档第 13 节 chaos-CFAR 想法的由来，以及本课题要交「最低可检测信噪比」时必须连 $P_{fa}$ 一起报的原因。</p>
+<h3>4.4 估幅公式里的一颗地雷</h3>
+<p><strong>【原文】</strong> 论文 Eq.(17) 印成 $\gamma=0.73^2-\lambda_1\lambda_2$。<strong>【推断 + 亲手验算】</strong> 正确形式是</p>
+<p>$$\boxed{\ \gamma=\sqrt{0.73^2-\lambda_1\lambda_2}\ }$$</p>
+<p>用论文自己的 $\lambda_1=0.7414,\ \lambda_2=0.7183$ 验算：$0.5329-0.532548=0.000352$，开方得 <strong>0.01876</strong>，正是 Table 3 报的 0.0188；不开放根号差 53 倍。照原文复现会直接卡死。<strong>【推断】</strong> 更要命的是灾难性相消：两个约 0.53 的数相减得到 0.00035，$\lambda_1$ 只要偏 $5\times10^{-4}$，根号里就可能变负。notebook 第 9 节把这条敏感性画出来。</p>
+<hr>
+<h2>5. 复现清单：notebook 各节 ↔ 原文动词 ↔ 阶段 2 过关产出</h2>
+<table><thead><tr><th>notebook 节</th><th>内容</th><th>对应「主要内容 2」</th><th>阶段 2 过关产出</th></tr></thead><tbody>
+<tr><td>§1</td><td>势函数 $V(x)=-x^4/4+x^6/6$ 与恢复力曲线</td><td>建立模型</td><td>参数表</td></tr>
+<tr><td>§2</td><td>相量合成 + 向量化 RK4 + Poincaré 判据</td><td>建立模型</td><td><strong>单振子 RK4 仿真程序</strong></td></tr>
+<tr><td>§3</td><td>$\lambda=0.70/0.76$ 的 x(t)、相图、Poincaré 散点三连图</td><td><strong>分析相轨迹演变规律</strong></td><td><strong>两幅并列相图 + 时序图</strong></td></tr>
+<tr><td>§4</td><td>$\lambda$ 扫描曲线、精扫阈值、四种步长敏感性</td><td><strong>确定临界阈值</strong></td><td>参数表 / 阈值曲线</td></tr>
+<tr><td>§5</td><td>$\max\lvert x\rvert$ 判据 vs Poincaré 判据的失败对照</td><td>演变规律（怎么量化）</td><td>判态伪代码</td></tr>
+<tr><td>§6</td><td>变尺度：10 rad/s 信号折算到 1 rad/s，扫 $R$</td><td>模型能用于极低频</td><td>—</td></tr>
+<tr><td>§7</td><td>$\beta=0,\pm120^\circ$ 三振子相位覆盖实测</td><td>模型扩展 / 阈值应用</td><td>—</td></tr>
+<tr><td>§8</td><td>工作点—覆盖率—虚警率权衡曲线</td><td>阈值标定条件</td><td>—</td></tr>
+<tr><td>§9</td><td>Eq.(17) 勘误验算与相消敏感性</td><td>阈值当标尺</td><td>—</td></tr>
+<tr><td>§10</td><td>$P_d$–SNR 曲线与 ROC；单调性检查未通过，明确<strong>不报</strong>单一门限</td><td>为「主要内容 3/4」铺路</td><td>指标必须带 $P_d/P_{fa}$ 与实验条件</td></tr>
+<tr><td>§11</td><td>结论、边界、与论文差异</td><td>—</td><td>—</td></tr>
+</tbody></table>
+<p><strong>【推断】</strong> §6–§10 严格说已经越过阶段 2、跨进阶段 3/4 了。放进来是因为它们全靠同一个 <code>simulate()</code> 函数，边际成本很低，既能让你一次拿到「最低可检测信噪比」的第一张图，也让你看清<strong>这张图为什么暂时还不配给出一个单一数字</strong>——毕设预期目标里那两个指标，从这里开始有证据。</p>
+<hr>
+<h2>6. 复现结果速览与边界</h2>
+<p><strong>【复现数据】</strong>（全部来自 notebook 实跑，2026-11-13；具体数字见 notebook 输出）</p>
+<table><thead><tr><th>项目</th><th>论文</th><th>本复现</th><th>差异说明</th></tr></thead><tbody>
+<tr><td>分岔位置 $\lambda_c$</td><td>0.72 / 0.73</td><td>跃变带 0.734–0.740，稳定周期态约从 0.736 起</td><td>带内间歇混沌 / 双稳；四种步长都落在 0.730–0.740</td></tr>
+<tr><td>单振子相位窗口（$\lambda=0.72,\gamma=0.02$）</td><td>$\pm60.69^\circ$，理论 100% 覆盖</td><td>实测 $-45^\circ\sim30^\circ$，三振子覆盖 ≈65.8%</td><td>相量幅值是必要非充分条件；吸引域与瞬态也起作用</td></tr>
+<tr><td>纯噪声虚警 $\sigma=0.20$</td><td>未报告</td><td>$\lambda_0=0.72$: 0%；0.73: 2.5%；0.735: 75%（$T=300$ s）</td><td>论文缺 $H_0$ 对照组；绝对值随 $T$ / seed 波动</td></tr>
+<tr><td>幅值估计</td><td>$\hat\gamma=0.0188$（误差 6%）</td><td>补根号得 0.01877；$\lambda_1$ 偏 $5\times10^{-4}$ 即根号为负</td><td>原式漏平方根，且灾难性相消</td></tr>
+<tr><td>变尺度扫 $R$</td><td>$R=\omega=10$ 相变</td><td>$R=10$ 的 $p_{std}$ 最低，但 8 / 9 / 9.5 / 12 / 13 也低；内驱分量占比 $\rho\approx0.98$–$0.99$ 与 0.995 分不开</td><td><strong>锁频伪相变</strong>：二分类与内驱相干性都无法自证频率</td></tr>
+<tr><td>最低可检测 SNR</td><td>−23 dB 频率检测 / −21 dB 参数估计</td><td><strong>不报单一数字</strong>，只给 $P_d$–SNR 曲线与 ROC</td><td>$P_d$ 非单调：相位窗口天花板 + 16 帧小样本误差 + 强噪声下 $H_0/H_1$ 重叠</td></tr>
+</tbody></table>
+<blockquote><p><strong>边界声明（务必连同数字一起抄进论文）</strong>：这些数据检验的是 claim 的<strong>敏感性与可复现性</strong>，不是「证明论文错了」。论文数据与代码未公开，第三方无法完全裁定；本复现条件是 $h=0.02$ s、$T=400$ s、Poincaré 判据、无变尺度的干净高斯白噪声，与论文的 Simulink Ode4、$h=0.1$ s、带限噪声、目测相图都不同。各文献的 SNR 门限（−21 / −23 / −18 / −15 dB）实验条件互不统一，<strong>不可横向比较</strong>。</p></blockquote>
+<hr>
+<h2>7. 常见坑清单（按踩到的顺序）</h2>
+<ol><li><strong>用 <code>python3</code> 跑不动</strong>：本机 <code>py</code> 指向 Python 3.13 且带 numpy 2.4.6 / matplotlib 3.11，<code>python3</code> 那个解释器没装科学计算包。统一用 <code>py</code>。</li><li><strong>把两个 cos 直接相加却忘了同频</strong>：只要频率不同，相量合成就不成立，变尺度那一节必须换回双频形式直接积分。</li><li><strong>噪声离散化漏掉 $\sqrt h$</strong>：白噪声是 $\sigma\,dW$，一步的增量是 $\sigma\sqrt h\,N(0,1)$，直接加 $\sigma N(0,1)$ 会让有效噪声强度随步长变化。</li><li><strong>瞬态不够长</strong>：前 200 s 丢掉，Poincaré 点再取后半段，否则起振过程会把周期态也判成混沌。</li><li><strong>用 $\max|x|$ 或目测判态</strong>：见第 3 节，虚警 100% 的教训。</li><li><strong>拿 0.73 当普适常数</strong>：它是经验值，换步长、换噪声、换恢复力都得重标。</li><li><strong>Eq.(17) 照抄原文</strong>：漏平方根，且病态相消，见 4.4 节。</li><li><strong>变尺度忘了噪声也变</strong>：$R=10$ 时等效采样率降到 1 Hz，对 0–10 Hz 噪声必然混叠，论文没讨论这一点【推断】。</li><li><strong>把跃变当成一个点</strong>：精扫带内 0.734 周期、0.735 混沌、0.736 起才稳定。报阈值要报带，并注明判据与步长【复现数据】。</li><li><strong>扫 $R$ 的锁频伪相变</strong>：notebook §6 里 $R=8/9/9.5/12/13$ 同样出现低 $p_{std}$，且内驱分量占比与 $R=10$ 几乎一样。换一个可观测量也没能救回「哪个 R 相变，$\omega$ 就是 R」这一推断，必须换成能看见待测信号 $\nu$ 分量的统计量【复现数据 + 推断】。</li><li><strong>从小样本曲线上抠一个 SNR 门限</strong>：16 帧的二项标准误约 ±12%，加上 $\lambda=0.72$ 的相位窗口天花板，$P_d$ 非单调是正常的。先做单调性检查，再决定要不要报数字【复现数据】。</li></ol>
+<blockquote><p><strong>【推断】</strong> 第 5、10、11 条其实是一条：<strong>可观测量决定结论</strong>。§5 的 $\max|x|$ 失效、§6 的内驱相干占比分不开锁频、§10 的固定 $p_{std}$ 阈值在强噪声下退化——三次都指向「混沌/周期二分类的信息量不够」。写毕设方法章节时，这句话比任何一张漂亮的相图都值钱。</p></blockquote>
+<hr>
+<h2>8. 写进论文时可以直接用的表述（示范）</h2>
+<blockquote><p><strong>【推断，示范文字，非原文】</strong> 本文采用改进恢复力的 Duffing 振子作为检测模型，其动力学方程为 $\ddot x+0.5\dot x-x^3+x^5=\lambda\cos(t+\beta)+\gamma\cos(t+\theta)+n(t)$。以四阶 Runge–Kutta 法数值求解（$h=0.02$ s，$T=400$ s，初值取零），并以 Poincaré 截面 $x(2\pi n)$ 在稳态后半段的标准差 $p_{std}$ 作为状态判据：$p_{std}&lt;0.08$ 判为大尺度周期态，否则判为混沌态。在无噪声条件下对内驱幅值 $\lambda$ 扫描，得到混沌态向大尺度周期态跃变的临界值 $\lambda_c=\text{（填你实测值）}$；在 $h=0.1/0.05/0.02/0.01$ s 四种步长下跃变区间一致，说明该阈值对积分步长不敏感。后续检测将工作点预置于略低于 $\lambda_c$ 处，待测同频信号与内驱的相量合成幅值越过该边界时，系统发生相变，据此判别信号有无并在此基础上估计幅值。</p></blockquote>
+<p>把「填你实测值」换成 notebook §4 打印的数字，并在脚注里写明与论文 0.72/0.73 的条件差异，这一段就成立了。</p>
+<hr>
+<h2>附录：信息分级与核查入口</h2>
+<ul><li><strong>【原文】</strong>：教务处课题信息页截图；★[2] 论文正文（<a href="../文献/02_Yang_阵列Duffing_MWD_Sensors2023.pdf">本地 PDF</a> / PMC10490661）。</li><li><strong>【文献】</strong>：B1 多尺度熵阈值、B2 变尺度、B3 0-1 test、C2 参数估计蓝本、F2 FPGA 实现，见<a href="../00-总览/参考资料-极低频磁场混沌振子微弱信号检测.html">主清单</a>。</li><li><strong>【推断】</strong>：本文所有「为什么这样设计」「差异从哪来」「写论文怎么表述」的判断，以及 notebook 的全部数值结论。</li><li><strong>【猜测】</strong>：论文为何选五次恢复力的动机（精读文档第 3 节），本文未新增猜测。</li><li><strong>核查入口</strong>：<a href="../04-论文精读/论文精读-阵列Duffing_Sensors2023.html">13 节精读</a>、<a href="../复现-2-混沌振子建模与临界阈值.ipynb">notebook 复现</a>、<a href="../复现输出/repro-out.txt">早期脚本输出</a>。</li></ul>
+<hr>
+<p><em>生成日期：2026-11-13 · 与 <code>index.html</code> 第 1、2、5 节及 <code>阅读路线.md</code> 阶段 2 互指</em></p></main></body></html>

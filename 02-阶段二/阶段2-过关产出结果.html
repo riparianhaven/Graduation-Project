@@ -1,0 +1,96 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>02-阶段二/阶段2-过关产出结果.md</title><style>
+:root{--bg:#f6f7f9;--panel:#fff;--line:#e3e7ec;--text:#1b232c;--muted:#63707e;--accent:#2f6fd0;--soft:#eaf1fc}
+@media(prefers-color-scheme:dark){:root{--bg:#14181d;--panel:#1d232a;--line:#303a45;--text:#e7edf3;--muted:#a7b3c0;--accent:#7fb0f5;--soft:#21334d}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.8 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+.bar{position:sticky;top:0;background:var(--panel);border-bottom:1px solid var(--line);padding:9px 24px;font-size:13px;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.bar a{color:var(--accent);text-decoration:none}.bar a:hover{text-decoration:underline}
+.bar .fn{color:var(--muted);margin-left:auto;word-break:break-all}
+main{max-width:980px;margin:0 auto;padding:26px 28px 70px;background:var(--panel);min-height:calc(100vh - 44px);
+  border-left:1px solid var(--line);border-right:1px solid var(--line)}
+h1,h2,h3,h4{line-height:1.4;margin:1.5em 0 .6em;font-weight:650}
+h1{font-size:25px;border-bottom:1px solid var(--line);padding-bottom:10px;margin-top:.4em}
+h2{font-size:20px;border-bottom:1px solid var(--line);padding-bottom:7px}
+h3{font-size:17px}h4{font-size:15px}
+p,li{color:var(--text)}li{margin:.25em 0}
+a{color:var(--accent)}
+code{background:var(--soft);padding:1px 5px;border-radius:4px;font:12.6px ui-monospace,Consolas,monospace}
+pre{background:var(--soft);border:1px solid var(--line);border-radius:8px;padding:14px 16px;overflow:auto}
+pre code{background:none;padding:0}
+blockquote{border-left:3px solid var(--accent);background:var(--soft);margin:12px 0;padding:8px 16px;color:var(--muted)}
+blockquote p{margin:.3em 0}
+.staticnote{max-width:980px;margin:14px auto -8px;padding:9px 14px;border:1px solid var(--line);
+  border-left:3px solid var(--accent);border-radius:0 8px 8px 0;background:var(--soft);
+  font-size:12.6px;color:var(--muted)}
+.staticnote a{color:var(--accent)}
+table{border-collapse:collapse;width:100%;margin:14px 0;font-size:13.4px;display:block;overflow:auto}
+th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top}
+th{background:var(--soft);color:var(--muted);white-space:nowrap}
+tr:nth-child(even) td{background:rgba(127,150,180,.045)}
+hr{border:none;border-top:1px solid var(--line);margin:26px 0}
+strong{font-weight:650}
+</style>
+<script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']]},
+  options:{skipHtmlTags:['script','noscript','style','textarea','pre','code','annotation']}};</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+</head><body>
+<div class="bar"><a href="../index.html">← 返回资料索引</a>
+<a href="阶段2-过关产出结果.md">查看 Markdown 源码</a><span class="fn">02-阶段二/阶段2-过关产出结果.md</span></div>
+<div class="staticnote">这是 <b>静态排版副本</b>，生成于 2026-11-24 20:12。直接双击 <code>index.html</code> 时看到的就是它；若 Markdown 刚改过，请在工作区运行 <code>py build_static.py</code> 重新生成，或用 <code>start_index.bat</code> 启动本地服务查看实时渲染版。页内公式由 MathJax 渲染，需要联网。</div><main><h1>阶段 2 过关产出结果：建模与相变</h1>
+<blockquote><p><strong>验收口径</strong>：<a href="../00-总览/阅读路线.html">阅读路线阶段 2</a> 原文——「Python 单振子 RK4 仿真程序，能画出两幅并列相图（混沌态 / 大尺度周期态）+ x(t) 时序图；记录一组可复现的参数表。<strong>这是整个毕设的地基，务必跑通再往下走。</strong>」</p><p><strong>核实时点</strong>：2026-11-23｜<strong>全部数字取自实跑</strong>，非手写估计。程序：<a href="../learn/2.ipynb">learn/2.ipynb</a>（18 单元 / 8 段代码 / 6 张内嵌图 / 0 报错）。机器可读汇总：<a href="../复现输出/阶段2-建模与阈值汇总.json">阶段2-建模与阈值汇总.json</a>。</p><p><strong>修复记录</strong>：本页五张 PNG 曾因「<code>plt.show()</code> 在 <code>savefig()</code> 之前」存成纯白图，2026-11-23 已调换顺序重跑，现已逐张验色（每张含数百至数千种颜色），可放心引用。</p></blockquote>
+<hr>
+<h2>一、过关要求逐条对照</h2>
+<table><thead><tr><th>#</th><th>路线过关要求</th><th>交付实物</th><th>结果</th></tr></thead><tbody>
+<tr><td>1</td><td>单振子 RK4 仿真程序，可跑通</td><td><a href="../learn/2.ipynb">learn/2.ipynb</a> §2 <code>simulate()</code>：支持标量 / 数组并行、同频相量合成、双频直接积分；冒烟 $p_{std}=[0.4841,\ 0.0149]$</td><td>✅</td></tr>
+<tr><td>2</td><td>两幅并列相图（混沌态 / 大尺度周期态）</td><td>下图上排：$\lambda=0.70$ 与 $\lambda=0.76$ 的 $(x,\dot x)$ 相图</td><td>✅</td></tr>
+<tr><td>3</td><td>x(t) 时序图</td><td>下图下排：同两条轨迹的时序，200–400 s 稳态段</td><td>✅</td></tr>
+<tr><td>4</td><td>一组可复现的参数表</td><td>本页 §二 + notebook §2 顶部 <code>CONFIG</code>，逐项注明出处与条件</td><td>✅</td></tr>
+<tr><td>5</td><td>（附加）阈值曲线</td><td>§四 粗扫 / 精扫两图，标出跃变带 0.734–0.736</td><td>✅</td></tr>
+<tr><td>6</td><td>（附加）步长稳定性佐证</td><td>§五 四种步长重扫，跃变均落在 0.730–0.740</td><td>✅</td></tr>
+</tbody></table>
+<p><strong>验收结论：阶段 2 过关。</strong> 但阈值带与变尺度各有必须写进论文的边界，见 §六。</p>
+<hr>
+<h2>二、可复现参数表（抄这组数就能重跑）</h2>
+<table><thead><tr><th>参数</th><th>取值</th><th>出处 / 条件</th></tr></thead><tbody>
+<tr><td>阻尼 $k$</td><td>0.5</td><td>【★[2] Eq.2】论文给定</td></tr>
+<tr><td>内驱角频率 $\omega$</td><td>1 rad/s</td><td>【★[2]】极低频经变尺度折算到此，不另设参数</td></tr>
+<tr><td>工作点 $\lambda_0$ / 论文经验值</td><td>0.72</td><td>【★[2]】本阶段实测阈值带在其上方</td></tr>
+<tr><td>论文触发合成幅值 $C_{trig}$</td><td>0.73</td><td>【★[2]】经验值，本阶段重标</td></tr>
+<tr><td>求解器 / 步长</td><td>RK4 / $h=0.02$ s</td><td>【本阶段】论文用 Simulink Ode4 / $h=0.1$，故做步长敏感性</td></tr>
+<tr><td>时长 / 瞬态丢弃</td><td>$T=400$ s / 前 200 s</td><td>【本阶段】保证吸引子稳定；批量扫描用 200 / 100 s</td></tr>
+<tr><td>初值</td><td>$x(0)=\dot x(0)=0$</td><td>【★[2]】</td></tr>
+<tr><td>判态量</td><td>Poincaré 截面 $x(2\pi n)$ 稳态后半段标准差 $p_{std}&lt;0.08$</td><td>【本阶段】周期态约 0.015，混沌态 0.16–0.63</td></tr>
+<tr><td>噪声</td><td>本阶段 §1–§6 不注入；噪声离散式为 $\sigma\sqrt h\,N(0,1)$</td><td>含噪判别留阶段 4</td></tr>
+</tbody></table>
+<p>模型方程：$\ddot x+0.5\dot x-x^3+x^5=\lambda\cos(t+\beta)+\gamma\cos(t+\theta)+n(t)$，势函数 $V(x)=-x^4/4+x^6/6$，阱底 $x=\pm1$（$V=-1/12$），势垒在 $x=0$（$V=0$）。</p>
+<hr>
+<h2>三、相图与时序（过关核心图）</h2>
+<p><img src="../复现输出/阶段2-混沌与周期相图时序.png" alt="混沌态与周期态的并列相图和时序" style="display:block;max-width:100%;height:auto;margin:10px 0"></p>
+<ul><li><strong>左列</strong> $\lambda=0.70$：轨道在两阱间无规则跳跃，$p_{std}=0.5176$ → 混沌态。</li><li><strong>右列</strong> $\lambda=0.76$：轨道被内驱锁定、绕两阱外侧整圈，$p_{std}=0.0149$ → 大尺度周期态。</li><li>判据是 $p_{std}$，不是「幅值大不大」：既有复现实测 $\max|x|&gt;1.2$ 会把<strong>所有</strong> $\lambda$、所有相位、所有噪声强度全判成周期态（虚警 100%），因为混沌轨道本来偶尔跑很远。<strong>目测相图与幅值门限都不是判据。</strong></li></ul>
+<p><img src="../复现输出/阶段2-Poincare截面散点.png" alt="Poincaré 截面散点：一片 vs 一点" style="display:block;max-width:100%;height:auto;margin:10px 0"></p>
+<blockquote><p>散点纵向抖动只为分层显示，不是物理量。</p></blockquote>
+<hr>
+<h2>四、临界阈值扫描（报带不报点）</h2>
+<p><img src="../复现输出/阶段2-临界阈值扫描.png" alt="λ 粗扫与精扫：阈值跃变带" style="display:block;max-width:100%;height:auto;margin:10px 0"></p>
+<ul><li>粗扫（0.60–0.85，步长 0.005）：首个稳定进入周期态 $\lambda=0.740$。</li><li>精扫（步长 0.001）：<strong>跃变带 0.734–0.736</strong>，带内混沌/周期交替（0.734 周期 → 0.735 混沌 → 0.736 又周期），$\lambda\ge0.736$ 才稳定；$p_{std}$ 从 0.5907 断崖跌到 0.0151。</li><li>判据条件：干净、无目标、$h=0.02$、$T=400$、初值 0、Poincaré 判据。</li></ul>
+<hr>
+<h2>五、步长敏感性（阈值不是数值假象）</h2>
+<p><img src="../复现输出/阶段2-步长敏感性.png" alt="四种步长的跃变位置对照" style="display:block;max-width:100%;height:auto;margin:10px 0"></p>
+<table><thead><tr><th>步长 $h$</th><th>首个跃变区间</th><th>$p_{std}(0.730)$</th><th>$p_{std}(0.740)$</th></tr></thead><tbody>
+<tr><td>0.100 s</td><td>0.730 → 0.735</td><td>0.5205</td><td>0.0737</td></tr>
+<tr><td>0.050 s</td><td>0.735 → 0.740</td><td>0.3797</td><td>0.0735</td></tr>
+<tr><td>0.020 s</td><td>0.735 → 0.740</td><td>0.4091</td><td>0.0150</td></tr>
+<tr><td>0.010 s</td><td>0.730 → 0.735</td><td>0.4868</td><td>0.0151</td></tr>
+</tbody></table>
+<p>四种步长跃变都落在 0.730–0.740 这 0.01 宽的窗口，边界抖动 ±0.005。注意「没 NaN」不是稳定性证据——试到 $h=0.5$ s 数值也不发散（$-x^3+x^5$ 在大 $|x|$ 强抑制）；粗步长 $h=0.1/0.05$ 在 0.740 处 $p_{std}\approx0.074$ 已贴近判据 0.08，会把周期态说得比实际更模糊。</p>
+<hr>
+<h2>六、变尺度演示与边界</h2>
+<p><img src="../复现输出/阶段2-变尺度扫描.png" alt="变尺度扫描：锁频伪相变" style="display:block;max-width:100%;height:auto;margin:10px 0"></p>
+<p>变尺度不改振子，改信号的时间标签：步长 $1/f_s$ 改读成 $R/f_s$，角频率 $\nu$ 压成 $\nu/R$，取 $R=\nu$ 折到 1 rad/s，故阈值只需标定一次。<strong>但本阶段实测出两个软肋，必须写进论文</strong>：</p>
+<ol><li><strong>噪声跟着变</strong>：等效采样率降到 $f_s/R$，$R=10$ 时对 0–10 Hz 噪声必然混叠。</li><li><strong>锁频伪相变</strong>：真值 $\omega_{true}=10$，扫 $R\in[6,14]$ 出现低 $p_{std}$ 的除 $R=10$ 外还有 <strong>$R=8/9/9.5/12/13$</strong>；相干指数 $\rho$ 在 0.749–0.995，分不开真假。故「哪个 $R$ 相变，频率就是 $R$」<strong>不能自证</strong>，留阶段 3/4。</li></ol>
+<hr>
+<h2>七、边界声明（数字必须连条件一起抄）</h2>
+<p>这些数字检验的是论文 claim 的<strong>敏感性与可复现性</strong>，不是「证明论文错了」：论文数据与代码未公开，第三方无法完全裁定；本阶段条件是 RK4 / $h=0.02$ / $T=400$ / Poincaré 判据 / 无变尺度的干净模型，与论文的 Simulink Ode4 / $h=0.1$ / 带限噪声 / 目测相图都不同。0.72 / 0.73 与本号 0.736 的差异属<strong>条件差异</strong>，不是论文有误的证据。各文献 SNR 门限（−21 / −23 / −18 / −15 dB）实验条件互不统一，<strong>不可横向比较</strong>。</p>
+<p><strong>本阶段不交</strong>：判态伪代码 / 初相位盲区（阶段 3）、$P_d/P_{fa}$ / ROC / SNR 门限（阶段 4）、定点化位宽（阶段 5）。逐问回答见 <a href="阶段2-建模与相变-问题回答.html">阶段2-建模与相变-问题回答.md</a>。</p></main></body></html>

@@ -1,0 +1,192 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>04-论文精读/论文精读-D1_磁异常检测综述_MST2021.md</title><style>
+:root{--bg:#f6f7f9;--panel:#fff;--line:#e3e7ec;--text:#1b232c;--muted:#63707e;--accent:#2f6fd0;--soft:#eaf1fc}
+@media(prefers-color-scheme:dark){:root{--bg:#14181d;--panel:#1d232a;--line:#303a45;--text:#e7edf3;--muted:#a7b3c0;--accent:#7fb0f5;--soft:#21334d}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.8 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+.bar{position:sticky;top:0;background:var(--panel);border-bottom:1px solid var(--line);padding:9px 24px;font-size:13px;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.bar a{color:var(--accent);text-decoration:none}.bar a:hover{text-decoration:underline}
+.bar .fn{color:var(--muted);margin-left:auto;word-break:break-all}
+main{max-width:980px;margin:0 auto;padding:26px 28px 70px;background:var(--panel);min-height:calc(100vh - 44px);
+  border-left:1px solid var(--line);border-right:1px solid var(--line)}
+h1,h2,h3,h4{line-height:1.4;margin:1.5em 0 .6em;font-weight:650}
+h1{font-size:25px;border-bottom:1px solid var(--line);padding-bottom:10px;margin-top:.4em}
+h2{font-size:20px;border-bottom:1px solid var(--line);padding-bottom:7px}
+h3{font-size:17px}h4{font-size:15px}
+p,li{color:var(--text)}li{margin:.25em 0}
+a{color:var(--accent)}
+code{background:var(--soft);padding:1px 5px;border-radius:4px;font:12.6px ui-monospace,Consolas,monospace}
+pre{background:var(--soft);border:1px solid var(--line);border-radius:8px;padding:14px 16px;overflow:auto}
+pre code{background:none;padding:0}
+blockquote{border-left:3px solid var(--accent);background:var(--soft);margin:12px 0;padding:8px 16px;color:var(--muted)}
+blockquote p{margin:.3em 0}
+.staticnote{max-width:980px;margin:14px auto -8px;padding:9px 14px;border:1px solid var(--line);
+  border-left:3px solid var(--accent);border-radius:0 8px 8px 0;background:var(--soft);
+  font-size:12.6px;color:var(--muted)}
+.staticnote a{color:var(--accent)}
+table{border-collapse:collapse;width:100%;margin:14px 0;font-size:13.4px;display:block;overflow:auto}
+th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top}
+th{background:var(--soft);color:var(--muted);white-space:nowrap}
+tr:nth-child(even) td{background:rgba(127,150,180,.045)}
+hr{border:none;border-top:1px solid var(--line);margin:26px 0}
+strong{font-weight:650}
+</style>
+<script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']]},
+  options:{skipHtmlTags:['script','noscript','style','textarea','pre','code','annotation']}};</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+</head><body>
+<div class="bar"><a href="../index.html">← 返回资料索引</a>
+<a href="论文精读-D1_磁异常检测综述_MST2021.md">查看 Markdown 源码</a><span class="fn">04-论文精读/论文精读-D1_磁异常检测综述_MST2021.md</span></div>
+<div class="staticnote">这是 <b>静态排版副本</b>，生成于 2026-11-24 20:12。直接双击 <code>index.html</code> 时看到的就是它；若 Markdown 刚改过，请在工作区运行 <code>py build_static.py</code> 重新生成，或用 <code>start_index.bat</code> 启动本地服务查看实时渲染版。页内公式由 MathJax 渲染，需要联网。</div><main><h1>精读 D1：磁异常检测方法综述（MST 2021）</h1>
+<blockquote><p><strong>一句话定位</strong>：这不是提出新算法的原创论文，而是一篇 <strong>Topical Review（专题综述）</strong>。它解决的是「领域知识怎么摆」的问题——把 1940 年代到 2018 年散落的磁异常检测（MAD）方法，按「是否需要对目标与磁强计的相对运动做假设」重新切成两派，逐法交代原理、检测灵敏度、优缺点，并指出共同的实时性与低 SNR 瓶颈。对本毕设而言，它是「国内外研究现状」的分类骨架 + 信号/噪声模型假设的来源，<strong>不是</strong>可以照抄的检测方法。</p></blockquote>
+<p>标注体系沿用项目约定：<strong>【原文】</strong>＝D1 正文/图表直接陈述；<strong>【文献】</strong>＝D1 所引第三方或外部核实资料；<strong>【推断】</strong>＝由原文推出但未明说；<strong>【猜测】</strong>＝需实验才能判定的猜想。公式号、图号、表号一律沿用 D1 原文编号，便于回查。</p>
+<hr>
+<h2>0. 题录与核实</h2>
+<table><thead><tr><th>项</th><th>内容</th></tr></thead><tbody>
+<tr><td>著录</td><td>ZHAO Y, ZHANG J, LI J, et al. A brief review of magnetic anomaly detection[J]. Measurement Science and Technology, 2021, 32(4): 042002. DOI: 10.1088/1361-6501/abd055.</td></tr>
+<tr><td>类型</td><td>Topical Review，正文 13 页（本地 PDF 14 页，含 IOP 封面页）</td></tr>
+<tr><td>作者全名（IOP 首页核实）</td><td>Yue Zhao, Junhai Zhang, Jiahui Li, Shuangqiang Liu, Peixian Miao, Yanchao Shi, Enming Zhao</td></tr>
+<tr><td>单位</td><td>哈尔滨工程大学物理与光电工程学院等 4 家</td></tr>
+<tr><td>时间</td><td>录用 2020-12-03，出版 2021-02-16</td></tr>
+<tr><td>本地全文</td><td><a href="../文献/D1_Zhao_磁异常检测综述_MST2021.pdf">D1 PDF</a></td></tr>
+<tr><td>分类来源</td><td>承自 Ginzburg &amp; Sheinker 2009（D1 参考文献 [30]），本文自称「给出更清晰的梳理」（§1 末）</td></tr>
+<tr><td>关键词（原文）</td><td>magnetic anomaly detection, orthogonal basis functions, entropy filtering, high-order crossing</td></tr>
+</tbody></table>
+<p><strong>【原文】</strong> 应用领域：水面舰艇目标检测、水下运动目标监测、地面目标检测、金属矿地震活动识别（摘要）；引言另列车辆、未爆弹、地雷、潜艇残骸、地质勘探、心磁测量、工业检测、地震预报。MAD 最早用于二战反潜，1944 年 VP-63 反潜机用磁通门磁强计发现并击沉 U-761。</p>
+<hr>
+<h2>1. 它到底解决什么问题</h2>
+<p>必须分三层答，否则容易把「综述的贡献」误当成「算法的贡献」。</p>
+<h3>1.1 领域共同的根本困难【原文】</h3>
+<ul><li>地磁场 $T$ 通常<strong>远大于</strong>铁磁目标的感应磁场 $B$（$T \gg B$），磁强计测到的是总场 $B_s=B+T$。</li><li>被检测的磁异常信号「是地磁噪声的万分之几」（§4 原文 <em>tens of thousands of parts of geomagnetic noise</em>），<strong>时域上直接检测太弱</strong>（§4：<em>It is too weak for the target to be detected directly in the time domain</em>）。</li><li>环境磁噪声多为<strong>有色噪声</strong>（$1/f^{\alpha}$），而主流 OBF 方法假设<strong>高斯白噪声</strong>；影响地磁噪声的因素多、变化无规律，难以去除。</li><li><strong>地质噪声</strong>（局部地质结构非均匀引起的局部磁场异常）的特征「与铁磁目标几乎相同」（§4），是最难对付的混淆源。</li><li>于是所有方法本质上都在做同一件事：<strong>在尽量保留磁异常信号的前提下，最大限度压掉地磁噪声</strong>，把这个矛盾转成某个可计算的统计量再设阈值。</li></ul>
+<h3>1.2 这篇综述自己解决的问题【原文 + 推断】</h3>
+<ul><li><strong>【原文】</strong> 把近年 MAD 方法归成两类，给出更清晰的分类与原理梳理（§1、摘要）；补上磁偶极子模型与 OBF 家族 3/4/5 基的演化脉络；对四种噪声派方法逐一讨论「原理与检测灵敏度」；末尾以表 1、表 2 列优缺点并提出未来方向。</li><li><strong>【推断】</strong> 它真正解决的是<strong>选型问题</strong>：面对一堆名字互不相干的方法，给出一条决策规则（见 §2），并首次把「<strong>实时性 / 计算量</strong>」和「<strong>噪声是否高斯白</strong>」摆到与「检测率」同等显眼的位置（§4、表 1/2）。这对工程选题比单纯的精度对比更有用。</li><li><strong>【原文】</strong> 明确承认的未解问题：能量函数、自适应算法、多点迭代等定位算法「需要更多计算」，必须改进或创新算法才能让 MAD 真正落地应用（§4 末）。</li></ul>
+<h3>1.3 每个被综述的方法各自解决什么【原文】</h3>
+<table><thead><tr><th>方法</th><th>它补的是哪个漏洞</th></tr></thead><tbody>
+<tr><td>磁偶极子模型 + CPA</td><td>把「目标是什么形状的信号」变成可写的解析式，让后续匹配检测有模板</td></tr>
+<tr><td>标准 OBF（3 基）</td><td>单磁强计下，把淹没在高斯白噪里的信号投影到低维基空间，用能量函数显著提 SNR</td></tr>
+<tr><td>5 基 OBF</td><td>梯度计（双磁强计差分）消除共模噪声，且不依赖相对偶极子位置</td></tr>
+<tr><td>4 基 OBF</td><td>5 基计算太重，在目标-探头距离较近时降维，减计算量、提鲁棒性</td></tr>
+<tr><td>AR 白化 + 匹配滤波</td><td>修 OBF 在<strong>非高斯 / 有色噪声</strong>下失效的问题</td></tr>
+<tr><td>最小熵 / 差分熵滤波</td><td>绕开 OBF 的庞大计算，用「噪声分布是否被目标扰动」直接判有无</td></tr>
+<tr><td>高阶过零 HOC</td><td>进一步把计算压到<strong>无需任何乘法</strong>，适合低功耗实时硬件</td></tr>
+<tr><td>随机共振 SR</td><td>反过来<strong>利用噪声</strong>增强弱信号，且不需要信号的确定性参数</td></tr>
+<tr><td>小波变换</td><td>用多尺度稀疏性去非高斯噪声，尽量保留目标信息</td></tr>
+</tbody></table>
+<hr>
+<h2>2. 全局分类框架：两派与唯一判据</h2>
+<p><strong>【原文】</strong> D1 摘要与 §2、§3 给出的分界：</p>
+<table><thead><tr><th></th><th><strong>基于目标 target-based</strong></th><th><strong>基于噪声 noise-based</strong></th></tr></thead><tbody>
+<tr><td>出发点</td><td>分析目标信号的典型模式，从目标磁场特征反推目标</td><td>分析磁强计噪声的统计特性，认为异常来自铁磁目标引起的扰动</td></tr>
+<tr><td>关键假设</td><td>磁强计与目标<strong>存在相对运动</strong>，且目标运动服从特定跟踪时间模式</td><td><strong>不能</strong>对目标与磁强计的互运动做任何假设</td></tr>
+<tr><td>目标先验</td><td>需要（偶极子模型、直线运动、特征时间 $\tau_0$ 已知）</td><td>不需要，「自适应于磁背景」，实现更简单、计算量更小</td></tr>
+<tr><td>代表方法</td><td>磁偶极子模型 → OBF 3/5/4 基 → AR 白化改进</td><td>最小熵/差分熵滤波、HOC、随机共振、小波变换</td></tr>
+<tr><td>代价</td><td>计算量大、需白化、不宜实时</td><td>多数受低 SNR 限制，或只对一类信号有效</td></tr>
+</tbody></table>
+<p><strong>【推断】</strong> 一句话记住判据：<strong>能不能预先写出「目标经过时信号长什么样」</strong>。能 → 用匹配类（OBF）；不能 → 只能盯噪声分布有没有被扰动。这也解释了为什么两派的失效模式完全不同：一派怕「模型不匹配」，另一派怕「扰动太小、被噪声淹没」。</p>
+<p><strong>【文献】</strong> D1 之后，2025 年 arXiv:2504.05212《On multipolar magnetic anomaly detection》明确把 Zhao et al. (2021) 的两派分类当作传统划分，并指出<strong>还应加上第三类：基于人工智能/深度学习的方法</strong>（SVM、全连接网络、自编码器、CNN/RNN/注意力等），同时点名这类方法「极度依赖数据、难以给出检测性能保证」。<strong>【推断】</strong> D1 成文于 2020 年，未纳入这一支；写 2026 年的开题报告时，现状小节应自行补上 AI 派，不能直接照抄 D1 的两分法当作「完整分类」。</p>
+<hr>
+<h2>3. 共同前提：从总场到可检测信号</h2>
+<p><strong>【原文】</strong> §2.1，公式 (1)–(5)：</p>
+<p>磁偶极子在空间任意点的场</p>
+<p>$$\mathbf{B}=\frac{\mu_0}{4\pi}\left[\frac{3(\mathbf{M}\cdot\mathbf{r})\mathbf{r}}{r^5}-\frac{\mathbf{M}}{r^3}\right] \tag{1}$$</p>
+<p>其中 $\mathbf{M}$ 为目标磁矩，$\mathbf{r}$ 为目标到测点的矢量。总场 $B_s=B+T$，由 $T\gg B$ 得 $|B_s|^2\cong |T|^2+2\mathbf{B}\cdot\mathbf{T}$，再用 $\sqrt{1+2x}\cong 1+x$ 线性化：</p>
+<p>$$B_s\cong T+\frac{\mathbf{B}\cdot\mathbf{T}}{T},\qquad S=\frac{\mathbf{B}\cdot\mathbf{T}}{T} \tag{2–5}$$</p>
+<p><strong>这一步是全部 target-based 方法的立足点</strong>：标量磁强计的读数等于目标场在<strong>地磁方向上的投影</strong>。</p>
+<p><strong>【原文】</strong> 场强随距离衰减（式 (1) 与 $R_0^{-3}$ 的前置因子）；定义 <strong>CPA（closest proximity approach，最近接近点）</strong> 为信号最强处，MAD 系统检测到的最大信号强度点即为 CPA。传感器尺寸相对 CPA 距离足够小时，CPA 前后一小段时间内的响应才跟随真实异常信号、保证有效定位。</p>
+<p><strong>【原文】</strong> §2 开头列出的 target-based <strong>三条硬前提</strong>：</p>
+<ul><li>(a) 测量点到目标的距离<strong>远大于目标自身尺寸</strong> → 才可等效为磁偶极子；</li><li>(b) 目标沿<strong>直线</strong>穿过磁传感器方向，且磁矩的<strong>大小与方向保持不变</strong>；</li><li>(c) 目标<strong>特征时间 $\tau$ 已知且预设</strong>，$\tau_0=R_0/v$。</li></ul>
+<p><strong>【原文】</strong> 另加一条隐含前提：OBF 分解算法<strong>要求背景噪声满足高斯白噪声假设</strong>，因此实际应用须先对环境数据做算法修正（§2 开头），这正是 §2.3 改进算法的动机。</p>
+<hr>
+<h2>4. 基于目标（target-based）的方法</h2>
+<h3>4.1 标准 OBF 分解（Ginzburg / Frumkis 2002）</h3>
+<p><strong>【原文】</strong> §2.2 的谱系：Anderson 1940 年代末首创 OBF → Mori 1990 用自适应权函数改善弱 SNR → 2002 年 Ginzburg/Frumkis 提出标准 OBF 分解 → 2004 年讨论梯度计的 5 基 → 再讨论 5 基降 4 基（简化计算并增强稳定性）。</p>
+<p><strong>核心思想</strong>：把目标信号写成少数几个<strong>标准正交基函数的线性组合</strong>，把「在时域找波形」变成「在基空间求系数」，用系数平方和构造能量函数。</p>
+<p>$$S=\frac{\mu_0 M}{4\pi R_0^3}\sum_{n=1}^{4} b_n\varphi_n(w),\qquad w=\frac{vt}{R_0}=\frac{t}{\tau_0} \tag{6,7}$$</p>
+<p>$w$ 是沿测线轨迹的无量纲坐标。经 Schmidt 正交化得三个归一化基（式 (8)）：</p>
+<p>$$f_1(w)=\sqrt{\tfrac{128}{3\pi}}\,\frac{w^2}{(1+w^2)^{5/2}},\quad f_2(w)=\sqrt{\tfrac{128}{5\pi}}\,\frac{w}{(1+w^2)^{5/2}},\quad f_3(w)=\sqrt{\tfrac{24}{5\pi}}\,\frac{1-\tfrac53 w^2}{(1+w^2)^{5/2}}$$</p>
+<p>$$S=\frac{\mu_0 M}{4\pi R_0^3}\sum_{n=1}^{3} a_n f_n(w),\qquad \int_{-\infty}^{+\infty} f_i f_j\,dw=0\ (i\neq j) \tag{9,10}$$</p>
+<p>系数由投影得到、能量函数由系数构造（式 (11)(12)）：</p>
+<p>$$\alpha_j=\Big(\frac{\mu_0 M}{4\pi R_0^3}\Big)^{-1}\int_{-\infty}^{+\infty} f_j(w)S\,dw,\qquad E=\alpha_1^2+\alpha_2^2+\alpha_3^2$$</p>
+<p><strong>【原文】</strong> 流程（图 5）：信号 → 滑窗 OBF 分解 → 求系数 → 能量函数 → 峰值判决。图 6 的对照中，滑窗宽度为 $-6\le w\le 6$；被高斯白噪污染的信号在能量函数上 SNR 显著提升，<strong>能量函数峰-峰值对应目标位置</strong>。</p>
+<blockquote><p><strong>【推断·勘误提醒】</strong> 本地 PDF 抽取文本中式 (10) 第二行作 $\int f_i^2 dw=0$，与「归一化正交基」自相矛盾（归一化应给出非零常数/1）。疑为原文排版或 PDF 抽取问题，引用时以标准 OBF 文献（D1 [38] Ginzburg et al., Sens. Actuators A, 2002, 102: 67–75）为准，不要照抄这个 0。</p></blockquote>
+<h3>4.2 三种基的数量怎么选</h3>
+<table><thead><tr><th>配置</th><th>适用条件【原文】</th><th>优点（表 1 / §2.2）</th><th>代价</th></tr></thead><tbody>
+<tr><td><strong>3 基</strong></td><td>单磁强计，线性航迹</td><td>提高 SNR、提取有效磁信号</td><td>只对高斯白噪理想</td></tr>
+<tr><td><strong>5 基</strong></td><td>梯度计（两台磁强计差分，$S=S_1-S_2$，式 (13)–(16)）</td><td>基可<strong>任意取向</strong>、<strong>不依赖相对偶极子位置</strong>，通用性好；基线长/CPA 距离比可在大范围变化</td><td>计算负担重（表 1：<em>Heavy calculation burden</em>）</td></tr>
+<tr><td><strong>4 基</strong></td><td>目标与磁强计距离很近时（Yarotsky 1992 提出，Ginzburg 用式 (17)(18)）</td><td>减少计算量、<strong>提高鲁棒性</strong>、更贴合实测</td><td>仅在该近距离条件下成立</td></tr>
+</tbody></table>
+<p><strong>【原文】</strong> 5 基由 Schmidt 正交化得到 6 个、舍去 1 个而来；4 基的四个函数 $v_1\ldots v_4$ 的分母为 $(1+w^2)^{7/2}$，梯度信号写作 $G(w)=\frac{\mu_0 M\delta}{4\pi R_0^3}\sum_{n=1}^{4}C_n v_n(w)$。图 8、图 9 分别给出 5 基、4 基的能量函数对照。</p>
+<h3>4.3 改进 OBF：AR 模型白化滤波（Sheinker 2007）</h3>
+<p><strong>动机【原文】</strong>：标准 OBF 在<strong>高斯白噪声下最优</strong>，对非高斯白噪效果不佳；而实测环境磁噪声「多数情况下是非高斯白噪」（§2.3）。因此<strong>先分析并高斯化环境磁噪声，是 OBF 优化的前提</strong>。</p>
+<p>$$x(n)=\sum_{k=1}^{M}a_k x(n-k)+\omega(n) \tag{19}$$</p>
+<p>把地磁噪声看作满足 $1/f^{\alpha}$（$0&lt;\alpha&lt;2$）功率谱的 $M$ 阶 AR 过程，$\omega(n)$ 为白噪声。重排为白化变换（式 (20)），用 <strong>Levinson–Durbin 递推</strong>求系数 $a_k$，把有色噪声变成白噪声。</p>
+<blockquote><p><strong>最关键的一步（式 (21)）</strong>：白化滤波会<strong>同时扭曲目标信号</strong>（原文：<em>the target signal will be distorted</em>）。所以不能只白化输入，必须<strong>把 OBF 本身也预先白化</strong>：</p><p>$$\xi_i(n)=h(n)\times f(n)$$</p><p>其中 $h(n)$ 为白化系统传递函数、$f(n)$ 为原 OBF。整体链路是：输入 → 白化滤波 → <strong>与已白化基的匹配滤波</strong> → 检测输出（图 10）。图 11 显示，对 $1/f^{\alpha}$ 噪声，白化后的能量函数比传统 OBF 的目标特征更突出。</p></blockquote>
+<p><strong>【推断】</strong> 这是全文最容易被读漏、也最值得学的一处工程思想：<strong>任何预处理只要改变了信号通道，就必须同等地改变模板/基</strong>，否则匹配失配。它和本毕设 notebook 里「换可观测量结论就塌」是同一类方法论教训。</p>
+<hr>
+<h2>5. 基于噪声（noise-based）的四种方法</h2>
+<p><strong>【原文】</strong> §3 开头的共同设定：假设噪声统计特性的变化由铁磁目标引起；方法自适应于磁背景、<strong>无需目标先验</strong>，实现简单、计算量小。</p>
+<h3>5.1 最小熵滤波（Sheinker 2008）与差分熵（Liu 2015 / Tang 2018）</h3>
+<p><strong>原理</strong>：真实磁噪声的 PDF 近似高斯、由均值与方差控制。由 $M$ 个样本估 $\mu,\sigma^2$（式 (22)(23)），再对区间积分得离散概率 $p(x_i)$（式 (24)），滑窗 $L$ 个样本的熵为</p>
+<p>$$I(x_i)=-\sum_{m=i-L+1}^{i}p(x_m)\log p(x_m) \tag{25}$$</p>
+<p><strong>目标出现 → 分布偏离高斯 → 熵下降 → 低于阈值即判有目标；阈值按 Neyman–Pearson 准则确定</strong>（§3.1.1）。图 12 给出滤波前后对照。</p>
+<p><strong>差分熵版本</strong>：用<strong>一对相隔一定距离、置于相对安静磁环境的磁强计</strong>做差分，用核平滑估计差分信号的 PDF（式 (26)(27) 的 $H(x)=-E_x[\log p_x]$），靠差分消掉共模地磁/外部场干扰。Tang 2018 用 2000 个采样点做实验（图 13）。</p>
+<p><strong>限制条件【原文】</strong></p>
+<ul><li>噪声 PDF 需<strong>近似高斯</strong>（否则式 (22) 的概率估计失真）；</li><li><strong>窗长 $N$（或 $L$）必须折中</strong>：太大 → 检测器对目标不响应；太小 → 过于敏感，背景噪声被误判为目标（§3.1.2 明文）；</li><li>阈值依赖 NP 准则，即需给定虚警率并标定量；</li><li>表 2 / §4：计算量小、<strong>目标移动速度慢时效果更好</strong>，适合实时；但<strong>受低 SNR 限制</strong>；</li><li>差分版额外要求：一对探头 + 相对安静的磁环境。</li></ul>
+<h3>5.2 高阶过零 HOC（Sheinker 2012）</h3>
+<p><strong>原理</strong>：平稳随机信号的高阶过零与其<strong>自相关函数 / 功率谱</strong>紧密相关，因此可用「过零计数」代替谱分析来分辨信号差异。</p>
+<p>$$q(n)=\begin{cases}1,&amp;x(n)&gt;0\\0,&amp;x(n)\le0\end{cases},\quad D=\sum_{n=2}^{N}[q(n)-q(n-1)]^2,\quad R=\frac{D}{N-1} \tag{28–30}$$</p>
+<p>引入差分算子 $\nabla x(n)=x(n)-x(n-1)$、$k$ 阶递推 $\nabla^k x(n)=\nabla[\nabla^{k-1}x(n)]$（式 (31)(32)），定义速率增量 $\Delta_k(R)$（式 (33)），最后用类 $\chi^2$ 判别函数（式 (34)）：</p>
+<p>$$\psi^2=\sum_{k=1}^{K}\frac{[\Delta_k(R_{\text{window}})-\Delta_k(R_{\text{background}})]^2}{\Delta_k(R_{\text{background}})}$$</p>
+<p>$K$ 为参与比较的 HOC 阶数。图 14 用 8000 个采样点，目标深埋噪声，HOC 输出的目标峰显著高于噪声峰。</p>
+<p><strong>限制条件【原文】</strong></p>
+<ul><li>必须先有<strong>干净的背景速率序列</strong> $R_{\text{background}}$ 作基线（判别函数以它为分母与参照）；</li><li>表 2 / §4：<strong>受低 SNR 限制</strong>（<em>Limited by low SNR</em>）；</li><li>优势：<strong>不需要任何乘法运算</strong>、实现简单、功耗低，只依赖噪声背景、不需目标信号假设，对实时应用与地震前兆研究很有吸引力。</li></ul>
+<h3>5.3 随机共振 SR（Wang 2017/2018）</h3>
+<p><strong>原理【原文】</strong>：往非线性势阱系统里加<strong>适当强度的噪声</strong>，使弱周期信号在势阱间跃迁，从而放大弱信号的幅值功率——「用噪声增强信号」。用 <strong>Langevin 方程</strong>描述，最常用经典<strong>双稳 SR</strong>（图 15）。做法是：先实验取得真实地磁噪声样本并仿真典型异常信号，再用 <strong>Runge–Kutta 法</strong>寻找合理的系统参数；异常信号出现时输出<strong>状态发生切换、标准差显著增大</strong>（图 16a/b/c）。</p>
+<p><strong>限制条件【原文】</strong></p>
+<ul><li>表 2：优点是<strong>不需要信号的确定性参数</strong>；缺点是 <strong>"Only works for one class"</strong> —— §4 措辞更完整：只能对<strong>一类异常信号</strong>给出近似性能的检测；</li><li>需真实噪声样本 + 仿真典型信号 + RK 调参，<strong>参数依赖具体场景</strong>；</li><li>§4：适用于<strong>有色噪声</strong>，可提高输出 SNR、易实现。</li></ul>
+<h3>5.4 小波变换（Zhang 2011；Zhou 验证高斯化）</h3>
+<p><strong>原理【原文】</strong>：小波是时间–尺度的局部变换，通过伸缩平移做多尺度分析。把小波系数矩阵处理成概率分布序列，其熵反映系数矩阵的稀疏度，称<strong>小波熵</strong>；用稀疏度抑制无关分量以提取信号、发现「小而短」的异常。Zhou 以海洋噪声为例验证小波变换的「Gaussian effect」；具体做法用 <strong>db3 小波做 4 尺度分解</strong>，取<strong>最低频分量</strong>即可有效去噪并保留目标（§3.4 正文所引图示；D1 全文图号止于 16，此处原文未另编号）。</p>
+<p><strong>限制条件【原文】</strong></p>
+<ul><li>表 2 / §4：降噪效果好，但<strong>强噪声下以信号幅度衰减为代价</strong>（<em>loss of signal amplitude attenuation</em>）；</li><li><strong>【推断】</strong> 幅度衰减对「只要判有无」影响小，对「要估幅值」是硬伤——这与本毕设「参数估计精度」指标直接冲突，是选型时必须记下的一条。</li></ul>
+<hr>
+<h2>6. 限制条件总表（逐法汇总）</h2>
+<table><thead><tr><th>方法</th><th>必须成立的假设 / 前提</th><th>明确写出的失效边界</th><th>实时性 / 计算量</th></tr></thead><tbody>
+<tr><td>磁偶极子 + 标量投影</td><td>$T\gg B$；距离 $\gg$ 目标尺寸；磁矩大小方向恒定</td><td>近场、大目标、磁矩翻转 → 偶极近似与线性化失效</td><td>—</td></tr>
+<tr><td>标准 OBF（3 基）</td><td>直线匀速航迹；$\tau_0=R_0/v$ <strong>已知</strong>；高斯白噪</td><td>非高斯/有色噪声下效果不佳；$\tau_0$ 失配则模板失配</td><td>计算量大</td></tr>
+<tr><td>5 基 OBF</td><td>双探头梯度计；需差分构造</td><td>计算负担重</td><td>重（表 1 唯一明写缺点）</td></tr>
+<tr><td>4 基 OBF</td><td>目标—探头<strong>距离很近</strong></td><td>不满足近距离条件时降维无依据</td><td>比 5 基省、鲁棒性提升</td></tr>
+<tr><td>AR 白化 + 已白化基</td><td>噪声近似高斯、可用 $1/f^{\alpha}$（$0&lt;\alpha&lt;2$）AR 过程建模；需先估 AR 系数</td><td>噪声不满足 AR/$1/f^{\alpha}$ 假设时白化失效；<strong>忘记同步白化基会导致匹配失配</strong></td><td>增加前置滤波开销</td></tr>
+<tr><td>最小熵 / 差分熵</td><td>噪声 PDF 近似高斯；虚警率给定；窗长 $N$ 需折中；差分版需双探头 + 安静磁环境</td><td>$N$ 过大漏检、过小虚警；<strong>低 SNR 受限</strong></td><td>计算量小，适合实时；慢速目标更佳</td></tr>
+<tr><td>HOC</td><td>需干净背景速率序列作基线</td><td><strong>低 SNR 受限</strong></td><td>无需乘法、低功耗，最适合实时</td></tr>
+<tr><td>随机共振</td><td>双稳势阱模型；需真实噪声样本 + RK 调参</td><td><strong>只对一类异常信号有效</strong>，泛化差</td><td>易实现</td></tr>
+<tr><td>小波变换</td><td>目标信息集中在低频、系数具稀疏性</td><td>强噪声下<strong>幅度衰减</strong></td><td>中等（多尺度分解）</td></tr>
+</tbody></table>
+<p><strong>【原文】</strong> §4 的跨方法结论，可直接作为开题报告「现有方法局限」小节的四条骨架：</p>
+<ol><li><strong>OBF</strong>：能量函数显著提 SNR，且<strong>对目标磁矩不敏感</strong>（故得到理想脉冲形状）；但<strong>计算密集、不适合实时应用</strong>；两台磁强计可消共模噪声；因 OBF 更适合白噪声而地磁周围多为有色噪声，<strong>使用前必须先白化</strong>。</li><li><strong>最小熵 + HOC</strong>：前者计算量小、目标慢速时效果好，后者无需乘法、简单低功耗；但<strong>两者都受低 SNR 限制</strong>。</li><li><strong>随机共振</strong>：用噪声增强提高输出 SNR，不需确定性参数、适用于有色噪声；但只能对一类异常信号给出近似检测性能。</li><li><strong>小波</strong>：降噪好，但强噪声下牺牲幅度。</li></ol>
+<p><strong>【原文】</strong> 未来方向：找到「<strong>最大限度保留磁异常信号 + 最大限度去除地磁噪声</strong>」的方法是研究重点；定位算法（能量函数、自适应、多点迭代）计算量大，须在现有方法基础上改进或创新才能实用化。</p>
+<hr>
+<h2>7. 放回本毕设：能拿什么、不能拿什么</h2>
+<h3>7.1 直接可用</h3>
+<table><thead><tr><th>用途</th><th>D1 提供的东西</th></tr></thead><tbody>
+<tr><td>开题报告「国内外研究现状」</td><td>两派分类框架（表 1/2 可直接改写成小标题）、1940s–2018 方法谱系、§4 四条局限</td></tr>
+<tr><td>环节 1「输入信号」建模</td><td>$B_s=B+T$、$T\gg B$ 下的投影 $S=\mathbf{B}\cdot\mathbf{T}/T$、CPA、$R_0^{-3}$ 衰减</td></tr>
+<tr><td>环节 1「噪声模型」</td><td>$1/f^{\alpha}$ 有色噪声（$0&lt;\alpha&lt;2$）、地质噪声特征与目标几乎相同、非高斯</td></tr>
+<tr><td>环节 4「相变判据」的对照组</td><td>熵滤波 / HOC / SR / 小波都是「把目测换成可计算统计量」的同类思路；HOC 的 NP 阈值、窗长折中可类比 $p_{std}$ 阈值与 $T$ 的折中</td></tr>
+<tr><td>工序 4 嵌入式实现的动机</td><td>「OBF 计算密集、不适合实时」正是要上 FPGA 的直接理由；HOC「无需乘法」是定点化思路的现成范例</td></tr>
+<tr><td>课题背景定位</td><td>MAD 是<strong>被动检测</strong>、地磁场既是「激励源」（磁化铁磁体）又是「最大干扰」</td></tr>
+</tbody></table>
+<h3>7.2 必须守住的边界</h3>
+<p><strong>【原文 + 检索核实】</strong> 对本地 D1 全文做词频核对：<strong>Duffing / chaos / chaotic / Lyapunov / bifurcation / Poincaré 均出现 0 次</strong>；machine learning / deep learning / SVM / CNN 也均为 0（"neural networks" 仅 4 次，且都出现在随机共振的应用领域举例里）。据此：</p>
+<ul><li><strong>【推断】</strong> D1 的两派里<strong>没有混沌振子这一支</strong>。它的「target-based」特指<strong>磁偶极子空间波形匹配</strong>（OBF），前提是空间直线航迹与已知 $\tau_0$；本课题的 Duffing 阵列假设的是<strong>已知频率的时间周期信号</strong>，靠非线性系统跨分岔阈值做窄带相干检测。二者「基于目标」的含义不同，<strong>不要把课题硬塞进 D1 的任何一派</strong>，写现状时宜表述为「在两派之外，基于非线性系统相变的弱信号检测构成另一条路线」，再引 A/B/C 组文献。</li><li><strong>【文献】</strong> ★[2] 作者组 2021 年前作（Sensors, 21(9):3011）恰是「随机共振 + 混沌相变协同检测」，说明 <strong>D1 §3.3 的 SR 与本课题的 Duffing 同源</strong>（非线性势阱 + 噪声辅助），但机制不同：SR 靠噪声促成势阱间跃迁并放大周期分量，Duffing 靠策动力幅值跨临界阈值引发混沌 → 大尺度周期态相变。这条脉络可用来把课题自然接进 MAD 大背景，见 [★[2] 精读](论文精读-阵列Duffing_Sensors2023.md)。</li><li><strong>【推断】</strong> 两处有意思的结构呼应：① D1 target-based 要求 $\tau_0=R_0/v$ <strong>已知</strong>，★[2] 的<strong>变尺度扫 $R$</strong> 本质上也是在搜这个未知尺度，只是搜的是频率而非空间特征时间；② D1 §4 说地质噪声「与目标特征几乎相同」，正是本课题必须报 $P_d/P_{fa}$、不能只报检测率的原因——混淆源与目标不可分辨时，$P_{fa}$ 才是硬约束。</li><li><strong>【推断】</strong> D1 所有方法面向<strong>单次通过式的空间异常脉冲</strong>（能量函数找峰、CPA 定位），本课题面向<strong>持续存在的极低频周期信号</strong>（判有无 + 估幅相）。信号模型不同，$SNR$ 口径不同，<strong>D1 里任何检测灵敏度数字都不可横向搬用</strong>；项目约定「SNR 门限必须连 $P_d/P_{fa}$ 与实验条件一起给」在这里同样成立。</li></ul>
+<h3>7.3 与阅读路线的关系</h3>
+<ul><li>第 0 步只读 D1 的<strong>摘要与分类框架</strong>（见 <a href="../00-总览/第0步-技术路线方框图.html">第 0 步方框图</a>），按「学到什么程度」的约定不推公式、不记数字；</li><li>阶段 1 写现状时再回来取表 1/2、§4 四条局限与信号/噪声模型（见 <a href="../00-总览/阅读路线.html">阅读路线</a>）；</li><li>本文属于<strong>超出第 0 步深度的按需查阅材料</strong>，不要把它当成第 0 步的必背内容。</li></ul>
+<hr>
+<h2>8. 引用时的小心处（【推断】，非原文结论）</h2>
+<p>回原文核对过以下几处，写进论文前建议以所引原始文献为准：</p>
+<ol><li>式 (10) 第二行 $\int f_i^2 dw=0$ 与归一化正交基矛盾，疑为排版/抽取问题。</li><li>§2.2.3 内部年份混用：Yarotsky 1992 提出、Ginzburg 2002 使用，而图 9 说明又写「In 2003」；§3.2 图 14 写「In 2018, Sheinker」但引文 [59] 是 2012 年工作。</li><li>§2.3 的 "Levison–Durbin" 拼写应为 <strong>Levinson–Durbin</strong>；摘要与 §3.3 对 SR 工作年份分别写 2017 / 2018。</li><li>表 1、表 2 在 PDF 中因分栏排版，优缺点条目与行有错位风险（例如表 2 的 <em>Limited by low SNR</em> 在抽取文本中跨行）。<strong>§4 的文字版表述比表格更可靠</strong>，引用优缺点时优先引 §4。</li><li>§4 的 <em>"tens of thousands of parts of geomagnetic noise"</em> 是定性措辞，未给 SNR 数值与实验条件，<strong>不要当成一个可引用的定量指标</strong>。</li><li>全文没有给出统一的 SNR 定义、虚警率或 ROC 口径，各方法「检测灵敏度」是<strong>叙述性比较</strong>而非同条件实测对比；【推断】这正是 D1 无法回答「最低可检测信噪比」的原因——那个指标得由本课题自己的实验条件定义。</li></ol>
+<hr>
+<h2>9. 一页速记</h2>
+<ul><li><strong>性质</strong>：综述，不是算法论文；贡献是分类、选型与局限梳理。</li><li><strong>判据</strong>：能否预设目标—探头的相对运动与信号波形？能 → OBF 匹配；不能 → 噪声统计突变。</li><li><strong>共同敌人</strong>：$T\gg B$、$1/f^{\alpha}$ 有色噪声、地质噪声与目标同特征、时域太弱。</li><li><strong>OBF 族</strong>：3 基单探头 / 5 基梯度计 / 4 基近距离降维；改进靠 AR 白化，且<strong>基也要白化</strong>。</li><li><strong>噪声族</strong>：熵（NP 阈值、窗长折中）、HOC（无需乘法、需干净背景基线）、SR（用噪声、只对一类）、小波（降噪好、幅度衰减）。</li><li><strong>四条硬限制</strong>：OBF 不宜实时且需先白化；熵与 HOC 受低 SNR 限制；SR 泛化差；小波强噪下丢幅值。</li><li><strong>对本课题</strong>：拿现状骨架、信号/噪声模型、对照组与 FPGA 动机；<strong>不拿</strong>方法归属——D1 全文没有混沌振子，也没有 AI 派。</li></ul>
+<hr>
+<p><em>精读依据：本地 <code>文献/D1_Zhao_磁异常检测综述_MST2021.pdf</code> 全文（14 页，逐节核对公式 (1)–(34)、图 1–16、表 1–2、§4），并与 IOP 官网摘要及后续 arXiv:2504.05212 对分类框架的引用交叉核实。相关文档：<a href="../00-总览/参考资料-极低频磁场混沌振子微弱信号检测.html">主清单</a> · <a href="../00-总览/阅读路线.html">阅读路线</a> · <a href="../00-总览/第0步-技术路线方框图.html">第 0 步方框图</a> · [★[2] 精读](论文精读-阵列Duffing_Sensors2023.md) · <a href="../02-阶段二/解读-主要内容2-混沌振子建模与临界阈值.html">「2」的解读</a>。</em></p></main></body></html>

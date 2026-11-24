@@ -1,0 +1,736 @@
+
+<!DOCTYPE html>
+
+
+<html lang="zh-CN" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>3. 变尺度：\(\nu\) 到底是什么，\(\omega\) 未知时怎么定 &#8212; ★[2] 完整复现：阵列 Duffing 检测钻具姿态信号</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=3c74b3bc" />
+    <link rel="stylesheet" type="text/css" href="_static/togglebutton.css?v=9c3e77be" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=6a604523" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
+
+    <script src="_static/documentation_options.js?v=946197a6"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="_static/togglebutton.js?v=b8b12719"></script>
+    <script src="_static/translations.js?v=beaddf03"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="_static/design-tabs.js?v=fcb327ea"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]]}, "options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '03-变尺度与nu';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="index" title="索引" href="genindex.html" />
+    <link rel="search" title="搜索" href="search.html" />
+    <link rel="next" title="4. 全相位阵列：初相不是小事" href="04-%E5%85%A8%E7%9B%B8%E4%BD%8D%E9%98%B5%E5%88%97.html" />
+    <link rel="prev" title="2. 临界阈值：0.72 还是 0.733？" href="02-%E5%88%86%E5%B2%94%E4%B8%8E%E4%B8%B4%E7%95%8C%E9%98%88%E5%80%BC.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="zh-CN"/>
+  <meta name="docsearch:version" content="" />
+  
+    
+    <script src="_static/searchtools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script src="searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">跳转至主要内容</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>回到顶部</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="版本警告"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="网页导航">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="搜索" aria-label="搜索" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">搜索</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="搜索" aria-label="搜索" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">搜索</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="当前页面">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="00-%E5%A4%8D%E7%8E%B0%E6%80%BB%E8%A7%88.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">★[2] 完整复现：阵列 Duffing 检测钻具姿态信号</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="搜索" aria-label="搜索" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">搜索</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="00-%E5%A4%8D%E7%8E%B0%E6%80%BB%E8%A7%88.html">
+                    ★[2] 完整复现：阵列 Duffing 检测钻具姿态信号
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">模型与阈值</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="01-%E6%A8%A1%E5%9E%8B%E4%B8%8E%E5%8A%BF%E5%87%BD%E6%95%B0.html">1. 模型：五次恢复力把井挖浅、把山顶削平</a></li>
+<li class="toctree-l1"><a class="reference internal" href="02-%E5%88%86%E5%B2%94%E4%B8%8E%E4%B8%B4%E7%95%8C%E9%98%88%E5%80%BC.html">2. 临界阈值：0.72 还是 0.733？</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">核心</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">3. 变尺度：<span class="math notranslate nohighlight">\(\nu\)</span> 到底是什么，<span class="math notranslate nohighlight">\(\omega\)</span> 未知时怎么定</a></li>
+<li class="toctree-l1"><a class="reference internal" href="04-%E5%85%A8%E7%9B%B8%E4%BD%8D%E9%98%B5%E5%88%97.html">4. 全相位阵列：初相不是小事</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">结果</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="05-%E6%A3%80%E6%B5%8B%E9%97%A8%E9%99%90.html">5. 检测门限：−23 dB 到不到？</a></li>
+<li class="toctree-l1"><a class="reference internal" href="06-%E5%8F%82%E6%95%B0%E4%BC%B0%E8%AE%A1.html">6. 参数估计：用阈值当标尺</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">收尾</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="07-%E5%A7%BF%E6%80%81%E4%B8%8E%E8%BE%B9%E7%95%8C.html">7. 姿态解算与不可复现项</a></li>
+<li class="toctree-l1"><a class="reference internal" href="08-%E7%BB%93%E8%AE%BA.html">8. 结论：哪些能写进报告，哪些不能</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="下载此页面">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="_sources/03-变尺度与nu.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="下载源文件"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="列印成 PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button pst-navbar-icon"
+  title="全屏模式"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="亮色"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="暗色"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button>
+
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="搜索" aria-label="搜索" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+<button class="sidebar-toggle secondary-toggle btn btn-sm pst-navbar-icon" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>3. 变尺度：\nu 到底是什么，\omega 未知时怎么定</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> 目录 </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">3.1 先把三个符号摆清楚</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">3.2 原文怎么做的</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#nu-omega-r">3.3 为什么很多复现代码里会出现 <code class="docutils literal notranslate"><span class="pre">nu=omega/R</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#omega">3.4 盲测：把 <span class="math notranslate nohighlight">\(\omega\)</span> 彻底藏起来</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">3.5 代价：三点必须写进报告</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#r">① 频率分辨率 = <span class="math notranslate nohighlight">\(R\)</span> 网格间距</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">② 扫 <span class="math notranslate nohighlight">\(R\)</span> 是多重检验，虚警必须校正</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">③ 步长放大与表 2 的参数不自洽</a></li>
+</ul>
+</li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="nu-omega">
+<h1>3. 变尺度：<span class="math notranslate nohighlight">\(\nu\)</span> 到底是什么，<span class="math notranslate nohighlight">\(\omega\)</span> 未知时怎么定<a class="headerlink" href="#nu-omega" title="Link to this heading">#</a></h1>
+<p>这是本书的核心，也是原文最容易让人卡住的一步。</p>
+<section id="id1">
+<h2>3.1 先把三个符号摆清楚<a class="headerlink" href="#id1" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>符号</p></th>
+<th class="head"><p>原文含义</p></th>
+<th class="head"><p>本书代码</p></th>
+<th class="head"><p>谁定的</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\omega\)</span></p></td>
+<td><p>待测信号的真实角频率</p></td>
+<td><p><strong>不出现</strong>（盲测）或作真值对照</p></td>
+<td><p>物理世界</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(R\)</span>（原文也叫 <span class="math notranslate nohighlight">\(N\)</span>）</p></td>
+<td><p>变尺度系数</p></td>
+<td><p>扫描变量</p></td>
+<td><p><strong>算法扫出来</strong></p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\nu\)</span></p></td>
+<td><p>变尺度后信号与内驱的<strong>频率比</strong> <span class="math notranslate nohighlight">\(\omega/R\)</span></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">nu=omega/R</span></code> 或由采样序列隐式产生</p></td>
+<td><p>由 <span class="math notranslate nohighlight">\(R\)</span> 与信号共同决定</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>关键一句：<strong><span class="math notranslate nohighlight">\(\nu\)</span> 不是输入参数，它是 <span class="math notranslate nohighlight">\(\omega/R\)</span> 的别名。</strong></p>
+</section>
+<section id="id2">
+<h2>3.2 原文怎么做的<a class="headerlink" href="#id2" title="Link to this heading">#</a></h2>
+<p>原文 2.2.1 节：设 <span class="math notranslate nohighlight">\(t_1=Nt\)</span>、<span class="math notranslate nohighlight">\(\omega=N\)</span>，则 <span class="math notranslate nohighlight">\(a(t_1)=\gamma\cos(t_1)\)</span>，频率从 <span class="math notranslate nohighlight">\(N\)</span> 压到 <span class="math notranslate nohighlight">\(1\)</span> rad/s。
+工程上改的是数值积分步长 <span class="math notranslate nohighlight">\(T_1=N/f_s\)</span>。步骤 4 写得很直白：</p>
+<blockquote>
+<div><p>Adjust the transformation coefficient <span class="math notranslate nohighlight">\(R\)</span> and observe the output state …
+As long as one of the phase trajectories jumps …, it means that <strong>the value of the
+transformation coefficient at this time is the frequency value of the characteristic signal.</strong></p>
+</div></blockquote>
+<p>所以原文的答案就是：<strong><span class="math notranslate nohighlight">\(\omega\)</span> 不需要事先知道，扫 <span class="math notranslate nohighlight">\(R\)</span>，相变那一点的 <span class="math notranslate nohighlight">\(R\)</span> 就是 <span class="math notranslate nohighlight">\(\omega\)</span>。</strong>
+<span class="math notranslate nohighlight">\(\nu\)</span> 是事后才被确定的量（<span class="math notranslate nohighlight">\(\nu=\omega/R=1\)</span>），不是事前输进去的。</p>
+</section>
+<section id="nu-omega-r">
+<h2>3.3 为什么很多复现代码里会出现 <code class="docutils literal notranslate"><span class="pre">nu=omega/R</span></code><a class="headerlink" href="#nu-omega-r" title="Link to this heading">#</a></h2>
+<p>因为在数值上，把信号写成 <span class="math notranslate nohighlight">\(\gamma\cos(\nu\tau+\theta)\)</span> 与”逐点读原采样序列、把步长放大 <span class="math notranslate nohighlight">\(R\)</span> 倍”
+是<strong>同一个方程</strong>：前者是后者的解析近似。用真值 <span class="math notranslate nohighlight">\(\omega\)</span> 构造 <span class="math notranslate nohighlight">\(\nu\)</span> 只适合”验证模式”
+（已知答案、检查方法能否复现），不能用于”检测模式”——检测模式下 <span class="math notranslate nohighlight">\(\omega\)</span> 是未知的，
+写 <code class="docutils literal notranslate"><span class="pre">nu=omega/R</span></code> 等于把答案先塞进输入。</p>
+<p>本书两种模式都做，并且证明它们在无噪声下给出同一个 <span class="math notranslate nohighlight">\(R\)</span>。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">sys</span><span class="o">,</span><span class="w"> </span><span class="nn">json</span><span class="o">,</span><span class="w"> </span><span class="nn">pathlib</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s2">"_src"</span><span class="p">)</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">s2sim</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">S</span>
+
+<span class="n">DATA</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="s2">"_data"</span><span class="p">)</span>
+<span class="n">OUT</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="s2">"../复现输出/s2-figs"</span><span class="p">);</span> <span class="n">OUT</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+    <span class="s2">"figure.dpi"</span><span class="p">:</span> <span class="mi">110</span><span class="p">,</span> <span class="s2">"font.size"</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+    <span class="s2">"font.sans-serif"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"Microsoft YaHei"</span><span class="p">,</span> <span class="s2">"SimHei"</span><span class="p">,</span> <span class="s2">"DejaVu Sans"</span><span class="p">],</span>
+    <span class="s2">"axes.unicode_minus"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">"axes.grid"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">"grid.alpha"</span><span class="p">:</span> <span class="mf">.25</span><span class="p">,</span>
+<span class="p">})</span>
+<span class="n">FIGS</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">savefig</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">OUT</span> <span class="o">/</span> <span class="n">name</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s2">"tight"</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s2">"white"</span><span class="p">)</span>
+    <span class="n">FIGS</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">));</span> <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">();</span> <span class="nb">print</span><span class="p">(</span><span class="s2">"图已保存:"</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">load</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">((</span><span class="n">DATA</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">.json"</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">d</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="s2">"nu"</span><span class="p">)</span>
+<span class="n">nus</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s2">"nu_list"</span><span class="p">]);</span> <span class="n">pn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s2">"nu_pstd"</span><span class="p">])</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">7.6</span><span class="p">,</span> <span class="mf">3.5</span><span class="p">))</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">semilogy</span><span class="p">(</span><span class="n">nus</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">pn</span><span class="p">,</span> <span class="mf">1e-6</span><span class="p">),</span> <span class="s2">"o-"</span><span class="p">,</span> <span class="n">ms</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">1.2</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"#1f4e79"</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="mf">0.02</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"#b3402f"</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">"--"</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">1.2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"周期判据"</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"#2e7d4f"</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">":"</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">1.2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"ν=1（严格同频）"</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">"频率比 $\nu=\omega/R$"</span><span class="p">);</span> <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"pstd（对数）"</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">"ν 的容差：偏 0.5% 就退回混沌"</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">9</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">();</span> <span class="n">savefig</span><span class="p">(</span><span class="s2">"s2-03-nu容差.png"</span><span class="p">)</span>
+<span class="n">ok</span> <span class="o">=</span> <span class="n">nus</span><span class="p">[</span><span class="n">pn</span> <span class="o">&lt;</span> <span class="mf">0.02</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"pstd&lt;0.02 的 ν 取值:"</span><span class="p">,</span> <span class="n">ok</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"选择带宽：</span><span class="si">{</span><span class="s1">'仅 ν=1'</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">ok</span><span class="o">.</span><span class="n">size</span><span class="o">&lt;=</span><span class="mi">1</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="sa">f</span><span class="s1">'±</span><span class="si">{</span><span class="p">(</span><span class="n">ok</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="o">-</span><span class="n">ok</span><span class="o">.</span><span class="n">min</span><span class="p">())</span><span class="o">/</span><span class="mi">2</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">'</span><span class="si">}</span><span class="s2">  "</span>
+      <span class="sa">f</span><span class="s2">"（相对 </span><span class="si">{</span><span class="mi">0</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">ok</span><span class="o">.</span><span class="n">size</span><span class="o">&lt;=</span><span class="mi">1</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">(</span><span class="n">ok</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="o">-</span><span class="n">ok</span><span class="o">.</span><span class="n">min</span><span class="p">())</span><span class="o">/</span><span class="mi">2</span><span class="o">*</span><span class="mi">100</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">%）"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"这解释了为什么 R 的扫描网格必须细：粗网格会整条漏掉这个尖谷。"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/ad26881aea37ebd2b208803b77dc2ec1d5f8903a79e6ccdbfde941da61c679dc.png" src="_images/ad26881aea37ebd2b208803b77dc2ec1d5f8903a79e6ccdbfde941da61c679dc.png" />
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>图已保存: ..\复现输出\s2-figs\s2-03-nu容差.png
+pstd&lt;0.02 的 ν 取值: [1.]
+选择带宽：仅 ν=1  （相对 0.0%）
+这解释了为什么 R 的扫描网格必须细：粗网格会整条漏掉这个尖谷。
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="omega">
+<h2>3.4 盲测：把 <span class="math notranslate nohighlight">\(\omega\)</span> 彻底藏起来<a class="headerlink" href="#omega" title="Link to this heading">#</a></h2>
+<p>下面这段代码<strong>不出现待测角频率</strong>。它只做一件事：把采样序列 <code class="docutils literal notranslate"><span class="pre">sig</span></code> 交给积分器，
+对每个候选 <span class="math notranslate nohighlight">\(R\)</span> 用步长 <span class="math notranslate nohighlight">\(h_1=R\,\Delta t\)</span> 重跑，第 <span class="math notranslate nohighlight">\(i\)</span> 步读 <code class="docutils literal notranslate"><span class="pre">sig[i]</span></code>。
+物理含义是”信号时间轴被压缩 <span class="math notranslate nohighlight">\(R\)</span> 倍”，而 <span class="math notranslate nohighlight">\(R\)</span> 只有猜对了才会与内驱同频。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Rs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s2">"Rs"</span><span class="p">]);</span> <span class="n">bl</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s2">"blind"</span><span class="p">])</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">7.8</span><span class="p">,</span> <span class="mf">3.5</span><span class="p">))</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">semilogy</span><span class="p">(</span><span class="n">Rs</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">bl</span><span class="p">,</span> <span class="mf">1e-6</span><span class="p">),</span> <span class="s2">"o-"</span><span class="p">,</span> <span class="n">ms</span><span class="o">=</span><span class="mf">3.5</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"#1f4e79"</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="mf">0.02</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"#b3402f"</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">"--"</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">1.2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"周期判据"</span><span class="p">)</span>
+<span class="n">hits</span> <span class="o">=</span> <span class="n">Rs</span><span class="p">[</span><span class="n">bl</span> <span class="o">&lt;</span> <span class="mf">0.02</span><span class="p">]</span>
+<span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">hits</span><span class="p">:</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"#2e7d4f"</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">":"</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"候选尺度 R"</span><span class="p">);</span> <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"pstd（对数）"</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">"盲测扫 R：只有 R=10 掉进谷里（代码里没有 ω）"</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">9</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">();</span> <span class="n">savefig</span><span class="p">(</span><span class="s2">"s2-03-盲测扫R.png"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"命中 R:"</span><span class="p">,</span> <span class="n">hits</span><span class="p">,</span> <span class="s2">"  -&gt; omega_hat = R ="</span><span class="p">,</span> <span class="n">hits</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"三个不同真值的定位："</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">w</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">d</span><span class="p">[</span><span class="s2">"locate"</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  omega_true=</span><span class="si">{</span><span class="n">w</span><span class="si">:</span><span class="s2">&gt;4</span><span class="si">}</span><span class="s2">  -&gt;  argmin pstd 的 R = </span><span class="si">{</span><span class="n">v</span><span class="p">[</span><span class="s1">'best'</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">"</span>
+          <span class="sa">f</span><span class="s2">"   误差 </span><span class="si">{</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="s1">'best'</span><span class="p">]</span><span class="o">-</span><span class="nb">float</span><span class="p">(</span><span class="n">w</span><span class="p">))</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="n">w</span><span class="p">)</span><span class="o">*</span><span class="mi">100</span><span class="si">:</span><span class="s2">+.2f</span><span class="si">}</span><span class="s2">%"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/ddb78047cbb21006da37d5a3f16bdceb304025c4e7cb6f5dd498a9de355a227d.png" src="_images/ddb78047cbb21006da37d5a3f16bdceb304025c4e7cb6f5dd498a9de355a227d.png" />
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>图已保存: ..\复现输出\s2-figs\s2-03-盲测扫R.png
+命中 R: [10.]   -&gt; omega_hat = R = [10.]
+
+三个不同真值的定位：
+  omega_true=10.0  -&gt;  argmin pstd 的 R = 10.000   误差 +0.00%
+  omega_true= 7.3  -&gt;  argmin pstd 的 R = 7.305   误差 +0.07%
+  omega_true= 3.7  -&gt;  argmin pstd 的 R = 3.695   误差 -0.14%
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="id3">
+<h2>3.5 代价：三点必须写进报告<a class="headerlink" href="#id3" title="Link to this heading">#</a></h2>
+<section id="r">
+<h3>① 频率分辨率 = <span class="math notranslate nohighlight">\(R\)</span> 网格间距<a class="headerlink" href="#r" title="Link to this heading">#</a></h3>
+<p><span class="math notranslate nohighlight">\(p_{std}\)</span> 的谷极窄（<span class="math notranslate nohighlight">\(\nu\)</span> 偏 0.5% 就退回混沌）。<span class="math notranslate nohighlight">\(R\)</span> 网格步长 0.05 时，
+<span class="math notranslate nohighlight">\(\omega=10\)</span> 的估计误差可以做到 0；换成 0.5 的粗网格就会整条漏掉。
+<strong>分辨率不是方法给的，是扫描预算给的。</strong></p>
+</section>
+<section id="id4">
+<h3>② 扫 <span class="math notranslate nohighlight">\(R\)</span> 是多重检验，虚警必须校正<a class="headerlink" href="#id4" title="Link to this heading">#</a></h3>
+<p>每试一个 <span class="math notranslate nohighlight">\(R\)</span> 都是一次判决。若单点虚警 5%，扫 <span class="math notranslate nohighlight">\(N\)</span> 个点的总虚警是
+<span class="math notranslate nohighlight">\(1-(1-0.05)^N\)</span>：<span class="math notranslate nohighlight">\(N=41\)</span> 时已到 <strong>87.8%</strong>。原文只报单点门限，没有提这一层。
+工程上要么按 Bonferroni 把单点门限压到 <span class="math notranslate nohighlight">\(0.05/N\)</span>，要么用”谷底显著性”而不是”超过门限”来判决。</p>
+</section>
+<section id="id5">
+<h3>③ 步长放大与表 2 的参数不自洽<a class="headerlink" href="#id5" title="Link to this heading">#</a></h3>
+<p>表 2 给 <span class="math notranslate nohighlight">\(f_s=10\)</span> Hz、<span class="math notranslate nohighlight">\(T=0.1\)</span> s；步骤 3 要求 <span class="math notranslate nohighlight">\(T_1=R/f_s\)</span>。<span class="math notranslate nohighlight">\(R=10\)</span> 时 <span class="math notranslate nohighlight">\(T_1=1\)</span> s，
+而内驱周期是 <span class="math notranslate nohighlight">\(2\pi\)</span> s，<strong>每周期只剩 6.28 步</strong>。实测：<span class="math notranslate nohighlight">\(h=1\)</span> s 时 RK4 直接数值发散。</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p><span class="math notranslate nohighlight">\(h_1\)</span></p></th>
+<th class="head"><p>步/周期</p></th>
+<th class="head"><p>结果</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1.0 s</p></td>
+<td><p>6.28</p></td>
+<td><p>数值发散（<span class="math notranslate nohighlight">\(x^5\)</span> 项把误差放大到溢出）</p></td>
+</tr>
+<tr class="row-odd"><td><p>0.5 s</p></td>
+<td><p>12.6</p></td>
+<td><p><span class="math notranslate nohighlight">\(p_{std}=0.56\)</span>，判据失真</p></td>
+</tr>
+<tr class="row-even"><td><p>0.1 s</p></td>
+<td><p>62.8</p></td>
+<td><p><span class="math notranslate nohighlight">\(p_{std}=0.03\)</span>，勉强可信</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(2\pi/300\)</span></p></td>
+<td><p>300</p></td>
+<td><p><span class="math notranslate nohighlight">\(p_{std}&lt;10^{-5}\)</span>，可信</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>所以要么表 2 的 <span class="math notranslate nohighlight">\(f_s\)</span> 实际更高，要么论文并没有真的按 <span class="math notranslate nohighlight">\(T_1=R/f_s\)</span> 改步长
+（而是保持 0.1 s、把仿真时长从 300 s 拉到 3000 s）。<strong>两种口径至少有一种与文中表述不符</strong>，
+这是复现者必须自己决定的地方。本书采用后者（定步长 + 长时长），并在 3.4 的盲测里
+用 <span class="math notranslate nohighlight">\(\Delta t=0.005\)</span> s、<span class="math notranslate nohighlight">\(R=10\to h_1=0.05\)</span> s，落在”可信”区间。</p>
+</section>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./."
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="02-%E5%88%86%E5%B2%94%E4%B8%8E%E4%B8%B4%E7%95%8C%E9%98%88%E5%80%BC.html"
+       title="上一页">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">上一页</p>
+        <p class="prev-next-title">2. 临界阈值：0.72 还是 0.733？</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="04-%E5%85%A8%E7%9B%B8%E4%BD%8D%E9%98%B5%E5%88%97.html"
+       title="下一页">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">下一页</p>
+        <p class="prev-next-title">4. 全相位阵列：初相不是小事</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item"><div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> 目录
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">3.1 先把三个符号摆清楚</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">3.2 原文怎么做的</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#nu-omega-r">3.3 为什么很多复现代码里会出现 <code class="docutils literal notranslate"><span class="pre">nu=omega/R</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#omega">3.4 盲测：把 <span class="math notranslate nohighlight">\(\omega\)</span> 彻底藏起来</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">3.5 代价：三点必须写进报告</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#r">① 频率分辨率 = <span class="math notranslate nohighlight">\(R\)</span> 网格间距</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">② 扫 <span class="math notranslate nohighlight">\(R\)</span> 是多重检验，虚警必须校正</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">③ 步长放大与表 2 的参数不自洽</a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+作者： 李俊 · 原文：Yang Y, Ding Q, Gao Y, Chen J. Sensors, 2023, 23(17): 7598
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+<div class="extra_footer">
+  ν 与 R 的辨析见第 3 章；复现边界见第 7、8 章。
+</div>
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

@@ -1,0 +1,119 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>03-阶段三/阶段3-过关产出结果.md</title><style>
+:root{--bg:#f6f7f9;--panel:#fff;--line:#e3e7ec;--text:#1b232c;--muted:#63707e;--accent:#2f6fd0;--soft:#eaf1fc}
+@media(prefers-color-scheme:dark){:root{--bg:#14181d;--panel:#1d232a;--line:#303a45;--text:#e7edf3;--muted:#a7b3c0;--accent:#7fb0f5;--soft:#21334d}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.8 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+.bar{position:sticky;top:0;background:var(--panel);border-bottom:1px solid var(--line);padding:9px 24px;font-size:13px;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.bar a{color:var(--accent);text-decoration:none}.bar a:hover{text-decoration:underline}
+.bar .fn{color:var(--muted);margin-left:auto;word-break:break-all}
+main{max-width:980px;margin:0 auto;padding:26px 28px 70px;background:var(--panel);min-height:calc(100vh - 44px);
+  border-left:1px solid var(--line);border-right:1px solid var(--line)}
+h1,h2,h3,h4{line-height:1.4;margin:1.5em 0 .6em;font-weight:650}
+h1{font-size:25px;border-bottom:1px solid var(--line);padding-bottom:10px;margin-top:.4em}
+h2{font-size:20px;border-bottom:1px solid var(--line);padding-bottom:7px}
+h3{font-size:17px}h4{font-size:15px}
+p,li{color:var(--text)}li{margin:.25em 0}
+a{color:var(--accent)}
+code{background:var(--soft);padding:1px 5px;border-radius:4px;font:12.6px ui-monospace,Consolas,monospace}
+pre{background:var(--soft);border:1px solid var(--line);border-radius:8px;padding:14px 16px;overflow:auto}
+pre code{background:none;padding:0}
+blockquote{border-left:3px solid var(--accent);background:var(--soft);margin:12px 0;padding:8px 16px;color:var(--muted)}
+blockquote p{margin:.3em 0}
+.staticnote{max-width:980px;margin:14px auto -8px;padding:9px 14px;border:1px solid var(--line);
+  border-left:3px solid var(--accent);border-radius:0 8px 8px 0;background:var(--soft);
+  font-size:12.6px;color:var(--muted)}
+.staticnote a{color:var(--accent)}
+table{border-collapse:collapse;width:100%;margin:14px 0;font-size:13.4px;display:block;overflow:auto}
+th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top}
+th{background:var(--soft);color:var(--muted);white-space:nowrap}
+tr:nth-child(even) td{background:rgba(127,150,180,.045)}
+hr{border:none;border-top:1px solid var(--line);margin:26px 0}
+strong{font-weight:650}
+</style>
+<script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']]},
+  options:{skipHtmlTags:['script','noscript','style','textarea','pre','code','annotation']}};</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+</head><body>
+<div class="bar"><a href="../index.html">← 返回资料索引</a>
+<a href="阶段3-过关产出结果.md">查看 Markdown 源码</a><span class="fn">03-阶段三/阶段3-过关产出结果.md</span></div>
+<div class="staticnote">这是 <b>静态排版副本</b>，生成于 2026-11-24 20:12。直接双击 <code>index.html</code> 时看到的就是它；若 Markdown 刚改过，请在工作区运行 <code>py build_static.py</code> 重新生成，或用 <code>start_index.bat</code> 启动本地服务查看实时渲染版。页内公式由 MathJax 渲染，需要联网。</div><main><h1>阶段 3 过关产出结果：阈值与判据</h1>
+<blockquote><p><strong>验收口径</strong>：<a href="../00-总览/阅读路线.html">阅读路线阶段 3</a> 原文——「γ 扫描曲线（横轴策动力幅值 γ，纵轴判据值），标出临界点 γ_c；把判态算法写成伪代码（输入 x(t) 序列 → 输出 0/1）；记录盲区出现的初相位区间。」</p><p><strong>核实时点</strong>：2026-11-23｜<strong>全部数字取自实跑</strong>，程序：<a href="../learn/3.ipynb">learn/3.ipynb</a>（26 单元 / 13 段代码 / 5 张内嵌图 / 0 报错 / 259 s）。机器可读汇总：<a href="../复现输出/阶段3-判据与盲区汇总.json">阶段3-判据与盲区汇总.json</a>。</p><p><strong>本页五张 PNG 已逐张验真</strong>（uniq 颜色 515–1569，非纯白图），可直接内嵌引用。</p></blockquote>
+<hr>
+<h2>一、过关要求逐条对照</h2>
+<table><thead><tr><th>#</th><th>路线过关要求</th><th>交付实物</th><th>结果</th></tr></thead><tbody>
+<tr><td>1</td><td>γ 扫描曲线，标出 γ_c</td><td>§四 三判据 γ 扫描图，标同相 γ_c=0.0100、全相 γ_c=0.0196、实测翻转 0.0175</td><td>✅</td></tr>
+<tr><td>2</td><td>判态算法伪代码（x(t)→0/1）</td><td>§五 完整伪代码：pstd 主 + MsEn 副 + 0-1 \</td><td>K\</td><td>第三票</td><td>✅</td></tr>
+<tr><td>3</td><td>盲区初相位区间</td><td>§六 Δ_max=60.69° + θ 全周 × 3 σ 退化图</td><td>✅</td></tr>
+<tr><td>4</td><td>（附加）判据局限对比</td><td>§二 五类判据避坑表 + 三判据对照扫描</td><td>✅</td></tr>
+<tr><td>5</td><td>（附加）0-1 test 含噪修正</td><td>§三 修正实现 bug（逐 c 取绝对值）→ 次序恢复、Δ\</td><td>K\</td><td>全档为正</td><td>✅</td></tr>
+<tr><td>6</td><td>（附加）回扣阶段 2 变尺度悬案</td><td>§七 谱峰占比 ρ 识别真频率 R=10</td><td>✅</td></tr>
+</tbody></table>
+<p><strong>验收结论：阶段 3 过关。</strong> 但三项过关产出各有必须连条件抄的边界，见文末。</p>
+<hr>
+<h2>二、判据全景：不能用什么</h2>
+<table><thead><tr><th>判据</th><th>原理</th><th>局限</th><th>出处</th></tr></thead><tbody>
+<tr><td>相轨迹 / 时序目测</td><td>看轨道是否整圈绕行</td><td>主观、精度低；本机 $\max</td><td>x</td><td>&gt;1.2$ 虚警 100%</td><td>B1 + 本机</td></tr>
+<tr><td>Melnikov / Shilnikov</td><td>解析算混沌参数范围</td><td>只说"可能混沌"，不能确定</td><td>B1</td></tr>
+<tr><td>Lyapunov 指数</td><td>收敛/发散率</td><td>算法复杂、易受噪声影响</td><td>B1</td></tr>
+<tr><td>相图分割 / 二分 / Poincaré</td><td>几何或统计定跃变</td><td>仍有局限；Poincaré 阈值随步长 ±0.005 漂</td><td>B1 + 阶段 2</td></tr>
+<tr><td>0-1 test</td><td>直接吃序列输出 0/1</td><td>须逐 c 取绝对值；幅度小、带内非单调 → 第三票</td><td>B3 + 本机</td></tr>
+<tr><td>多尺度熵 MsEn</td><td>复杂度多尺度度量</td><td>容差选错全塌成 0；须看趋势不只看幅值</td><td>B1 + 本机</td></tr>
+</tbody></table>
+<hr>
+<h2>三、三判据对照与含噪修正（核心科学发现）</h2>
+<p><img src="../复现输出/阶段3-三判据对照扫描.png" alt="三判据对照扫描" style="display:block;max-width:100%;height:auto;margin:10px 0"></p>
+<ul><li><strong>pstd（基准）</strong>：λ=0.70 → 0.674、λ=0.76 → 0.010，阈值 0.08 干净分开；在 0.740 断崖。</li><li><strong>MsEn（τ=1,2,4,8，m=2，r=0.2SD）</strong>：混沌 0.635、周期 0.038，同样在 0.740 跌到 0.04，与 pstd 同步。</li><li><strong>0-1 test 的 |K|</strong>：<strong>混沌 0.0316 &gt; 周期 0.0083，方向与理论一致</strong>；但幅度远小于 1，且黄色阈值带内非单调（λ=0.745 处反弹到 0.0559），对间歇不敏感。</li></ul>
+<p><img src="../复现输出/阶段3-判据含噪漂移.png" alt="判据含噪漂移" style="display:block;max-width:100%;height:auto;margin:10px 0"></p>
+<table><thead><tr><th>σ</th><th>\</th><th>K\</th><th>(混)</th><th>\</th><th>K\</th><th>(周)</th><th>Δ\</th><th>K\</th><th></th><th>ΔM(MsEn)</th></tr></thead><tbody>
+<tr><td>0.00</td><td>0.0316</td><td>0.0074</td><td>+0.0241</td><td>+0.5970</td></tr>
+<tr><td>0.02</td><td>0.0176</td><td>0.0077</td><td>+0.0099</td><td>+0.8368</td></tr>
+<tr><td>0.05</td><td>0.0552</td><td>0.0076</td><td>+0.0476</td><td>+0.7591</td></tr>
+<tr><td>0.10</td><td>0.0423</td><td>0.0074</td><td>+0.0349</td><td>+0.7969</td></tr>
+<tr><td>0.20</td><td>0.0291</td><td>0.0074</td><td>+0.0217</td><td>+0.7148</td></tr>
+</tbody></table>
+<p><strong>一处翻案（重要）</strong>：早期实现用带符号中位数 $\mathrm{median}_c\,\mathrm{corr}(n,M_c)$，得到"混沌 −0.031 &lt; 周期 +0.008、含噪翻号"的假象，一度判为"弃用"。那是<strong>实现 bug</strong>——有限长序列下 $K_c$ 会因相位抵消出负值，负值被中位数累积就拉反了次序。改为<strong>逐 c 取绝对值</strong> $K=\mathrm{median}_c|\mathrm{corr}(n,M_c)|$ 后，两态次序正确、Δ\|K\| 五档全正、不再翻号。<strong>结论：0-1 test 可用但须本机定分界（幅度远小于理论 1）且带内非单调，推荐 pstd 主 + MsEn 副 + 0-1 第三票</strong>。这不等于 B3 论文错了——条件是相量驱动强周期混沌 + 750 点短序列，与原始条件不同。</p>
+<hr>
+<h2>四、γ 扫描曲线与临界点 γ_c（过关产出 1）</h2>
+<p><img src="../复现输出/阶段3-gamma扫描与临界点.png" alt="γ 扫描与临界点" style="display:block;max-width:100%;height:auto;margin:10px 0"></p>
+<p>条件：λ=0.72、同相、σ=0、h=0.02 s、T=200 s。</p>
+<ul><li><strong>同相触发</strong> $\gamma_c=C_{trig}-\lambda=\mathbf{0.0100}$；</li><li><strong>全相位覆盖</strong> $\gamma\approx\mathbf{0.0196}$（三振子 $\Delta_{\max}=60°$ 无缝覆盖，与销账 Q7 吻合）；</li><li>实测 $p_{std}$ 首个翻转 $\gamma=0.0175$，落在两者之间——<strong>判据翻转点 ≠ 相量几何阈值</strong>，还要等吸引子收敛。</li></ul>
+<blockquote><p>三个判据的翻转点可能不一致（K 在此完全不可用），这正是必须交叉验证的理由。</p></blockquote>
+<hr>
+<h2>五、判态伪代码（过关产出 2）</h2>
+<pre><code>函数 判态(x, 噪声σ, 标定参数):
+    输入: x[0..N-1]        # 稳态段观测（丢弃瞬态后）
+          σ, pstd_th(σ), K_th(σ), MsEn_th(σ)   # 本机 H0 标定门限，不是理论值
+    1. 去均值 → xc
+    2. p = xc[每 2π 采样一次]          # Poincaré 截面，需内驱相位参考
+       pstd = std(p[后半段])
+    3. MsEn = [ SampEn(x 粗粒度 τ) for τ in (1,2,4,8) ]
+       平稳性 = std(MsEn 后半窗) &lt; 容差
+    4. K = median_c |corr(n, p_c(n)² + q_c(n)²)|   # 逐 c 取绝对值！周期态 K 小
+    5. vote = (pstd &lt; pstd_th) + (MsEn低 且 平稳) + (K &lt; K_th)
+       return 1 if vote &gt;= 2 else 0
+    输出: 0=混沌/无信号, 1=大尺度周期/有信号</code></pre>
+<p>门限须在目标噪声条件下用 $H_0$ 样本重标定（阶段 4 做 $P_{fa}$ 时一并给）；三振子对三路各自执行，再按 OR / 多数表决融合。</p>
+<hr>
+<h2>六、初相位盲区区间（过关产出 3）</h2>
+<p><img src="../复现输出/阶段3-初相位盲区噪声退化.png" alt="初相位盲区噪声退化" style="display:block;max-width:100%;height:auto;margin:10px 0"></p>
+<p>合成幅值 $C=\sqrt{\lambda^2+\gamma^2+2\lambda\gamma\cos\Delta\theta}\ge0.73$ 给出</p>
+<p>$$\Delta_{\max}(\lambda,\gamma)=\arccos\frac{0.73^2-\lambda^2-\gamma^2}{2\lambda\gamma}$$</p>
+<p>λ=0.72、γ=0.02 时 $\Delta_{\max}=\mathbf{60.69°}$（与 ★[2] 完全吻合），即 <strong>$|\Delta\theta|&gt;60.69°$ 为硬盲区</strong>；三振子 0°/±120° 把覆盖补到理论 100%。</p>
+<table><thead><tr><th>σ</th><th>单振子检出</th><th>三振子 OR</th></tr></thead><tbody>
+<tr><td>0.00</td><td>2/36 (6%)</td><td>13/36 (36%)</td></tr>
+<tr><td>0.05</td><td>2/36 (6%)</td><td>14/36 (39%)</td></tr>
+<tr><td>0.15</td><td>5/36 (14%)</td><td>17/36 (47%)</td></tr>
+</tbody></table>
+<p>⚠️ 理论 33.7%/100% 用<strong>合成幅值 $C\ge0.73$ 解析判据</strong>；实测用 <strong>$p_{std}&lt;0.08$ 动力学判据 + 200 s 短窗 + 单种子</strong>，故更保守。三振子 OR 持续 2–3 倍高于单振子，"多振子扩大覆盖"方向成立；绝对覆盖率待阶段 4 用长序列 + 多种子重标。</p>
+<hr>
+<h2>七、回扣阶段 2：变尺度真频率判别</h2>
+<p><img src="../复现输出/阶段3-变尺度真频率判别.png" alt="变尺度真频率判别" style="display:block;max-width:100%;height:auto;margin:10px 0"></p>
+<p>真值 $R=10$ 的信号频率处谱峰占比 ρ=0.0012，比伪相变候选（R=8/9/13 的 ρ≈0）高一个数量级。<strong>pstd 分不开真假 R，谱峰可以</strong>——这就是阶段 2 欠缺的"能看见信号的统计量"。完整频率/幅值估计仍是阶段 4 任务。</p>
+<hr>
+<h2>八、边界声明与销账</h2>
+<p><strong>边界</strong>：条件为 λ=0.72、h=0.02 s、T=200–300 s、干净/白噪、单种子；MsEn 取 m=2、r=0.2SD、τ∈{1,2,4,8}（r 选错全塌成 0）。0-1 test 用 K=median_c\|corr(n,M_c)\|（30 个 c，逐 c 取绝对值），幅度偏小的结论只在本系统条件下成立，不外推 B3 原始条件。各文献 SNR 门限不可横向比较。</p>
+<p><strong>阶段一问题销账进展</strong>：</p>
+<ul><li><strong>Q7 三振子盲区</strong>：解析式封口 + 本阶段补 θ 全周 × 3 σ 退化实验 ✅（绝对覆盖率待阶段 4 重标）</li><li><strong>Q11 OR vs 多数表决</strong>：销账已证 +43~58 pp，本阶段把 2-of-3 写进伪代码 ✅</li><li><strong>Q6 换判据漂多少</strong>：三判据跃变点已对照 🟡（恢复力/噪声维度仍缺）</li><li><strong>Q10 极低频段</strong>：待导师 🔴</li></ul>
+<p><strong>本阶段不交</strong>：$P_d/P_{fa}$ / ROC / SNR 门限（阶段 4）、定点化位宽（阶段 5）。逐问回答见 <a href="阶段3-判据与盲区-问题回答.html">阶段3-判据与盲区-问题回答.md</a>。</p></main></body></html>

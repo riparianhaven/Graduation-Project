@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 680 470" width="680" height="470" role="img" xmlns="http://www.w3.org/2000/svg" style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif">
+<title>λ 域相变边界追踪与固定工作点法的流程对比</title>
+<desc>左侧为文献常规做法：固定内驱幅值 0.72、单次积分、二值判态，输出有无；右侧为相变边界追踪法：二分搜索边界 λ*、驻留比与 H0 分布、三振子边界反演幅值与初相，输出带置信区间的估计。两者共用同一前端与同一振子，差别在于把相变当事件还是当位置。2026-11-19。</desc>
+<defs>
+  <marker id="ag" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+    <path d="M2 1L8 5L2 9" fill="none" stroke="#888780" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </marker>
+  <marker id="ab" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+    <path d="M2 1L8 5L2 9" fill="none" stroke="#185FA5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </marker>
+</defs>
+<rect x="0" y="0" width="680" height="470" fill="#FFFFFF"/>
+
+<text x="28" y="34" font-size="15" font-weight="500" fill="#0C447C" dominant-baseline="central">λ 域相变边界追踪 · 与固定工作点法的流程差异</text>
+<text x="28" y="56" font-size="11.5" fill="#5F5E5A" dominant-baseline="central">同一前端、同一振子、同一相变判据；差别只在：把相变当「事件」还是当「位置」</text>
+
+<line x1="330" y1="78" x2="330" y2="404" stroke="#D3D1C7" stroke-width="1" stroke-dasharray="4 4"/>
+
+<!-- ============ 左栏：常规做法 ============ -->
+<text x="47" y="88" font-size="11" font-weight="500" fill="#5F5E5A" dominant-baseline="central">文献常规：固定工作点</text>
+
+<rect x="47" y="102" width="250" height="40" rx="5" fill="#F1EFE8" stroke="#B4B2A9" stroke-width="1"/>
+<text x="172" y="122" font-size="12" fill="#2C2C2A" text-anchor="middle" dominant-baseline="central">含噪极低频输入（已知频率）</text>
+
+<rect x="47" y="164" width="250" height="40" rx="5" fill="#F1EFE8" stroke="#B4B2A9" stroke-width="1"/>
+<text x="172" y="184" font-size="12" fill="#2C2C2A" text-anchor="middle" dominant-baseline="central">固定 λ = 0.72（离线标定一次）</text>
+
+<rect x="47" y="226" width="250" height="40" rx="5" fill="#F1EFE8" stroke="#B4B2A9" stroke-width="1"/>
+<text x="172" y="246" font-size="12" fill="#2C2C2A" text-anchor="middle" dominant-baseline="central">单次积分 → 判态（二值）</text>
+
+<rect x="47" y="288" width="250" height="40" rx="5" fill="#FAECE7" stroke="#C88B72" stroke-width="1"/>
+<text x="172" y="300" font-size="12" fill="#7A2E12" text-anchor="middle" dominant-baseline="central">边界带内非单调</text>
+<text x="172" y="317" font-size="11" fill="#7A2E12" text-anchor="middle" dominant-baseline="central">0.734 周期 → 0.735 混沌</text>
+
+<rect x="47" y="350" width="250" height="40" rx="5" fill="#F1EFE8" stroke="#B4B2A9" stroke-width="1"/>
+<text x="172" y="370" font-size="12" font-weight="500" fill="#2C2C2A" text-anchor="middle" dominant-baseline="central">输出：有 / 无（1 bit）</text>
+
+<line x1="172" y1="142" x2="172" y2="160" stroke="#888780" stroke-width="1.2" marker-end="url(#ag)"/>
+<line x1="172" y1="204" x2="172" y2="222" stroke="#888780" stroke-width="1.2" marker-end="url(#ag)"/>
+<line x1="172" y1="266" x2="172" y2="284" stroke="#888780" stroke-width="1.2" marker-end="url(#ag)"/>
+<line x1="172" y1="328" x2="172" y2="346" stroke="#888780" stroke-width="1.2" marker-end="url(#ag)"/>
+
+<text x="47" y="416" font-size="10.5" fill="#8A4B2A" dominant-baseline="central">工作点锁死 → 阈值随噪声漂移，虚警不可控</text>
+<text x="47" y="434" font-size="10.5" fill="#8A4B2A" dominant-baseline="central">覆盖率与虚警二选一（57.5%/0% ↔ 98.6%/75%）</text>
+
+<!-- ============ 右栏：PBT ============ -->
+<text x="371" y="88" font-size="11" font-weight="500" fill="#185FA5" dominant-baseline="central">本方法：λ 域相变边界追踪（PBT）</text>
+
+<rect x="371" y="102" width="250" height="40" rx="5" fill="#E6F1FB" stroke="#378ADD" stroke-width="1"/>
+<text x="496" y="122" font-size="12" fill="#0C2E4E" text-anchor="middle" dominant-baseline="central">含噪极低频输入（同一前端）</text>
+
+<rect x="371" y="164" width="250" height="40" rx="5" fill="#E6F1FB" stroke="#378ADD" stroke-width="1"/>
+<text x="496" y="184" font-size="12" fill="#0C2E4E" text-anchor="middle" dominant-baseline="central">二分搜索边界 λ*（6–8 次重放）</text>
+
+<rect x="371" y="226" width="250" height="40" rx="5" fill="#E6F1FB" stroke="#378ADD" stroke-width="1"/>
+<text x="496" y="246" font-size="12" fill="#0C2E4E" text-anchor="middle" dominant-baseline="central">驻留比 r 与 H0 分布 → p 值</text>
+
+<rect x="371" y="288" width="250" height="40" rx="5" fill="#E6F1FB" stroke="#378ADD" stroke-width="1"/>
+<text x="496" y="308" font-size="12" fill="#0C2E4E" text-anchor="middle" dominant-baseline="central">三振子边界 {λ1,λ2,λ3} → 反演 (γ, θ)</text>
+
+<rect x="371" y="350" width="250" height="40" rx="5" fill="#0C447C" stroke="#0C447C" stroke-width="1"/>
+<text x="496" y="370" font-size="12" font-weight="500" fill="#FFFFFF" text-anchor="middle" dominant-baseline="central">输出：γ ± CI · θ · p · 判决</text>
+
+<line x1="496" y1="142" x2="496" y2="160" stroke="#185FA5" stroke-width="1.2" marker-end="url(#ab)"/>
+<line x1="496" y1="204" x2="496" y2="222" stroke="#185FA5" stroke-width="1.2" marker-end="url(#ab)"/>
+<line x1="496" y1="266" x2="496" y2="284" stroke="#185FA5" stroke-width="1.2" marker-end="url(#ab)"/>
+<line x1="496" y1="328" x2="496" y2="346" stroke="#185FA5" stroke-width="1.2" marker-end="url(#ab)"/>
+
+<text x="371" y="416" font-size="10.5" fill="#185FA5" dominant-baseline="central">工作点随边界移动 → 同相位移 / 幅值 = 1.000</text>
+<text x="371" y="434" font-size="10.5" fill="#185FA5" dominant-baseline="central">跟踪模式：上一帧先验 → 重放降至 2–3 次</text>
+
+<!-- 底部注 -->
+<text x="28" y="458" font-size="10" fill="#888780" dominant-baseline="central">解析依据：C² = λ² + γ² + 2λγcosΔ ≥ 0.73² ⇒ λ*(γ,Δ) = −γcosΔ + √(0.73² − γ²sin²Δ)</text>
+</svg>

@@ -1,0 +1,86 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>00-总览/环境说明-跑ipynb.md</title><style>
+:root{--bg:#f6f7f9;--panel:#fff;--line:#e3e7ec;--text:#1b232c;--muted:#63707e;--accent:#2f6fd0;--soft:#eaf1fc}
+@media(prefers-color-scheme:dark){:root{--bg:#14181d;--panel:#1d232a;--line:#303a45;--text:#e7edf3;--muted:#a7b3c0;--accent:#7fb0f5;--soft:#21334d}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.8 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+.bar{position:sticky;top:0;background:var(--panel);border-bottom:1px solid var(--line);padding:9px 24px;font-size:13px;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.bar a{color:var(--accent);text-decoration:none}.bar a:hover{text-decoration:underline}
+.bar .fn{color:var(--muted);margin-left:auto;word-break:break-all}
+main{max-width:980px;margin:0 auto;padding:26px 28px 70px;background:var(--panel);min-height:calc(100vh - 44px);
+  border-left:1px solid var(--line);border-right:1px solid var(--line)}
+h1,h2,h3,h4{line-height:1.4;margin:1.5em 0 .6em;font-weight:650}
+h1{font-size:25px;border-bottom:1px solid var(--line);padding-bottom:10px;margin-top:.4em}
+h2{font-size:20px;border-bottom:1px solid var(--line);padding-bottom:7px}
+h3{font-size:17px}h4{font-size:15px}
+p,li{color:var(--text)}li{margin:.25em 0}
+a{color:var(--accent)}
+code{background:var(--soft);padding:1px 5px;border-radius:4px;font:12.6px ui-monospace,Consolas,monospace}
+pre{background:var(--soft);border:1px solid var(--line);border-radius:8px;padding:14px 16px;overflow:auto}
+pre code{background:none;padding:0}
+blockquote{border-left:3px solid var(--accent);background:var(--soft);margin:12px 0;padding:8px 16px;color:var(--muted)}
+blockquote p{margin:.3em 0}
+.staticnote{max-width:980px;margin:14px auto -8px;padding:9px 14px;border:1px solid var(--line);
+  border-left:3px solid var(--accent);border-radius:0 8px 8px 0;background:var(--soft);
+  font-size:12.6px;color:var(--muted)}
+.staticnote a{color:var(--accent)}
+table{border-collapse:collapse;width:100%;margin:14px 0;font-size:13.4px;display:block;overflow:auto}
+th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top}
+th{background:var(--soft);color:var(--muted);white-space:nowrap}
+tr:nth-child(even) td{background:rgba(127,150,180,.045)}
+hr{border:none;border-top:1px solid var(--line);margin:26px 0}
+strong{font-weight:650}
+</style>
+<script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']]},
+  options:{skipHtmlTags:['script','noscript','style','textarea','pre','code','annotation']}};</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+</head><body>
+<div class="bar"><a href="../index.html">← 返回资料索引</a>
+<a href="环境说明-跑ipynb.md">查看 Markdown 源码</a><span class="fn">00-总览/环境说明-跑ipynb.md</span></div>
+<div class="staticnote">这是 <b>静态排版副本</b>，生成于 2026-11-24 20:12。直接双击 <code>index.html</code> 时看到的就是它；若 Markdown 刚改过，请在工作区运行 <code>py build_static.py</code> 重新生成，或用 <code>start_index.bat</code> 启动本地服务查看实时渲染版。页内公式由 MathJax 渲染，需要联网。</div><main><h1>环境说明：用 .venv 跑 ipynb</h1>
+<ul><li>环境位置：<code>C:\Users\22902\WorkBuddy\毕设\.venv</code>（Python 3.13.9，Windows，约 353 MB）</li><li><strong>最省事的一条路</strong>：双击 <a href="../start_notebook.bat">start_notebook.bat</a> → 浏览器自动打开 JupyterLab → 打开 <code>复现-2-混沌振子建模与临界阈值.ipynb</code> → Kernel 选 <code>Python 3 (毕设 .venv)</code> → Run All。</li><li>已实跑验证（2026-11-14）：在虚拟环境里跑 notebook 的<strong>临时副本</strong>，39.8 秒、13 个代码单元全部有输出、10 张内嵌图、0 报错；验证过程未改动已交付的 ipynb 与 <code>复现输出/</code> 里的图纸。</li><li>本环境只服务于 <a href="../复现-2-混沌振子建模与临界阈值.html">notebook 复现</a>；<a href="阅读路线.html">阅读路线</a>、<a href="第0步-技术路线方框图.html">第 0 步方框图</a>、<code>index.html</code> 的排版服务用的是系统 <code>py</code>，两者互不干扰。</li></ul>
+<table><thead><tr><th>文件</th><th>作用</th></tr></thead><tbody>
+<tr><td><code>requirements.txt</code></td><td>顶层依赖与锁定版本，换机器重装用</td></tr>
+<tr><td><code>start_notebook.bat</code></td><td>一键启动 JupyterLab（虚拟环境的 Python）</td></tr>
+<tr><td><code>run_ipynb.bat</code> / <code>tools/run_ipynb.py</code></td><td>不开浏览器，直接重跑 notebook 并把输出写回</td></tr>
+<tr><td><code>.venv\share\jupyter\kernels\python3\kernel.json</code></td><td>Kernel 定义，已指向本工作区的虚拟环境</td></tr>
+</tbody></table>
+<hr>
+<h2>一、三种打开方式</h2>
+<table><thead><tr><th>方式</th><th>怎么做</th><th>适合</th></tr></thead><tbody>
+<tr><td><strong>① JupyterLab（推荐）</strong></td><td>双击 <code>start_notebook.bat</code>，浏览器自动打开 <code>127.0.0.1:8888/lab</code>；左侧双击 ipynb，右上角 Kernel 选 <code>Python 3 (毕设 .venv)</code>，菜单 Run → Run All Cells</td><td>想边看边改参数、当场看 10 张图</td></tr>
+<tr><td><strong>② VS Code</strong></td><td>打开 <code>.ipynb</code> → 右上角「选择内核」→「Python 环境」→ 选 <code>.\.venv\Scripts\python.exe</code> → 全部运行</td><td>已经习惯 VS Code、要断点调试</td></tr>
+<tr><td><strong>③ 命令行重跑</strong></td><td>双击 <code>run_ipynb.bat</code>（等价于 <code>.venv\Scripts\python.exe tools/run_ipynb.py</code>），等约 40 秒看 PASS</td><td>只想刷新结果、不想开界面；可传给别人复现</td></tr>
+</tbody></table>
+<p><code>tools/run_ipynb.py</code> 常用参数：</p>
+<pre><code>.venv\Scripts\python.exe tools/run_ipynb.py --no-write                  # 只验证，不改动 ipynb
+.venv\Scripts\python.exe tools/run_ipynb.py --workdir D:\tmp\repro     # 图纸另存到别处
+.venv\Scripts\python.exe tools/run_ipynb.py --input foo.ipynb --output bar.ipynb</code></pre>
+<blockquote><p>⚠️ 默认重跑会把输出<strong>写回原 ipynb</strong>，并覆盖 <code>复现输出\</code> 下 10 张 PNG 与 <code>结果汇总.json</code>。这是预期行为，但<strong>写论文前请确认曲线数字与文档里引用的版本一致</strong>；只想检查环境就用 <code>--no-write --workdir</code> 指到临时目录。</p></blockquote>
+<hr>
+<h2>二、装了什么（顶层依赖，版本已锁定）</h2>
+<table><thead><tr><th>包</th><th>版本</th><th>用途</th></tr></thead><tbody>
+<tr><td>numpy</td><td>2.4.6</td><td>RK4 积分、扫描、统计</td></tr>
+<tr><td>matplotlib</td><td>3.11.0</td><td>10 张图，中文字体 Microsoft YaHei</td></tr>
+<tr><td>ipykernel</td><td>6.30.0</td><td>notebook 的 Python 内核</td></tr>
+<tr><td>nbformat</td><td>5.11.1</td><td>读写 .ipynb</td></tr>
+<tr><td>nbclient</td><td>0.11.0</td><td>无界面执行全部单元</td></tr>
+<tr><td>nbconvert</td><td>7.17.2</td><td>导出 HTML 预览</td></tr>
+<tr><td>jupyterlab</td><td>4.4.5</td><td>浏览器界面</td></tr>
+</tbody></table>
+<p>版本与交付 notebook 实跑时<strong>逐一对齐</strong>，避免升级 numpy / matplotlib 后曲线与论文里的数字漂移。完整依赖树可用 <code>.venv\Scripts\python.exe -m pip freeze</code> 查看。</p>
+<blockquote><p>系统 <code>py</code> 里原本就有 numpy / matplotlib / ipykernel / nbformat / nbclient / nbconvert，只是<strong>没有</strong> JupyterLab。虚拟环境是独立副本，不改动、也不依赖系统 Python。</p></blockquote>
+<hr>
+<h2>三、换电脑 / 删了 .venv 怎么重建</h2>
+<p>在工作区根目录执行（Windows、Python 3.13）：</p>
+<pre><code>py -m venv .venv
+.venv\Scripts\python.exe -m pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple</code></pre>
+<p>装完即可双击 <code>start_notebook.bat</code>。若 pip 默认源不通，保留上面的清华源参数。</p>
+<p><strong>关于 Kernel 的绝对路径</strong>：当前 <code>.venv\share\jupyter\kernels\python3\kernel.json</code> 里 <code>argv[0]</code> 写死为<br><code>C:/Users/22902/WorkBuddy/毕设/.venv/Scripts/python.exe</code>，<code>display_name</code> 为 <code>Python 3 (毕设 .venv)</code>。这样即使从系统 Jupyter 或 VS Code 启动，选 <code>python3</code> 也会落到本虚拟环境。<strong>如果工作区换了路径或重建了 venv，把 <code>argv[0]</code> 改成新的 <code>python.exe</code> 绝对路径即可</strong>（或重新执行<br><code>.venv\Scripts\python.exe -m ipykernel install --prefix .venv --name python3 --display-name "Python 3 (毕设 .venv)"</code> 生成默认 kernelspec，此时依赖激活 venv 后的 PATH）。</p>
+<hr>
+<h2>四、常见问题</h2>
+<ul><li><strong>中文标题变方块</strong>：一般不会，系统字体 Microsoft YaHei / SimHei 在虚拟环境的 matplotlib 里已确认可用。若换了机器，把 notebook 顶部的 <code>plt.rcParams['font.sans-serif']</code> 改成该机器有的中文字体。</li><li><strong><code>Proactor event loop does not implement add_reader</code> 警告</strong>：Windows + pyzmq 的常见提示，出现在 stderr，<strong>不影响执行结果</strong>，可忽略。</li><li><strong>8888 端口被占用</strong>：JupyterLab 会自动换端口，以控制台里打印的带 token URL 为准；也可以编辑 <code>start_notebook.bat</code> 里的 <code>--port=8888</code>。</li><li><strong>重跑后数字和文档对不上</strong>：先确认没有 <code>--no-write</code> 之外的版本混用；<code>复现输出/结果汇总.json</code> 记录了当次参数与耗时。</li><li><strong><code>.venv</code> 不要提交 / 打包</strong>：约 353 MB，且含绝对路径；交付给别人的只需 <code>requirements.txt</code> + ipynb + 图纸。</li><li><strong>关闭服务</strong>：JupyterLab 那个黑色控制台窗口关闭即停止；<code>index.html</code> 的 8765 排版服务是另一回事，不受影响。</li></ul>
+<hr>
+<h2>五、相关文件</h2>
+<p><a href="../复现-2-混沌振子建模与临界阈值.html">notebook 实跑预览（网页，无需环境）</a>｜<a href="../复现-2-混沌振子建模与临界阈值.ipynb">ipynb 源文件</a>｜<a href="../02-阶段二/解读-主要内容2-混沌振子建模与临界阈值.html">「主要内容 2」逐句解读</a>｜<a href="../复现输出/结果汇总.json">结果汇总.json</a>｜<a href="../index.html">返回资料索引</a></p></main></body></html>

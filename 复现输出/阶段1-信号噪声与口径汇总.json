@@ -1,0 +1,100 @@
+{
+  "stage": 1,
+  "signal_model": {
+    "form": "s(t) = gamma*cos(2*pi*f*t + theta)",
+    "gamma_nT": 1.0,
+    "freq_grid_Hz": [
+      0.1,
+      1.0,
+      10.0
+    ],
+    "theta_deg_assumed": 40.0,
+    "known": [
+      "frequency (or band)"
+    ],
+    "unknown": [
+      "gamma",
+      "theta"
+    ]
+  },
+  "noise_models": {
+    "A_white": "n ~ N(0, sigma^2), per-sample",
+    "B_colored": {
+      "psd": "f^(-alpha)",
+      "alphas": [
+        0.5,
+        1.0,
+        1.2,
+        1.5
+      ],
+      "fitted_slopes": [
+        -0.457,
+        -0.957,
+        -1.156,
+        -1.456
+      ]
+    },
+    "C_measured": "PENDING — replace with导师实测序列"
+  },
+  "conditions": {
+    "fs_Hz": 1000.0,
+    "T_s": 300.0,
+    "B_Hz": 10.0,
+    "seed": 20261123,
+    "snr_main_def": "SNR_E = 10lg(sum s^2 / sum n^2)"
+  },
+  "snr_reverse": [
+    {
+      "SNR_E_dB": -23.0,
+      "sigma_nT": 9.9881,
+      "SNR_band_dB": -6.0
+    },
+    {
+      "SNR_E_dB": -21.0,
+      "sigma_nT": 7.9339,
+      "SNR_band_dB": -4.0
+    },
+    {
+      "SNR_E_dB": -20.0,
+      "sigma_nT": 7.0711,
+      "SNR_band_dB": -3.0
+    },
+    {
+      "SNR_E_dB": -15.0,
+      "sigma_nT": 3.9764,
+      "SNR_band_dB": 2.0
+    },
+    {
+      "SNR_E_dB": -10.0,
+      "sigma_nT": 2.2361,
+      "SNR_band_dB": 7.0
+    }
+  ],
+  "hypothesis_demo": {
+    "method": "coherent projection (framework demo, NOT the detector)",
+    "NMC": 200,
+    "threshold_from_H0_percentile": 95,
+    "Pfa": 0.05,
+    "Pd": 1.0
+  },
+  "literature_baseline": {
+    "source": "Sun 2025 IEEE Sensors J, 100 runs, 1/f noise, CPA=5m",
+    "SNR_dB": [
+      -20.0,
+      -15.0,
+      -10.0
+    ],
+    "Pd": [
+      0.23,
+      0.72,
+      0.98
+    ]
+  },
+  "gaps": [
+    "Q1 只有Pd无Pfa",
+    "Q2 峰峰值≠谱密度",
+    "Q3 静态标定无温漂",
+    "Q4 SNR指标会骗人",
+    "Q5 全领域无统一ROC"
+  ]
+}

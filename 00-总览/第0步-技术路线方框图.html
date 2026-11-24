@@ -1,0 +1,102 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>00-总览/第0步-技术路线方框图.md</title><style>
+:root{--bg:#f6f7f9;--panel:#fff;--line:#e3e7ec;--text:#1b232c;--muted:#63707e;--accent:#2f6fd0;--soft:#eaf1fc}
+@media(prefers-color-scheme:dark){:root{--bg:#14181d;--panel:#1d232a;--line:#303a45;--text:#e7edf3;--muted:#a7b3c0;--accent:#7fb0f5;--soft:#21334d}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.8 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+.bar{position:sticky;top:0;background:var(--panel);border-bottom:1px solid var(--line);padding:9px 24px;font-size:13px;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.bar a{color:var(--accent);text-decoration:none}.bar a:hover{text-decoration:underline}
+.bar .fn{color:var(--muted);margin-left:auto;word-break:break-all}
+main{max-width:980px;margin:0 auto;padding:26px 28px 70px;background:var(--panel);min-height:calc(100vh - 44px);
+  border-left:1px solid var(--line);border-right:1px solid var(--line)}
+h1,h2,h3,h4{line-height:1.4;margin:1.5em 0 .6em;font-weight:650}
+h1{font-size:25px;border-bottom:1px solid var(--line);padding-bottom:10px;margin-top:.4em}
+h2{font-size:20px;border-bottom:1px solid var(--line);padding-bottom:7px}
+h3{font-size:17px}h4{font-size:15px}
+p,li{color:var(--text)}li{margin:.25em 0}
+a{color:var(--accent)}
+code{background:var(--soft);padding:1px 5px;border-radius:4px;font:12.6px ui-monospace,Consolas,monospace}
+pre{background:var(--soft);border:1px solid var(--line);border-radius:8px;padding:14px 16px;overflow:auto}
+pre code{background:none;padding:0}
+blockquote{border-left:3px solid var(--accent);background:var(--soft);margin:12px 0;padding:8px 16px;color:var(--muted)}
+blockquote p{margin:.3em 0}
+.staticnote{max-width:980px;margin:14px auto -8px;padding:9px 14px;border:1px solid var(--line);
+  border-left:3px solid var(--accent);border-radius:0 8px 8px 0;background:var(--soft);
+  font-size:12.6px;color:var(--muted)}
+.staticnote a{color:var(--accent)}
+table{border-collapse:collapse;width:100%;margin:14px 0;font-size:13.4px;display:block;overflow:auto}
+th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top}
+th{background:var(--soft);color:var(--muted);white-space:nowrap}
+tr:nth-child(even) td{background:rgba(127,150,180,.045)}
+hr{border:none;border-top:1px solid var(--line);margin:26px 0}
+strong{font-weight:650}
+</style>
+<script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']]},
+  options:{skipHtmlTags:['script','noscript','style','textarea','pre','code','annotation']}};</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+</head><body>
+<div class="bar"><a href="../index.html">← 返回资料索引</a>
+<a href="第0步-技术路线方框图.md">查看 Markdown 源码</a><span class="fn">00-总览/第0步-技术路线方框图.md</span></div>
+<div class="staticnote">这是 <b>静态排版副本</b>，生成于 2026-11-24 20:12。直接双击 <code>index.html</code> 时看到的就是它；若 Markdown 刚改过，请在工作区运行 <code>py build_static.py</code> 重新生成，或用 <code>start_index.bat</code> 启动本地服务查看实时渲染版。页内公式由 MathJax 渲染，需要联网。</div><main><h1>第 0 步：技术路线方框图（一页纸地图）</h1>
+<ul><li>对应：<a href="阅读路线.html">阅读路线.md</a> 第一节「第 0 步（半天，开学前或第 1 周第 1 天）：画一张地图」的过关产出</li><li>课题：基于混沌振子的极低频磁场微弱信号检测｜学期：第二学期第 1–16 周</li><li>整理日期：2026-11-13</li><li>矢量原图：<a href="../assets/第0步-技术路线方框图.svg">第0步-技术路线方框图.svg</a>（可单独打开、可插入 Word / 开题报告、可无损缩放打印）</li></ul>
+<p><img src="../assets/第0步-技术路线方框图.svg" alt="第 0 步技术路线方框图" style="display:block;max-width:100%;height:auto;margin:10px 0"></p>
+<blockquote><p><strong>主链（阅读路线第 0 步原文口径）</strong>：输入（含噪极低频磁信号）→ 变尺度预处理 → Duffing 振子 → 相变判据 → 幅值/相位估计 → 指标。</p><p>本图在此基础上补了两条线：<strong>指标反馈</strong>（虚线）与<strong>嵌入式实现载体</strong>（底部灰条），因为课题「主要内容」第 4、5 条与「预期目标」都要求落到板上并给出指标，缺了它们技术路线就交不了差。</p></blockquote>
+<hr>
+<h2>零、学到什么程度（第 0 步验收口径）</h2>
+<blockquote><p>一句话定深度：<strong>只建地图，不修路</strong>。全部内容停留在「知道名词、能讲清关系」，不进入 🅰 精读；不要求推公式、写代码、报数值。</p></blockquote>
+<p><strong>1. 核心目标</strong></p>
+<ul><li>半天内建立一张可自洽复述的全局地图：用六个环节把「含噪极低频磁信号」讲到「两项交付指标」，并说出每环靠哪组文献支撑。</li><li>明确分工而非求解：知道每个方框「进什么、出什么、归谁做、在第几周」，不要求会算其中任何一步。</li><li>产出一份「问题清单」：能说清自己还不知道什么、该去哪几篇里找。</li></ul>
+<p><strong>2. 必须理解的概念（到「能说清是什么 / 为什么需要」为止）</strong></p>
+<ul><li>六环节的功能与输入→输出：输入信号、变尺度、Duffing 阵列、相变判据、幅相估计、指标。</li><li>临界混沌态 / 大尺度周期态 / 间歇混合：只作定性区分，记住「临界态会混着规整片段」即可。</li><li>「相变判据必须可计算」：目测相图为何不够（B1 引言），知道判据不止一种。</li><li>两条辅助线：指标反馈（阈值按 $P_d/P_{fa}$ 重标定）、嵌入式载体（最终要落到板上）。</li><li>A–G 是文献抽屉标签、★[2] 是母本；<strong>数据流顺序 ≠ 阅读顺序</strong>。</li><li>两项最终指标的名称与含义：最低可检测 SNR、参数估计精度。</li></ul>
+<p><strong>3. 必须具备的能力</strong></p>
+<ul><li>不看资料默画六环主链 + 两条辅助线，每环标出文献分组。</li><li>对每环用一句话说出「输入 → 输出 → 对应阶段」。</li><li>3 分钟口头讲清：课题做什么、难在哪、最终交什么。</li><li>会用 <a href="../文献/00-下载索引.html">00-下载索引.md</a> 查到某环该读哪几篇；知道 F1 失效、不提供替代链接。</li><li>能分辨「这是地图，不是最终系统框图」。</li></ul>
+<p><strong>4. 可衡量的完成标准（逐条打勾）</strong></p>
+<ul><li>□ 方框图已画，或能用 <a href="../assets/第0步-技术路线方框图.svg">SVG 原图</a> 复述：六环 + 两条线齐全、每环有文献分组。</li><li>□ 三处速读完（★[2] 摘要/引言/结论/图题/小标题、B1 引言、D1 摘要与分类框架），总耗时 ≤ 半天。</li><li>□ 六环逐一口述输入→输出不卡壳；能答「环节 4 为什么不能用眼睛判」。</li><li>□ 能说出两条写作口径：阈值不是普适常数、指标必须连实验条件一起报（<strong>只记规则，不要求会算</strong>）。</li><li>□ 能说清下面第 6 节的「暂不深入」范围，且不把后续周次任务提前记成欠账。</li><li><strong>验收方式</strong>：对着图给导师或同门讲 3 分钟；或默写六环的输入/输出单，逐条对答案。</li></ul>
+<p><strong>5. 与后续步骤的衔接边界</strong></p>
+<ul><li><strong>交出</strong>：一张图（SVG + 本说明页）、六环文献分组索引、一份「待回答问题清单」。</li><li><strong>不交</strong>：公式、代码、仿真曲线、相图、$\lambda_c$ 数值、SNR 数值、指标数值、参数表。</li><li><strong>划界</strong>：本步结束 = 能提出正确的问题；一旦开始推方程、跑 RK4、扫阈值、算 $P_d$，就已越过边界，计入后续阶段，不算第 0 步的账。</li><li>图上环节编号只是交接锚点，本步不对任何环节的内部内容负责。</li></ul>
+<p><strong>6. 只需了解、暂不深入</strong></p>
+<ul><li>Holmes–Duffing 方程、$-x^3+x^5$ 改进恢复力、势函数与平衡点：知道「有这样一个模型」即可。</li><li>Melnikov / Lyapunov / 0-1 test / 多尺度熵 / Poincaré 判据的推导与实现：只记「判据有多种、各有坑」。</li><li>变尺度系数 $R$ 的取法、等效采样率、噪声混叠：只记「有这一环、有个坑」。</li><li>相量合成、相位窗口、120° 阵列覆盖：只记「初相有盲区，阵列用来补」。</li><li>幅相估计公式、Eq.(17) 一类估幅式：完全不碰。</li><li>SNR 口径、$P_d/P_{fa}$ 计算、ROC、蒙特卡洛次数：只需知道最终要交两项指标。</li><li>FPGA 定点化、位宽、资源、RK4 流水线：只记「最后要落到板上」。</li><li>0.72/0.73、0.734–0.736、−21 dB 等具体数字：听过即可，不作记忆点、不用于比较。</li><li>全文精读、参数表、公式推导、代码实现：一律留给后续。</li></ul>
+<hr>
+<h2>一、这张图只用半天、只读三处</h2>
+<p>第 0 步的目的不是推公式，是<strong>建立全局地图</strong>。所以只读摘要、引言、结论、图题、小标题，不碰推导。</p>
+<table><thead><tr><th>序</th><th>读什么</th><th>只读哪里</th><th>从图里得到哪个方框</th></tr></thead><tbody>
+<tr><td>1</td><td>★[2] Yang 等, Sensors 2023 <a href="../文献/02_Yang_阵列Duffing_MWD_Sensors2023.pdf">PDF</a></td><td>摘要 / 引言 / 结论 / 全部图题 / 方法节小标题</td><td>环节 2–6 的整条骨架（母本，一条龙全覆盖）</td></tr>
+<tr><td>2</td><td>B1 黄泽徽等, 物理学报 2020 <a href="../文献/B1_黄泽徽_多尺度熵阈值_物理学报2020.pdf">PDF</a></td><td><strong>引言</strong>（把相图分割、二分法、0-1、Poincaré 截面、Lyapunov 指数各家判据的优劣数了一遍，是免费的小型综述）</td><td>环节 4「相变判据」为什么必须可计算</td></tr>
+<tr><td>3</td><td>D1 Zhao 等, MST 2021 <a href="../文献/D1_Zhao_磁异常检测综述_MST2021.pdf">PDF</a> · <a href="../04-论文精读/论文精读-D1_磁异常检测综述_MST2021.html">详细精读</a>（<strong>超出第 0 步深度，阶段 1 再读</strong>）</td><td>摘要 / 综述分类框架（「基于目标信号」vs「基于噪声」两派）</td><td>环节 1「输入信号」与课题背景定位</td></tr>
+</tbody></table>
+<p>三篇全文均已入库 ✅，半天的量刚好。<strong>不要在第 0 步碰 A1 的 Melnikov 推导或 G1 的检测理论</strong>——那是阶段 2、阶段 4 的事。</p>
+<hr>
+<h2>二、六个方框逐项对照</h2>
+<table><thead><tr><th>环节</th><th>输入 → 输出</th><th>图中标注的文献</th><th>对应阶段 / 周次</th><th>该环节的过关产出</th></tr></thead><tbody>
+<tr><td><strong>1 输入信号</strong></td><td>磁通门等传感器输出 → 含噪极低频磁信号 $s(t)+n(t)$</td><td>D1 D4 D5 E1–E5 ★[3]</td><td>阶段 1｜第 1–2 周</td><td>开题报告「国内外研究现状」约 800 字 + 一段信号/噪声模型假设（先写高斯白噪声 + 1/f 可调模型，待导师给实测数据后替换）</td></tr>
+<tr><td><strong>2 变尺度预处理</strong></td><td>极低频 $\omega_s$ → 尺度系数 $R=\omega/\omega_s$，重采样、归一化到振子固有频率附近</td><td>B2 ★[2]</td><td>阶段 2–3｜第 3–8 周</td><td>明确 $R$ 的取法与等效采样率；<strong>注意重采样带来的噪声混叠</strong></td></tr>
+<tr><td><strong>3 Duffing 振子阵列</strong></td><td>预处理后序列 + 内驱策动力 → $x(t)$ 相轨迹</td><td>A1 A2 A4 C2 ★[1]★[2]</td><td>阶段 2｜第 3–5 周</td><td>单振子 RK4 程序 + 两幅并列相图（混沌态 / 大尺度周期态）+ 可复现参数表</td></tr>
+<tr><td><strong>4 相变判据</strong></td><td>$x(t)$ → 0/1 判态结果；并标定 $\lambda_c$</td><td>B1 B3 B4 ★[2]</td><td>阶段 3｜第 6–8 周</td><td>$\lambda$ 扫描曲线标出临界点 + 判态伪代码 + 初相位盲区区间</td></tr>
+<tr><td><strong>5 幅值 / 相位估计</strong></td><td>判为「有」之后 → 幅值 $\hat\gamma$、初相 $\hat\theta$</td><td>C1 C2 ★[1]★[2]</td><td>阶段 4｜第 9–11 周</td><td>蒙特卡洛表：不同 SNR 下的幅值相对误差、相位误差</td></tr>
+<tr><td><strong>6 性能指标</strong></td><td>全链路 → 最低可检测 SNR、参数估计精度</td><td>D3 G1 G2 ★[2]</td><td>阶段 4 / 6｜第 9–11 周、第 16 周</td><td>$P_d$–SNR 曲线、ROC、误差–SNR 曲线；<strong>指标必须连实验条件一起报</strong></td></tr>
+</tbody></table>
+<blockquote><p>⚠️ <strong>图上位置是数据流顺序，不是阅读顺序。</strong> 阅读按 <a href="阅读路线.html">阅读路线.md</a> 的六阶段问题链走（例如 B2 变尺度在阶段 3 才精读，但在数据流上排第 2 环）。编号 A–G 是「资料柜的抽屉标签」，不要按字母顺序读。</p></blockquote>
+<h3>两个必须写进论文的坑（来自已跑通的复现）</h3>
+<ul><li>$\lambda_c$ <strong>不是普适常数</strong>。论文 ★[2] 用 0.72 / 0.73，本机干净数值条件下跃变带落在约 0.734–0.740；换恢复力、步长、噪声带宽、判据都要重标。写论文时把自己标定的阈值和文献值并列，注明条件。</li><li>工作点存在<strong>三者不可兼得</strong>：离分岔越远越抗噪但越不灵敏、相位覆盖越差。复现里 $\lambda_0=0.720$ 时覆盖率 57.5% / 虚警 0%，0.730 时 97.3% / 2.5%，0.735 时 98.6% / 75%。这正是虚线反馈回路的由来。</li></ul>
+<p>详见 <a href="../02-阶段二/解读-主要内容2-混沌振子建模与临界阈值.html">「2」的解读</a> 与 <a href="../复现-2-混沌振子建模与临界阈值.html">notebook 实跑预览</a>。</p>
+<hr>
+<h2>三、两条不是数据流的线</h2>
+<p><strong>虚线 · 指标反馈（环节 6 → 环节 4）</strong>：拿到 $P_d/P_{fa}$、ROC 之后回头重标定 $\lambda_c$、判据阈值与工作点，而不是把阈值当成一次标定就锁死的常数。这是把「最低可检测信噪比」做成可信指标的前提，也是精读文档里 chaos-CFAR 想法的落点。</p>
+<p><strong>底部灰条 · 实现载体（阶段 5，第 12–15 周）</strong>：课题「主要内容」第 5 条要求嵌入式实现。F2 <a href="../文献/微弱电磁脉冲信号低失真度实时检测的FPGA实现_NormalPdf.pdf">PDF</a> 是最直接的蓝本（最大稳定域实时 RK4、流水线、数据分段并行、FIFO 分离阈值检测与波形恢复）。灰条承载环节 3 的求解、4 的判态、5 的估计三者的定点化。<strong>F1 的下载链接失效且无法打开，全文未到手，不提供替代链接</strong>；F3、E5 需校园网 / 文献传递，状态见 <a href="../文献/00-下载索引.html">00-下载索引.md</a>。</p>
+<hr>
+<h2>四、文献速查（图中编号，仅列已有本地全文的）</h2>
+<table><thead><tr><th>分组</th><th>可点开的 PDF</th></tr></thead><tbody>
+<tr><td>★ 课题自带</td><td>★[1] <a href="../文献/01_李远芳_改进强耦合振子_物理学报2024.pdf">PDF</a>｜★[2] <a href="../文献/02_Yang_阵列Duffing_MWD_Sensors2023.pdf">PDF</a>｜★[3] <a href="../文献/A_Weak_Anomaly_Signal_Enhancement_Method_Based_on_Vector_Magnetic_Sensor.pdf">PDF</a></td></tr>
+<tr><td>A 理论源头</td><td>A5 <a href="../文献/A5_Gammaitoni_随机共振_RMP1998.pdf">PDF</a>（A1 / A2 / A4 需订阅或纸本，查下载索引）</td></tr>
+<tr><td>B 判据与变尺度</td><td>B1 <a href="../文献/B1_黄泽徽_多尺度熵阈值_物理学报2020.pdf">PDF</a>｜B2 <a href="../文献/B2_基于Duffing振子的变尺度微弱特征信号检测方法研究.pdf">PDF</a>｜B3 <a href="../文献/B3_Gottwald_0-1混沌检验_2004.pdf">PDF</a>｜B4 <a href="../文献/aps.64.060503.pdf">PDF</a></td></tr>
+<tr><td>C 参数估计</td><td>C1 <a href="../文献/C1_Wang_混沌振子幅相估计_SignalProcessing2002.pdf">PDF</a>｜C2 <a href="../文献/C2_曹保锋_强耦合Duffing参数估计_物理学报2019.pdf">PDF</a></td></tr>
+<tr><td>D 磁场背景</td><td>D1 <a href="../文献/D1_Zhao_磁异常检测综述_MST2021.pdf">PDF</a>｜D5 <a href="../文献/D5_Murzin_超灵敏磁场传感器综述_Sensors2020.pdf">PDF</a>（D4 / D3 未入库）</td></tr>
+<tr><td>E 导师组</td><td>E4 <a href="../文献/035035_1_online.pdf">PDF</a></td></tr>
+<tr><td>F 嵌入式</td><td>F2 <a href="../文献/微弱电磁脉冲信号低失真度实时检测的FPGA实现_NormalPdf.pdf">PDF</a>（F1 链接失效且无法打开；F3 / F4 未入库）</td></tr>
+<tr><td>G 指标与规范</td><td>G2 <a href="../文献/G2_GBT7714-2015_参考文献著录规则.pdf">PDF</a>（G1 纸本）</td></tr>
+</tbody></table>
+<p>状态图例与完整 30 条清单见 <a href="../文献/00-下载索引.html">00-下载索引.md</a> 与 <a href="参考资料-极低频磁场混沌振子微弱信号检测.html">参考资料主清单</a>。著录一律按 GB/T 7714—2015，30 条题录见 <a href="../文献/参考文献.bib">参考文献.bib</a>。</p>
+<hr>
+<h2>五、怎么用这张图</h2>
+<ol><li><strong>开题报告</strong>：把 <a href="../assets/第0步-技术路线方框图.svg">SVG 原图</a> 直接拖进 Word（矢量、放大不糊），或在本页打印成 PDF；图下配一句「图中编号为参考文献清单分组，详见第 × 章」。</li><li><strong>答辩 / 周报</strong>：按六个方框逐环汇报进度，每个方框对应一个阶段和一个过关产出，不会漏项。</li><li><strong>写作时的口径</strong>：环节 6 的两个指标（最低可检测 SNR、参数估计精度）必须连 $P_d/P_{fa}$、噪声带宽、采样率、判据、蒙特卡洛次数一起报；文献里的 −21 / −18 / −12~−16 dB 实验条件互不相同，<strong>不可横向比较</strong>。</li><li><strong>图的边界</strong>：这是第 0 步的「地图」，不是最终系统框图。等导师给出实测磁场噪声数据、以及环节 3–5 定点化方案确定后，应把环节 1 的信号模型、环节 4 的判据、灰条里的位宽与资源一并细化重画。</li></ol></main></body></html>

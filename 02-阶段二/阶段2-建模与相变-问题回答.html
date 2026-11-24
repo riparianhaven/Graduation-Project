@@ -1,0 +1,114 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>02-阶段二/阶段2-建模与相变-问题回答.md</title><style>
+:root{--bg:#f6f7f9;--panel:#fff;--line:#e3e7ec;--text:#1b232c;--muted:#63707e;--accent:#2f6fd0;--soft:#eaf1fc}
+@media(prefers-color-scheme:dark){:root{--bg:#14181d;--panel:#1d232a;--line:#303a45;--text:#e7edf3;--muted:#a7b3c0;--accent:#7fb0f5;--soft:#21334d}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.8 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+.bar{position:sticky;top:0;background:var(--panel);border-bottom:1px solid var(--line);padding:9px 24px;font-size:13px;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.bar a{color:var(--accent);text-decoration:none}.bar a:hover{text-decoration:underline}
+.bar .fn{color:var(--muted);margin-left:auto;word-break:break-all}
+main{max-width:980px;margin:0 auto;padding:26px 28px 70px;background:var(--panel);min-height:calc(100vh - 44px);
+  border-left:1px solid var(--line);border-right:1px solid var(--line)}
+h1,h2,h3,h4{line-height:1.4;margin:1.5em 0 .6em;font-weight:650}
+h1{font-size:25px;border-bottom:1px solid var(--line);padding-bottom:10px;margin-top:.4em}
+h2{font-size:20px;border-bottom:1px solid var(--line);padding-bottom:7px}
+h3{font-size:17px}h4{font-size:15px}
+p,li{color:var(--text)}li{margin:.25em 0}
+a{color:var(--accent)}
+code{background:var(--soft);padding:1px 5px;border-radius:4px;font:12.6px ui-monospace,Consolas,monospace}
+pre{background:var(--soft);border:1px solid var(--line);border-radius:8px;padding:14px 16px;overflow:auto}
+pre code{background:none;padding:0}
+blockquote{border-left:3px solid var(--accent);background:var(--soft);margin:12px 0;padding:8px 16px;color:var(--muted)}
+blockquote p{margin:.3em 0}
+.staticnote{max-width:980px;margin:14px auto -8px;padding:9px 14px;border:1px solid var(--line);
+  border-left:3px solid var(--accent);border-radius:0 8px 8px 0;background:var(--soft);
+  font-size:12.6px;color:var(--muted)}
+.staticnote a{color:var(--accent)}
+table{border-collapse:collapse;width:100%;margin:14px 0;font-size:13.4px;display:block;overflow:auto}
+th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top}
+th{background:var(--soft);color:var(--muted);white-space:nowrap}
+tr:nth-child(even) td{background:rgba(127,150,180,.045)}
+hr{border:none;border-top:1px solid var(--line);margin:26px 0}
+strong{font-weight:650}
+</style>
+<script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']]},
+  options:{skipHtmlTags:['script','noscript','style','textarea','pre','code','annotation']}};</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+</head><body>
+<div class="bar"><a href="../index.html">← 返回资料索引</a>
+<a href="阶段2-建模与相变-问题回答.md">查看 Markdown 源码</a><span class="fn">02-阶段二/阶段2-建模与相变-问题回答.md</span></div>
+<div class="staticnote">这是 <b>静态排版副本</b>，生成于 2026-11-24 20:12。直接双击 <code>index.html</code> 时看到的就是它；若 Markdown 刚改过，请在工作区运行 <code>py build_static.py</code> 重新生成，或用 <code>start_index.bat</code> 启动本地服务查看实时渲染版。页内公式由 MathJax 渲染，需要联网。</div><main><h1>阶段 2：建模与相变 —— 问题回答与过关清单</h1>
+<blockquote><p><strong>阶段定位</strong>：第 3–5 周｜回答「方程是什么、相图怎么变」。<a href="../00-总览/阅读路线.html">阅读路线阶段 2</a> 的过关产出是：单振子 RK4 仿真程序 + 混沌态/大尺度周期态两幅并列相图 + x(t) 时序图 + 一张可复现参数表。</p><p><strong>核实时点</strong>：2026-11-23，全部数字取自 <a href="../learn/2.ipynb">learn/2.ipynb</a> 的<strong>实跑输出</strong>（8 个代码单元、6 张内嵌图、0 报错），可复核 JSON 见 <a href="../复现输出/阶段2-建模与阈值汇总.json">阶段2-建模与阈值汇总.json</a>。</p><p><strong>边界</strong>：本阶段做到「模型 + 相变 + 阈值带 + 变尺度原理」为止。判态伪代码与初相位盲区是阶段 3；$P_d/P_{fa}$、ROC、门限是阶段 4；定点化是阶段 5。</p></blockquote>
+<hr>
+<h2>一、五个问题，逐条回答</h2>
+<h3>Q1｜Holmes–Duffing 方程各项的物理含义？</h3>
+<p>标准式是 $\ddot x+k\dot x-x+x^3=\lambda\cos\omega t$；母本 ★[2] 把线性恢复力换成五次项：</p>
+<p>$$\ddot x+0.5\dot x-x^3+x^5=\underbrace{\lambda\cos(t+\beta)}_{\text{内置参考}}+\underbrace{\gamma\cos(t+\theta)}_{\text{待测信号}}+n(t)$$</p>
+<p>对应的势函数是 $V(x)=-\frac{x^4}{4}+\frac{x^6}{6}$，恢复力 $F(x)=x^3-x^5=-V'(x)$。平衡点由 $x^3(1-x^2)=0$ 给出：$x=0$ 是不稳势垒，$x=\pm1$ 是稳定势阱底，$V(\pm1)=-1/12\approx-0.08333$，势垒高度 $1/12$。</p>
+<table><thead><tr><th>项</th><th>物理含义</th><th>取值</th></tr></thead><tbody>
+<tr><td>$\ddot x$</td><td>惯性；拆成 $\dot x=y,\ \dot y=-0.5y+x^3-x^5+u(t)$ 才能数值积分</td><td>—</td></tr>
+<tr><td>$0.5\dot x$</td><td>阻尼耗散，没有它系统不收敛到吸引子</td><td>$k=0.5$【★[2] Eq.2】</td></tr>
+<tr><td>$-x^3+x^5$</td><td>改进恢复力，双阱且阱壁比标准 Duffing 更陡</td><td>【★[2]】</td></tr>
+<tr><td>$\lambda\cos(t+\beta)$</td><td>内驱，提供已知频率 1 rad/s 与已知相位的相干参考</td><td>$\lambda$ 是<strong>工作点</strong>，本阶段标定</td></tr>
+<tr><td>$\gamma\cos(t+\theta)+n(t)$</td><td>待测弱信号 + 噪声；只有同频分量能与内驱相干叠加</td><td>$\gamma\ll\lambda$，$\theta$ 未知</td></tr>
+</tbody></table>
+<p><strong>一句话直觉</strong>：振子是双阱里被周期性推搡的小球。推力小，在两阱间乱跳；推力越过临界，跟着外力整圈绕行。检测不是放大信号，而是<strong>让系统跨过分界线</strong>。</p>
+<hr>
+<h3>Q2｜阻尼 $k$、策动力 $\lambda$、内置频率 $\omega$ 各怎么取？</h3>
+<p><strong>可复现参数表</strong>（notebook §2 顶部 <code>CONFIG</code>）：</p>
+<table><thead><tr><th>参数</th><th>取值</th><th>依据 / 条件</th></tr></thead><tbody>
+<tr><td>阻尼 $k$</td><td>0.5</td><td>【★[2] Eq.2】论文给定</td></tr>
+<tr><td>内驱角频率 $\omega$</td><td>1 rad/s</td><td>【★[2]】极低频靠变尺度折算到这里，不另设参数</td></tr>
+<tr><td>工作点 $\lambda_0$</td><td>0.72</td><td>【★[2]】经验值；本阶段实测阈值带在它上方</td></tr>
+<tr><td>触发合成幅值 $C_{trig}$</td><td>0.73</td><td>【★[2]】经验值，本阶段重标</td></tr>
+<tr><td>求解器 / 步长</td><td>RK4 / $h=0.02$ s</td><td>【本阶段】论文用 Simulink Ode4 / $h=0.1$，故做步长敏感性</td></tr>
+<tr><td>时长 / 瞬态</td><td>400 s / 前 200 s 丢弃</td><td>【本阶段】保证吸引子稳定；批量扫描用 200/100 s</td></tr>
+<tr><td>初值</td><td>$x(0)=\dot x(0)=0$</td><td>【★[2]】</td></tr>
+<tr><td>判态量</td><td>Poincaré 截面 $x(2\pi n)$ 后半段标准差 $p_{std}&lt;0.08$</td><td>【本阶段】周期态约 0.015、混沌态 0.16–0.63</td></tr>
+<tr><td>噪声离散</td><td>$\sigma\sqrt h\,N(0,1)$</td><td>【本阶段】本阶段 §1–§6 先不注入噪声</td></tr>
+</tbody></table>
+<hr>
+<h3>Q3｜RK4 步长取多少才稳定？</h3>
+<p><strong>「稳定」有两层意思，必须先拆开</strong>：</p>
+<ol><li><strong>数值不发散</strong>：因为 $-x^3+x^5$ 在大 $|x|$ 时强抑制，本机试到 $h=0.5$ s 也不爆掉。所以「没有 NaN」<strong>不能</strong>当精度证据。</li><li><strong>结论不随步长漂</strong>：这才是要检验的。用四种 $h$ 在 $[0.720,0.760]$ 重扫跃变位置，结果：</li></ol>
+<table><thead><tr><th>步长 $h$</th><th>首个跃变区间</th><th>$p_{std}(0.730)$</th><th>$p_{std}(0.740)$</th></tr></thead><tbody>
+<tr><td>0.100 s</td><td>0.730 → 0.735</td><td>0.5205</td><td>0.0737</td></tr>
+<tr><td>0.050 s</td><td>0.735 → 0.740</td><td>0.3797</td><td>0.0735</td></tr>
+<tr><td>0.020 s</td><td>0.735 → 0.740</td><td>0.4091</td><td>0.0150</td></tr>
+<tr><td>0.010 s</td><td>0.730 → 0.735</td><td>0.4868</td><td>0.0151</td></tr>
+</tbody></table>
+<p><strong>结论</strong>：跃变都落在 0.730–0.740 这 0.01 宽的窗口内，边界有 ±0.005 抖动。选 $h=0.02$ s（比论文细一档），<strong>阈值报带不报点</strong>。注意 $h=0.1/0.05$ 在 0.740 处的 $p_{std}\approx0.074$，已贴近判态阈值 0.08——粗步长会把「稳定周期」说得比实际更模糊，这也是不照抄论文步长的理由。</p>
+<hr>
+<h3>Q4｜$\lambda$ 从小到大时，相轨迹如何从混沌跃到大尺度周期态？</h3>
+<p><strong>三个层次（不是只贴两张图）</strong>：</p>
+<ol><li><strong>小 $\lambda$</strong>：轨道在两阱间不规则跳跃，Poincaré 点散成一片。实测 $\lambda=0.70$ 时 $p_{std}=0.5176$。</li><li><strong>越界后</strong>：轨道被内驱锁定，绕两阱外侧整圈运动，Poincaré 点收敛。实测 $\lambda=0.76$ 时 $p_{std}=0.0149$。</li><li><strong>跃变是突变，不是渐变</strong>：精扫中 $p_{std}$ 从 0.5907（$\lambda=0.735$）掉到 0.0151（$\lambda=0.734/0.736$），中间没有平滑过渡。这条「悬崖」正是检测器灵敏度的来源。</li></ol>
+<p><strong>本阶段标定的阈值</strong>（条件：干净、无目标、$h=0.02$、$T=400$、初值 0、Poincaré 判据）：</p>
+<ul><li>粗扫（0.60–0.85，步长 0.005）首个稳定进入周期态：$\lambda=0.740$；</li><li>精扫（步长 0.001）出现混沌/周期交替的<strong>跃变带：0.734–0.736</strong>，$\lambda\ge0.736$ 起稳定；</li><li>带内的交替（0.734 周期、0.735 混沌、0.736 又周期）是间歇混沌、双稳与吸引域竞争的结果，<strong>不能把阈值写成单个数</strong>。</li></ul>
+<p>对照论文：0.72 / 0.73 是经验值，本阶段条件不同（求解器 Ode4→RK4、步长 0.1→0.02、判据目测→$p_{std}$、论文含带限噪声而此处干净），低约 0.01 属于<strong>条件差异</strong>，不是「论文错了」的证据。</p>
+<blockquote><p>判据必须可计算：既有复现（<a href="解读-主要内容2-混沌振子建模与临界阈值.html">解读 §3</a>）实测过 $\max|x|&gt;1.2$ 这个判据——所有 $\lambda$、所有相位、所有噪声强度<strong>全部</strong>判成周期态，虚警 100%。原因是混沌轨道本来就偶尔跑很远。<strong>目测相图或幅值门限都不是判据。</strong></p></blockquote>
+<hr>
+<h3>Q5｜「变尺度」为什么能解决极低频？</h3>
+<p>振子内驱被钉在 $\omega=1$ rad/s，真实信号频率未知且可能低到 0.1 Hz。变尺度<strong>不改振子，改信号的时间标签</strong>：采样步长 $1/f_s$ 改读成 $R/f_s$，第 $n$ 个样本读成时刻 $nR/f_s$，角频率 $\nu$ 被压成 $\nu/R$；取 $R=\nu$ 就把信号折到 1 rad/s。阈值因此只需标定一次。</p>
+<p><strong>但本阶段实测出两个软肋，必须写进论文</strong>：</p>
+<ol><li><strong>噪声跟着变</strong>：等效采样率降到 $f_s/R$，$R=10$ 时对 0–10 Hz 噪声必然混叠（阶段一 Q8）。</li><li><strong>锁频伪相变</strong>：扫 $R$ 时不止真值会「收敛」。实测 $\omega_{true}=10$、$R\in\{6,\dots,14\}$，出现低 $p_{std}$ 的除了 $R=10$，还有 <strong>$R=8/9/9.5/12/13$</strong>；内驱分量占比 $\rho$ 在 0.749–0.995 之间，同样分不开真假。</li></ol>
+<p><strong>所以「哪个 $R$ 相变，$\nu$ 就是 $R$」这个推断不能被本阶段证据自证</strong>。要挑出真频率，需要能看见待测信号 $\nu$ 分量的统计量（谱峰、多初值一致性等）——这是阶段 3/4 的任务，不要提前写成结论。</p>
+<hr>
+<h2>二、阶段一问题清单销账</h2>
+<table><thead><tr><th>阶段一问</th><th>本阶段进展</th><th>状态</th></tr></thead><tbody>
+<tr><td>Q6 $\lambda_c$ 换参数漂多少？</td><td>步长维度已答：跃变窗口 0.730–0.740、±0.005 抖动；恢复力/噪声维度未做</td><td>🟡 部分回答</td></tr>
+<tr><td>Q8 变尺度会不会缩放噪声带宽？</td><td>已指出等效采样率降低与混叠风险；PSD 对照实验未做</td><td>🟡 部分回答</td></tr>
+<tr><td>Q10「极低频」取哪一段？</td><td>仍待导师给实测对象与频段，本阶段不给假答案</td><td>🔴 待导师</td></tr>
+<tr><td>Q1 / Q4 / Q5（$P_{fa}$、SNR 发散、ROC）</td><td>属阶段 4 指标，本阶段不碰</td><td>⏳ 后续</td></tr>
+</tbody></table>
+<hr>
+<h2>三、过关产出对照（逐条打勾）</h2>
+<ul><li>[x] <strong>单振子 RK4 仿真程序</strong>：<code>simulate()</code> 支持标量/数组并行、同频相量合成与双频直接积分；冒烟 $p_{std}=[0.4841,0.0149]$，判混沌/周期正确</li><li>[x] <strong>两幅并列相图</strong>：$\lambda=0.70/0.76$ 的 $(x,\dot x)$ 相图并排，<a href="../复现输出/阶段2-混沌与周期相图时序.png">PNG</a></li><li>[x] <strong>x(t) 时序图</strong>：同一图下半部分，<a href="../复现输出/阶段2-混沌与周期相图时序.png">PNG</a></li><li>[x] <strong>可复现参数表</strong>：本页 §一 Q2 与 notebook §2</li><li>[x] <strong>阈值曲线 + 步长敏感性</strong>：<a href="../复现输出/阶段2-临界阈值扫描.png">阈值扫描</a> · <a href="../复现输出/阶段2-步长敏感性.png">步长敏感性</a> · <a href="../复现输出/阶段2-Poincare截面散点.png">截面散点</a></li><li>[x] <strong>变尺度反例</strong>：<a href="../复现输出/阶段2-变尺度扫描.png">扫 R 曲线</a></li><li>[ ] <strong>判态伪代码 / 初相位盲区</strong>：阶段 3</li><li>[ ] <strong>$P_d/P_{fa}$ / ROC / 门限</strong>：阶段 4</li></ul>
+<p><strong>本阶段不交</strong>：Duffing 之外的判据实现（0-1 test、多尺度熵）、参数估计公式、FPGA 位宽、任何 SNR 门限数字。</p>
+<hr>
+<h2>四、写进论文的表述（示范，数字已填）</h2>
+<blockquote><p>本文采用改进恢复力的 Duffing 振子作为检测模型，其动力学方程为 $\ddot x+0.5\dot x-x^3+x^5=\lambda\cos(t+\beta)+\gamma\cos(t+\theta)+n(t)$。以四阶 Runge–Kutta 法数值求解（$h=0.02$ s，$T=400$ s，丢弃前 200 s 瞬态，初值取零），以 Poincaré 截面 $x(2\pi n)$ 在稳态后半段的标准差 $p_{std}$ 作为状态判据：$p_{std}&lt;0.08$ 判为大尺度周期态。在无噪声、无目标条件下对 $\lambda$ 扫描：粗扫首个稳定进入周期态的位置为 0.740，0.001 精扫显示 0.734–0.736 区间内混沌与周期交替，$\lambda\ge0.736$ 起稳定。四种步长（0.1/0.05/0.02/0.01 s）下跃变均落在 0.730–0.740，表明该阈值不是数值假象，但边界随步长与吸引域有 ±0.005 抖动；因此本文以<strong>阈值带</strong>而非单点给出标定结果，并在脚注中说明与文献经验值 0.72/0.73 在求解器、步长、判据与噪声条件上的差异。</p></blockquote>
+<hr>
+<h2>五、边界声明（务必连数字一起抄）</h2>
+<p>这些数字检验的是论文 claim 的<strong>敏感性与可复现性</strong>，不是「证明论文错了」：论文数据与代码未公开，第三方无法完全裁定；本阶段条件是 $h=0.02$ s、$T=400$ s、Poincaré 判据、无变尺度的干净模型，与论文的 Simulink Ode4、$h=0.1$ s、带限噪声、目测相图都不同。各文献的 SNR 门限（−21 / −23 / −18 / −15 dB）实验条件互不统一，<strong>不可横向比较</strong>。</p>
+<blockquote><p>下一站：带着这里的阈值带与变尺度反例，进入阶段 3（判据、盲区、扫 $R$ 的真频率判据）。相对文档：<a href="解读-主要内容2-混沌振子建模与临界阈值.html">「主要内容 2」逐句解读</a> · <a href="../复现-2-混沌振子建模与临界阈值.ipynb">完整复现 notebook</a> · <a href="../01-阶段一/阶段1-问题清单.html">阶段 1 问题清单</a>。</p></blockquote></main></body></html>

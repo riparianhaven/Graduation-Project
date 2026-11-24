@@ -1,0 +1,32 @@
+title: "★[2] 完整复现：阵列 Duffing 检测钻具姿态信号"
+author: "李俊 · 原文：Yang Y, Ding Q, Gao Y, Chen J. Sensors, 2023, 23(17): 7598"
+copyright: "2026"
+only_build_toc_files: true
+
+execute:
+  # notebook 已由 nbclient 在 .venv 中实跑并内嵌输出
+  execute_notebooks: "off"
+  timeout: 1800
+
+parse:
+  myst_enable_extensions:
+    - amsmath
+    - dollarmath
+    - colon_fence
+    - deflist
+
+html:
+  home_page_in_navbar: true
+  use_edit_page_button: false
+  use_issues_button: false
+  use_repository_button: false
+  baseurl: ""
+  extra_footer: "ν 与 R 的辨析见第 3 章；复现边界见第 7、8 章。"
+
+sphinx:
+  config:
+    language: zh_CN
+    html_show_copyright: false
+    mathjax3_config:
+      tex:
+        inlineMath: [["$", "$"], ["\\(", "\\)"]]

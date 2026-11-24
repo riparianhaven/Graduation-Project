@@ -1,0 +1,147 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>05-方法创新/新方法-阈值位移符号判别.md</title><style>
+:root{--bg:#f6f7f9;--panel:#fff;--line:#e3e7ec;--text:#1b232c;--muted:#63707e;--accent:#2f6fd0;--soft:#eaf1fc}
+@media(prefers-color-scheme:dark){:root{--bg:#14181d;--panel:#1d232a;--line:#303a45;--text:#e7edf3;--muted:#a7b3c0;--accent:#7fb0f5;--soft:#21334d}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.8 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+.bar{position:sticky;top:0;background:var(--panel);border-bottom:1px solid var(--line);padding:9px 24px;font-size:13px;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.bar a{color:var(--accent);text-decoration:none}.bar a:hover{text-decoration:underline}
+.bar .fn{color:var(--muted);margin-left:auto;word-break:break-all}
+main{max-width:980px;margin:0 auto;padding:26px 28px 70px;background:var(--panel);min-height:calc(100vh - 44px);
+  border-left:1px solid var(--line);border-right:1px solid var(--line)}
+h1,h2,h3,h4{line-height:1.4;margin:1.5em 0 .6em;font-weight:650}
+h1{font-size:25px;border-bottom:1px solid var(--line);padding-bottom:10px;margin-top:.4em}
+h2{font-size:20px;border-bottom:1px solid var(--line);padding-bottom:7px}
+h3{font-size:17px}h4{font-size:15px}
+p,li{color:var(--text)}li{margin:.25em 0}
+a{color:var(--accent)}
+code{background:var(--soft);padding:1px 5px;border-radius:4px;font:12.6px ui-monospace,Consolas,monospace}
+pre{background:var(--soft);border:1px solid var(--line);border-radius:8px;padding:14px 16px;overflow:auto}
+pre code{background:none;padding:0}
+blockquote{border-left:3px solid var(--accent);background:var(--soft);margin:12px 0;padding:8px 16px;color:var(--muted)}
+blockquote p{margin:.3em 0}
+.staticnote{max-width:980px;margin:14px auto -8px;padding:9px 14px;border:1px solid var(--line);
+  border-left:3px solid var(--accent);border-radius:0 8px 8px 0;background:var(--soft);
+  font-size:12.6px;color:var(--muted)}
+.staticnote a{color:var(--accent)}
+table{border-collapse:collapse;width:100%;margin:14px 0;font-size:13.4px;display:block;overflow:auto}
+th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top}
+th{background:var(--soft);color:var(--muted);white-space:nowrap}
+tr:nth-child(even) td{background:rgba(127,150,180,.045)}
+hr{border:none;border-top:1px solid var(--line);margin:26px 0}
+strong{font-weight:650}
+</style>
+<script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']]},
+  options:{skipHtmlTags:['script','noscript','style','textarea','pre','code','annotation']}};</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+</head><body>
+<div class="bar"><a href="../index.html">← 返回资料索引</a>
+<a href="新方法-阈值位移符号判别.md">查看 Markdown 源码</a><span class="fn">05-方法创新/新方法-阈值位移符号判别.md</span></div>
+<div class="staticnote">这是 <b>静态排版副本</b>，生成于 2026-11-24 20:12。直接双击 <code>index.html</code> 时看到的就是它；若 Markdown 刚改过，请在工作区运行 <code>py build_static.py</code> 重新生成，或用 <code>start_index.bat</code> 启动本地服务查看实时渲染版。页内公式由 MathJax 渲染，需要联网。</div><main><h1>新方法：阈值位移符号判别法（STS）</h1>
+<blockquote><p><strong>一句话</strong>：不再问「系统翻没翻」,而是问「阈值被推向哪一边」——<strong>信号把相变阈值往下推,噪声往上推</strong>,位移的符号本身就是判据。</p><p></p><p><strong>状态</strong>：设计态 + 首批实测证据（2026-11-19，本机 RK4 实跑）。方法未完整实现，未做 Pd/Pfa 曲面，未上硬件。</p><p><strong>配套</strong>：本文件只讲方法本身。撞车清单与诚实定级见第五节，失败过的想法见第六节。</p></blockquote>
+<hr>
+<h2>一、为什么还需要一个新判据</h2>
+<p>现行的 Duffing 检测只有<strong>一个观测量</strong>：系统在固定工作点上的状态（混沌 / 大尺度周期）。于是所有衍生方法都在同一个 1 bit 上做文章：</p>
+<ul><li>固定工作点法：判「翻没翻」；</li><li>阈值之差法：调两次 λ，用<strong>前后两次临界值之差</strong>读幅值；</li><li>二分法：串行多次重放去<strong>定位</strong>临界值；</li><li>阵列计数法：铺多个相位，<strong>数</strong>有几个翻了。</li></ul>
+<p>今天实测暴露了这套观测量的一条硬伤：</p>
+<blockquote><p><strong>噪声也会把振子「顶翻」,而且顶出来的样子和信号几乎一样。</strong></p></blockquote>
+<p>实测（17 振子 λ 梯度阵列，判据 $p_{std}&lt;0.08$，每个条件 12 次独立实现）：</p>
+<table><thead><tr><th>条件</th><th>周期态振子个数 $k$</th><th>看起来像多大的信号</th></tr></thead><tbody>
+<tr><td>$\gamma=0,\ \sigma=0$（无信号无噪声）</td><td>1.0 ± 0.0</td><td>—</td></tr>
+<tr><td>$\gamma=0,\ \sigma=0.05$（<strong>纯噪声</strong>）</td><td>1.9 ± 0.6</td><td>≈ 0.004</td></tr>
+<tr><td>$\gamma=0.005,\ \sigma=0$</td><td>3.5 ± 0.6</td><td>0.005</td></tr>
+<tr><td>$\gamma=0.010,\ \sigma=0.05$</td><td>5.3 ± 1.0</td><td>—</td></tr>
+</tbody></table>
+<p>纯噪声 0.05 就顶出 $k=1.9$,与一个 $\gamma\approx0.004$ 的真实信号难以区分。<strong>用「翻没翻」这一个观测量,信号和噪声在低信噪比下不可分辨</strong>——这是虚警的根,不是实现细节。</p>
+<p>我试过用码型形状补救（"信号推一整块、噪声翻散点"）,<strong>实测失败</strong>：连续性判据的 AUC 在全部条件下都低于计数判据（0.76–0.97 vs 0.89–0.99）。详见第六节。</p>
+<hr>
+<h2>二、核心机制：两个位移的符号相反</h2>
+<p>关键在于区分两种让系统"翻"的物理过程。</p>
+<h3>2.1 信号位移是几何的</h3>
+<p>论文（★[2]）把两个同频激励合成为相量,相变条件是合成幅值达到 $C$：</p>
+<p>$$C^{2}=\lambda^{2}+\gamma^{2}+2\lambda\gamma\cos\Delta,\qquad \Delta=\theta-\beta$$</p>
+<p>同相（$\Delta=0$）时解出正根：</p>
+<p>$$\lambda^{*}(\gamma)=C-\gamma$$</p>
+<p><strong>这是纯几何关系,不含任何动力学参数。</strong> 对 $\gamma$ 求导：</p>
+<p>$$\frac{\partial \lambda^{*}}{\partial \gamma}=-1$$</p>
+<p>它<strong>与阻尼 $k$、与噪声 $\sigma$、与恢复力形状都无关</strong>——因为边界只由"相量落在哪个圆周上"决定。</p>
+<p>实测验证（$k=0.5$）：</p>
+<table><thead><tr><th>条件</th><th>实测阈值</th></tr></thead><tbody>
+<tr><td>$\gamma=0$</td><td>0.734</td></tr>
+<tr><td>$\gamma=0.010$</td><td><strong>0.724</strong></td></tr>
+</tbody></table>
+<p>位移 $-0.010$,<strong>恰好等于 $-\gamma$</strong>,精确到 0.002 的网格。</p>
+<h3>2.2 噪声位移是统计的,且方向相反</h3>
+<p>噪声不是相量,它靠反复把状态推出势阱来制造跃迁。噪声越强,系统越"坐不住",要它稳定停在周期态就需要更大的 λ——<strong>阈值被推高</strong>。</p>
+<p>实测（$k=0.5$）：$\sigma=0.10$ 时阈值 $0.734\to0.738$,位移 $+0.004$；$\sigma=0.05$ 时 $+0.002$。</p>
+<h3>2.3 于是得到一条符号判据</h3>
+<p>$$\boxed{\ \Delta\lambda^{<em>}\equiv \lambda^{</em>}_{\text{观测}}-\lambda^{<em>}_{\text{标定}}\ \begin{cases}&lt;0 &amp; \text{信号主导,且}\ \gamma\approx-\Delta\lambda^{</em>}\\[2pt] =0 &amp; \text{两者相当}\\[2pt] &gt;0 &amp; \text{噪声主导}\end{cases}}$$</p>
+<p><strong>左侧是几何（精确、可标定、与器件参数无关）,右侧是统计（只增不减、单调）</strong>。前人把两者都塞进同一个"翻没翻"里,所以分不开；把位移的<strong>符号</strong>单独取出来看,就分开了。</p>
+<hr>
+<h2>三、主要步骤</h2>
+<p><strong>S0 标定两条曲线（离线一次）</strong></p>
+<ol><li>$\lambda^{*}_0(k)$：无噪无信号下的阈值（对每个阻尼档各测一条）。</li><li>$\delta(\sigma,\alpha)$：噪声引起的阈值上移量,按噪声强度 $\sigma$ 与色度 $\alpha$ 建表。$\alpha$ 从输入 Welch 谱斜率估计。</li></ol>
+<p>实测已知 $\delta&gt;0$ 且随 $\sigma$ 单调。</p>
+<p><strong>S1 双偏置读码（在线,一次观测）</strong><br>在工作点两侧各放一个振子：$\lambda_{-}=\lambda^{<em>}_0-\varepsilon$、$\lambda_{+}=\lambda^{</em>}_0+\varepsilon$。</p>
+<table><thead><tr><th>情形</th><th>$\lambda_{-}$（原判混沌）</th><th>$\lambda_{+}$（原判周期）</th><th>码变化方向</th></tr></thead><tbody>
+<tr><td>无信号无噪声</td><td>混沌</td><td>周期</td><td>基准</td></tr>
+<tr><td>有信号 $\gamma$</td><td><strong>转为周期</strong></td><td>周期</td><td>向下翻</td></tr>
+<tr><td>仅噪声</td><td>混沌</td><td><strong>转回混沌</strong></td><td>向上翻</td></tr>
+</tbody></table>
+<p><strong>两个振子的翻转方向相反,这就是判别量。</strong> 只需 2 个振子,不需要 17 个,也不需要 6–8 次串行重放。</p>
+<p><strong>S2 判决</strong><br>令 $S=\mathbb{1}[\lambda_{-}\text{周期}]-\mathbb{1}[\lambda_{+}\text{周期}]$。$S&gt;0$ 判有信号,$S&lt;0$ 判噪声主导,$S=0$ 不确定。</p>
+<p><strong>S3 幅值估计</strong><br>若判有信号：$\hat\gamma=-\Delta\lambda^{<em>}$,并扣除已知噪声偏移 $\hat\gamma=-(\Delta\lambda^{</em>}-\delta(\hat\sigma,\hat\alpha))$。不确定度取 $\pm\varepsilon$（工作点间距）与 $\delta$ 表误差的合成。</p>
+<p><strong>S4 自检（可选,但很便宜）</strong><br>$\delta(\sigma,\alpha)$ 的实测值若与表不符,说明噪声模型变了或器件漂了,直接报警——这一步白送。</p>
+<hr>
+<h2>四、适用条件与预期效果</h2>
+<p><strong>成立前提</strong></p>
+<ol><li>频率已知且窄带（相量合成成立）。频率偏差会额外引入相位漂移,等效于 $\Delta$ 缓慢变化。</li><li>$\varepsilon$ 要大于观测噪声引起的阈值抖动,小于待测信号量级。按实测,抖动约 0.002–0.004,故 $\varepsilon\approx0.005$ 起步。</li><li>观测窗容得下暂态（本机用 200 s 预热 + 200 s 统计）。</li><li>标定用的 $k$、恢复力、步长与在线一致。</li></ol>
+<p><strong>预期效果（均为预期,未测）</strong></p>
+<ul><li>用 2 个振子代替 6–8 次串行重放,<strong>单帧延迟降 3–4 倍</strong>；</li><li>在"噪声顶翻"的情形下给出<strong>明确否定</strong>而不是误判为有信号——这正是现行方法最吃亏的地方；</li><li>幅值估计自带偏置项,可解释文献中 0.72 / 0.73 / 0.734 的口径分歧。</li></ul>
+<p><strong>不适用</strong></p>
+<ul><li>宽带或频率未知：相量关系失效；</li><li>强非平稳（冲击、磁暴）：$\delta$ 表失效,符号可能翻转；</li><li>信号与噪声同量级：位移相互抵消,$S=0$,只能报"不确定"；</li><li>幅值超出 $\varepsilon$ 邻域：需要自适应移档。</li></ul>
+<hr>
+<h2>五、与已有方法的区别,以及新颖性的诚实定级</h2>
+<p>这一节必须先说清楚<strong>前人已经占住了什么</strong>,否则又会出现"声称没人做过、结果撞车"的错误。</p>
+<table><thead><tr><th>已占位的工作</th><th>它做了什么</th><th>本方法与之的差别</th></tr></thead><tbody>
+<tr><td>专利 CN111190049 S41–S43</td><td>调内驱至临界得 $\gamma_d$,加信号后再回调得 $\gamma_z$,<strong>$\gamma_d-\gamma_z$ 即幅值</strong></td><td>它用<strong>位移的绝对值</strong>读幅值,且默认无噪；本方法用<strong>位移的符号</strong>做判别,正的位移不是噪声误差而是判据</td></tr>
+<tr><td>专利 CN102323476B</td><td>$\gamma_2-\gamma_1$ = 间谐波幅值,最大 Lyapunov 定临界</td><td>同上</td></tr>
+<tr><td>IOP Conf. Ser. 1656 (2020) 012032</td><td>同机制的期刊版本</td><td>同上</td></tr>
+<tr><td>《二分法快速求解 Duffing 混沌阈值》实验室研究与探索 2016, 35(2):86-88</td><td>二分定位临界值</td><td>本方法不做搜索,只读两个固定偏置的翻转方向</td></tr>
+<tr><td>专利 CN107066740B</td><td>相位阵列 + <strong>统计翻转振子个数</strong> + 不依赖 $\gamma_c$ 的幅值估计</td><td>那用的是<strong>计数</strong>;今天实测证明计数被噪声顶高（$k$ 1.0→1.9）,本方法用<strong>方向</strong></td></tr>
+<tr><td>专利 CN102519491A</td><td>估输入噪声方差 → 归一化增益 → 控虚警 10⁻⁴</td><td>它从<strong>输入端</strong>估噪声再查表；本方法从<strong>振子响应</strong>读噪声（阈值上移量）</td></tr>
+<tr><td>金天, 张骅. 中国科学:信息科学（Lyapunov 统计特性 → Pfa/Pd 与门限选取）</td><td>已建立统计检测框架</td><td>它仍以"状态"为观测量；本方法以"阈值位移符号"为观测量</td></tr>
+<tr><td>Lei, Hua, Du. <em>Nonlinear Dynamics</em> 2017, 89(2):1371-1383</td><td>解析给出红/绿/白噪声下混沌阈值的换算关系</td><td><strong>这条最要小心</strong>：色噪改变阈值这件事<strong>已被理论上证明</strong>,我没发现它被用于检测判别。本方法借用该物理事实,不主张发现它</td></tr>
+</tbody></table>
+<p><strong>新颖性定级：中偏弱（可辩护的主张只有一条）</strong></p>
+<blockquote><p><strong>把「阈值位移的符号」作为独立判据,用来区分信号与噪声引起的相变；前人只把阈值位移当作幅值的读数（取其大小）,没有把它的方向当作分类依据。</strong></p></blockquote>
+<p>这一条在检索过的专利与中文期刊中未发现对应工作。但它<strong>建立在已被公开的物理之上</strong>（相量几何 + 色噪阈值理论）,所以只能算<strong>观测量层面的新用法</strong>,不能算机制发现。</p>
+<p><strong>必须同时承认</strong>：如果评审把"两个振子放在阈值两侧比较翻转"视为"阈值之差法的双偏置实现",这条新颖性就会被压到"实现变体"。答辩时应当<strong>主动</strong>给出这个对比,而不是等人来问。</p>
+<hr>
+<h2>六、失败过的想法（写下来,防止以后再走一遍）</h2>
+<table><thead><tr><th>想法</th><th>结果</th><th>数据</th></tr></thead><tbody>
+<tr><td>λ 梯度阵列 + 温度计码直接读幅值</td><td><strong>放弃</strong>：码有空洞,不能单调解码</td><td>$\gamma=0.010$ 时码为 <code>............PPP..</code>,中段翻转后又翻回</td></tr>
+<tr><td>码型连续性判别（信号推整块、噪声翻散点）</td><td><strong>实测失败</strong></td><td>AUC(L) 在所有条件下低于 AUC(k)：σ=0.05 时 0.913 vs 0.951；σ=0.2 时 0.764 vs 0.885</td></tr>
+<tr><td>双阻尼差分比值（$R=\Delta\lambda_{k_1}/\Delta\lambda_{k_2}$）</td><td><strong>未能成立</strong>：换阻尼会把阈值推出可扫描区间</td><td>$k=0.9$ 全程无周期态；$k=0.35$ 在 $\lambda\ge0.56$ 全程周期态</td></tr>
+<tr><td>噪声色度改变阈值作为"新发现"</td><td><strong>不新</strong>：已被 Lei 2017 解析给出</td><td>见第五节</td></tr>
+<tr><td>滞回环宽当噪声温度计</td><td><strong>未证实</strong>：准静态升/降路径未测出可靠滞回</td><td>首轮斜坡测到的是启动瞬态,判据失效</td></tr>
+</tbody></table>
+<hr>
+<h2>七、局限与风险</h2>
+<ol><li><strong>位移量太小。</strong> 实测在 $\sigma=0.10$ 时噪声位移只有 0.004,与网格步长同量级。要可靠判定符号,$\varepsilon$ 与积分时长必须配套优化,否则"符号"会被抖动淹没。这是<strong>最硬的风险</strong>。</li><li><strong>两级效应会抵消。</strong> 真实场景是信号+噪声同时存在。若 $\gamma\approx\delta(\sigma)$,$S=0$,方法只能报"不确定"——<strong>不能解决同量级情形</strong>,只能解决"一边明显占优"的情形。</li><li><strong>依赖标定表。</strong> $\delta(\sigma,\alpha)$ 换恢复力、换步长、换判据都要重标。</li><li><strong>$\varepsilon$ 的选取没有闭环。</strong> 现在只能凭实测抖动估,需要 S4 的自检来兜。</li><li><strong>未做 Pd/Pfa。</strong> 因此<strong>不能声称"检测概率优于现有方法"</strong>——只能说"提供了一个新的判别维度"。</li></ol>
+<hr>
+<h2>八、可证伪预测（一周内可全部判完）</h2>
+<table><thead><tr><th>#</th><th>预测</th><th>判定标准</th><th>若失败说明什么</th></tr></thead><tbody>
+<tr><td>P1</td><td>同相时 $\partial\lambda^{*}/\partial\gamma=-1$</td><td>实测位移与 $\gamma$ 之差 &lt;5%</td><td>相量几何在五次恢复力下不严格成立,方法地基塌陷</td></tr>
+<tr><td>P2</td><td>噪声位移恒为正且随 $\sigma$ 单调</td><td>5 档 $\sigma$ 全为正、单调</td><td>符号判据不成立</td></tr>
+<tr><td>P3</td><td>双偏置码方向在 $\gamma$ 与 $\sigma$ 下相反</td><td>各 20 次实现,方向一致率 &gt;90%</td><td>判别量无效</td></tr>
+<tr><td>P4</td><td>同 $P_{fa}$ 下,STS 的 $P_d$ 高于固定工作点法</td><td>200 帧蒙特卡洛,ROC 在上方</td><td>新增维度没有换来性能,方法只剩解释价值</td></tr>
+<tr><td>P5</td><td>$\delta$ 随色度 $\alpha$ 变化</td><td>同 $\sigma$ 下 $\alpha=0/1$ 的 $\delta$ 差异 &gt;2 倍网格</td><td>色度项可删,标定表退化为一维</td></tr>
+</tbody></table>
+<p>P4 是<strong>唯一能决定这个方法值不值得写进论文</strong>的一条。P1–P3 只需半天,P4 需要一天。</p>
+<hr>
+<h2>九、复现信息</h2>
+<ul><li>方程：$\ddot x+0.5\dot x-x^{3}+x^{5}=\lambda\cos t+\gamma\cos(t+\theta)+n(t)$（★[2] Eq.3）</li><li>积分：RK4,$h=0.02$ s,400 s,弃前 200 s；判据 Poincaré 截面 $p_{std}&lt;0.08$</li><li>脚本：<code>.workbuddy/tmp/novelty/exp_dualK.py</code>（符号位移）、<code>exp_flash.py</code>（阵列计数）、<code>exp_pattern.py</code>（码型 AUC）、<code>exp_color2.py</code>（色度）、<code>exp_hysteresis.py</code>（滞回）</li><li>数据：<code>dual_damping.json</code>、<code>flash.json</code>、<code>pattern.json</code>、<code>color.json</code></li></ul>
+<blockquote><p>本文件所有数字均来自上述脚本的实跑输出,未经手工润色。凡标「预期」者未测；凡标「实测」者可在本机复跑核对。</p></blockquote>
+<p><em>相关文档：<a href="方案创新点与版本对比.html">方案创新点与版本对比</a> · <a href="新方法-相变边界追踪.html">新方法-相变边界追踪（已证撞车）</a> · <a href="新方法-边界条件与场景适用性.html">新方法-边界条件与场景适用性</a> · <a href="../01-阶段一/阶段1-文献卡片.html">文献卡片</a></em></p></main></body></html>

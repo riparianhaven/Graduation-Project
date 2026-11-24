@@ -1,0 +1,73 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>01-阶段一/阶段1-现状综述草稿.md</title><style>
+:root{--bg:#f6f7f9;--panel:#fff;--line:#e3e7ec;--text:#1b232c;--muted:#63707e;--accent:#2f6fd0;--soft:#eaf1fc}
+@media(prefers-color-scheme:dark){:root{--bg:#14181d;--panel:#1d232a;--line:#303a45;--text:#e7edf3;--muted:#a7b3c0;--accent:#7fb0f5;--soft:#21334d}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.8 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+.bar{position:sticky;top:0;background:var(--panel);border-bottom:1px solid var(--line);padding:9px 24px;font-size:13px;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.bar a{color:var(--accent);text-decoration:none}.bar a:hover{text-decoration:underline}
+.bar .fn{color:var(--muted);margin-left:auto;word-break:break-all}
+main{max-width:980px;margin:0 auto;padding:26px 28px 70px;background:var(--panel);min-height:calc(100vh - 44px);
+  border-left:1px solid var(--line);border-right:1px solid var(--line)}
+h1,h2,h3,h4{line-height:1.4;margin:1.5em 0 .6em;font-weight:650}
+h1{font-size:25px;border-bottom:1px solid var(--line);padding-bottom:10px;margin-top:.4em}
+h2{font-size:20px;border-bottom:1px solid var(--line);padding-bottom:7px}
+h3{font-size:17px}h4{font-size:15px}
+p,li{color:var(--text)}li{margin:.25em 0}
+a{color:var(--accent)}
+code{background:var(--soft);padding:1px 5px;border-radius:4px;font:12.6px ui-monospace,Consolas,monospace}
+pre{background:var(--soft);border:1px solid var(--line);border-radius:8px;padding:14px 16px;overflow:auto}
+pre code{background:none;padding:0}
+blockquote{border-left:3px solid var(--accent);background:var(--soft);margin:12px 0;padding:8px 16px;color:var(--muted)}
+blockquote p{margin:.3em 0}
+.staticnote{max-width:980px;margin:14px auto -8px;padding:9px 14px;border:1px solid var(--line);
+  border-left:3px solid var(--accent);border-radius:0 8px 8px 0;background:var(--soft);
+  font-size:12.6px;color:var(--muted)}
+.staticnote a{color:var(--accent)}
+table{border-collapse:collapse;width:100%;margin:14px 0;font-size:13.4px;display:block;overflow:auto}
+th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top}
+th{background:var(--soft);color:var(--muted);white-space:nowrap}
+tr:nth-child(even) td{background:rgba(127,150,180,.045)}
+hr{border:none;border-top:1px solid var(--line);margin:26px 0}
+strong{font-weight:650}
+</style>
+<script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']]},
+  options:{skipHtmlTags:['script','noscript','style','textarea','pre','code','annotation']}};</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+</head><body>
+<div class="bar"><a href="../index.html">← 返回资料索引</a>
+<a href="阶段1-现状综述草稿.md">查看 Markdown 源码</a><span class="fn">01-阶段一/阶段1-现状综述草稿.md</span></div>
+<div class="staticnote">这是 <b>静态排版副本</b>，生成于 2026-11-24 20:12。直接双击 <code>index.html</code> 时看到的就是它；若 Markdown 刚改过，请在工作区运行 <code>py build_static.py</code> 重新生成，或用 <code>start_index.bat</code> 启动本地服务查看实时渲染版。页内公式由 MathJax 渲染，需要联网。</div><main><h1>阶段 1 过关产物 1｜现状综述草稿</h1>
+<blockquote><p><strong>用途</strong>：开题报告「国内外研究现状」第一小节（原要求约 800 字；本稿实测 <strong>1110 汉字</strong>，含标点约 1300 字，可按导师意见删减）。</p><p><strong>状态</strong>：初稿，可直接粘进开题报告后按导师意见删改。</p><p><strong>写作口径</strong>：四段结构（领域困难 → 两派方法 → 第三条路线 → 本课题定位）；每个数字都带条件；只写已读全文的文献，★[1] 仅按题录级引用。引用编号见文末清单。</p><p><strong>核实日期</strong>：2026-11-19</p></blockquote>
+<hr>
+<h2>正文（约 1100 字）</h2>
+<h3>一、领域困难：信号比噪声小一到两个数量级</h3>
+<p>极低频磁场测量覆盖的频率与幅值跨度都极大：频域电磁法中被测磁场可从 mHz 到 kHz、幅值从 pT 到 μT［6］；而工程上常用磁通门的低噪声窗口只在 1–100 Hz、噪声底约 1 pT/√Hz，SQUID 虽能逼近 fT/√Hz，却需低温与磁屏蔽室［2］。真正难的不是"测到磁场"，而是"从背景里分出目标"：地磁场 $T$ 远大于目标感应场 $B$，磁强计读到的是 $B+T$，线性化后有用信号退化为目标场在地磁方向上的投影 $S=\mathbf{B}\cdot\mathbf{T}/T$，磁异常只有地磁噪声的万分之几；而环境噪声是 $1/f^{\alpha}$ 有色噪声，地质噪声的特征又与铁磁目标几乎相同［1］。再叠一层器件自身的非理想性：环形磁通门在 ±0.5 gauss（±50 μT）量程内，未补偿时非线性误差最大可达约 100 nT［5］——这比要检的信号大一到两个数量级。</p>
+<h3>二、主流两派：以"能否预设波形"划线</h3>
+<p>Zhao 等的综述给出的唯一分类判据是：能不能预先写出"目标经过时信号长什么样"［1］。能，则走 target-based 路线——偶极子模型 + CPA 航迹模板 + 正交基函数（OBF）分解，按距离与探头数分为 3 基、4 基、5 基版本；其改进版引入 AR 白化，并留下一条教训：基函数必须同步白化，否则滤波会把目标信号一起扭曲［1］。不能，则走 noise-based 路线——最小熵与差分熵、高阶过零（HOC）、随机共振、小波［1］。两派的短板都在同一处暴露：OBF 计算密集、不适合实时且用前必须先白化；熵类与 HOC 受低 SNR 限制，且需要干净背景或给定虚警率；随机共振不需确定性参数、能适应有色噪声，但泛化差；小波在强噪声下会损失信号幅度［1］。更关键的是，该综述全文没有统一的 SNR 定义、没有 $P_{fa}$、没有 ROC 口径——各方法之间的"灵敏度"是叙述性比较，而不是同条件实测［1］。</p>
+<h3>三、第三条路线：从"增强"到"相变"</h3>
+<p>随机共振提供了与滤波完全相反的世界观：阈值或势垒系统 + 弱周期驱动 + 噪声，三者齐备时系统响应随噪声强度呈共振型变化［3］。但同一篇综述给出一条常被忽略的方法学警告：SNR 在 $D\to0$ 时反而发散，因此"SNR 提升多少 dB"本身不足以证明 SR 发生，必须看谱放大系数或驻留时间分布［3］。2025 年的 Sun 等是这条路线的最新代表：用指数势 $U_e=A(e^{-kx^2}-1)+Bx^4$ 替代经典双稳，再把总场与三轴共 4 路 SR 输出的滑窗标准差归一化合成；在 100 组 $1/f$ 色噪下，−20/−15/−10 dB 的检出概率分别为 23% / 72% / 98%，同一批 −15 dB 输入下比原始信号提升 16.50 dB、比 OBF / EMD / CEEMDAN 分别高 7.56 / 7.79 / 7.86 dB［4］。但它只报检出概率，没有虚警率、没有 ROC、也没有阈值选择规则；其 SNR 是整段序列的能量比，与带限噪声下的窄带口径不可横向比较［4］。</p>
+<p>另一条更贴近本课题的路线是混沌振子的相变判别：以改进恢复力 $-x^3+x^5$ 重构势函数，用变尺度把任意频率映射到振子固有频率附近，用三振子阵列覆盖初相位，靠"混沌态 → 大尺度周期态"的跃变判断信号有无，并在动态 MWD 场景报出频率检测门限 −23 dB、参数估计门限 −21 dB（0–10 Hz 带限噪声、噪声方差 0.04、仿真时长 3000 s）［7］；强耦合振子则把耦合项用于脉冲信号检测，并用变迭代步长代替改变内置频率做扫频［8］。工程侧本组已有两条底牌：环形磁通门的非线性误差可建模并矢量补偿，在 ±0.5 gauss 内从约 100 nT 压到约 20 nT［5］；磁通门与 TMR 经互补滤波在 FPGA 上"拼接"，频带达 10 kHz、灵敏度 0.113 mV/nT、屏蔽筒内峰峰噪声 0.5 nT［6］。</p>
+<h3>四、本课题定位：两派之外，补"判决"这一环</h3>
+<p>本课题<strong>不属于上述任何一派</strong>：target-based 的前提是已知直线航迹与偶极子波形，noise-based 靠统计量或噪声增强，而本课题假设的是<strong>已知频率的时间周期弱信号</strong>［1］。它与 Sun 等的工作同属非线性系统，但机制不同——后者用噪声"抬高"信号幅度，本课题用相变判别信号的<strong>有无</strong>。因此本课题真正的空位不在"更强的增强器"，而在<strong>判决</strong>：把"检出概率 vs SNR"曲线升级为 $P_d$–$P_{fa}$–SNR 曲面［4］，把文献里的单点阈值升级为<strong>带条件的阈值带</strong>［7］，并在嵌入式平台上给出实测，指标一律连实验条件一起报。</p>
+<hr>
+<h2>引文清单（按正文出现顺序）</h2>
+<table><thead><tr><th>#</th><th>文献（GB/T 7714—2015）</th><th>本地全文</th><th>读到的深度</th></tr></thead><tbody>
+<tr><td>［1］</td><td>ZHAO Y, et al. A brief review of magnetic anomaly detection[J]. Measurement Science and Technology, 2021, 32(4): 042002. DOI: 10.1088/1361-6501/abd055.</td><td><code>D1_Zhao_磁异常检测综述_MST2021.pdf</code></td><td>全文精读（另有 30 KB 精读文档）</td></tr>
+<tr><td>［2］</td><td>MURZIN D, MAPPS D J, LEVADA K, et al. Ultrasensitive magnetic field sensors for biomedical applications[J]. Sensors, 2020, 20(6): 1569. DOI: 10.3390/s20061569.</td><td><code>D5_Murzin_超灵敏磁场传感器综述_Sensors2020.pdf</code></td><td>全文（噪声底表与结论段）</td></tr>
+<tr><td>［3］</td><td>GAMMAITONI L, HÄNGGI P, JUNG P, et al. Stochastic resonance[J]. Reviews of Modern Physics, 1998, 70(1): 223-287. DOI: 10.1103/RevModPhys.70.223.</td><td><code>A5_Gammaitoni_随机共振_RMP1998.pdf</code></td><td>指定章节（第 I、II、VI.C、VII.C.3 与结论）</td></tr>
+<tr><td>［4］</td><td>SUN H, et al. A weak anomaly signal enhancement method based on vector magnetic sensor[J]. IEEE Sensors Journal, 2025, 25(12): 22479-22487. DOI: 10.1109/JSEN.2025.3567707.</td><td><code>A_Weak_Anomaly_Signal_Enhancement_Method_Based_on_Vector_Magnetic_Sensor.pdf</code></td><td>全文</td></tr>
+<tr><td>［5］</td><td>韩维维, 杨晓非, 欧阳君, 等. 环形磁通门的非线性误差及补偿技术[J]. 电子测量技术, 2013, 36(3): 98-101. DOI: 10.19651/j.cnki.emt.2013.03.022.</td><td><code>E1_韩维维_环形磁通门非线性误差_电子测量技术2013.pdf</code></td><td>全文</td></tr>
+<tr><td>［6］</td><td>许朋博, 王鲜然, 欧阳君, 等. 基于磁通门和磁阻传感器的混合宽带磁传感器的研究与设计[J]. 仪表技术与传感器, 2021(4): 14-19.</td><td><code>E3_许朋博_磁通门磁阻混合宽带传感器_仪表技术与传感器2021.pdf</code></td><td>全文</td></tr>
+<tr><td>［7］</td><td>YANG Y, DING Q, GAO Y, et al. Chaotic effect-based array Duffing systems with improved nonlinear restoring force for weak signal detection in dynamic MWD[J]. Sensors, 2023, 23(17): 7598. DOI: 10.3390/s23177598.</td><td><code>02_Yang_阵列Duffing_MWD_Sensors2023.pdf</code></td><td>全文精读 + 数值复现</td></tr>
+<tr><td>［8］</td><td>李远芳, 姜园, 赵磊. 基于改进强耦合振子的微弱脉冲信号检测方法[J]. 物理学报, 2024, 73(4): 040503. DOI: 10.7498/aps.73.20231343.</td><td><code>01_李远芳_改进强耦合振子_物理学报2024.pdf</code></td><td><strong>仅题录+摘要级</strong>，正文只写到"耦合项用于脉冲检测、变步长扫频"</td></tr>
+</tbody></table>
+<blockquote><p>引文 8 条，全部有本地全文；其中 7 条已读全文、1 条（［8］）只到题录级并已在正文中限制表述范围。开题前若时间允许，把［8］补读一遍。</p></blockquote>
+<hr>
+<h2>自查表（逐条打勾）</h2>
+<ul><li>[x] 四段结构齐全：领域困难 → 两派方法 → 第三条路线 → 本课题定位</li><li>[x] 引文 ≥8 条，全部来自已入库文献；唯一未读全文的［8］已标注并限制表述</li><li>[x] 每个数字后跟条件（频段 / 带宽 / 噪声类型 / 量程 / 仿真时长）</li><li>[x] 不出现任何未读全文文献的方法细节</li><li>[x] 明确写出「本课题不属于 D1 两派」，并用一句话说清理由</li><li>[x] 自查无整句照抄：全部为改写句式 + 数字型引用，未复制原文长句</li><li>[x] 字数实测 <strong>1110 汉字</strong>（不含表格与引文清单）；若需压到 800 字，优先删第三节的 ★[2]/★[1] 半段与第四节第二句</li></ul>
+<h2>还需要补的三处（诚实标注）</h2>
+<ol><li>第四节「补判决这一环」目前是<strong>主张</strong>，尚无论证；等阶段 4 的 ROC 跑出来才能变成结论。</li><li>［8］未读全文，若开题被追问「强耦合具体怎么耦合」，只能回到题录级回答。</li><li>全文没有引用任何 MAD 的<strong>实测</strong>背景噪声谱（只有 D1/D5 的综述性描述），这一点只能等导师给实测数据后补一句。</li></ol>
+<hr>
+<p><em>相关文档：<a href="阶段1-文献解读与过关清单.html">阶段 1 文献解读与过关清单</a> · <a href="阶段1-信号与噪声模型假设.html">信号与噪声模型假设</a> · <a href="阶段1-文献卡片.html">文献卡片</a> · <a href="../00-总览/参考资料-极低频磁场混沌振子微弱信号检测.html">参考资料主清单</a></em></p></main></body></html>

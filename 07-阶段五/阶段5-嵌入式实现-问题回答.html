@@ -1,0 +1,82 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>07-阶段五/阶段5-嵌入式实现-问题回答.md</title><style>
+:root{--bg:#f6f7f9;--panel:#fff;--line:#e3e7ec;--text:#1b232c;--muted:#63707e;--accent:#2f6fd0;--soft:#eaf1fc}
+@media(prefers-color-scheme:dark){:root{--bg:#14181d;--panel:#1d232a;--line:#303a45;--text:#e7edf3;--muted:#a7b3c0;--accent:#7fb0f5;--soft:#21334d}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.8 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+.bar{position:sticky;top:0;background:var(--panel);border-bottom:1px solid var(--line);padding:9px 24px;font-size:13px;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.bar a{color:var(--accent);text-decoration:none}.bar a:hover{text-decoration:underline}
+.bar .fn{color:var(--muted);margin-left:auto;word-break:break-all}
+main{max-width:980px;margin:0 auto;padding:26px 28px 70px;background:var(--panel);min-height:calc(100vh - 44px);
+  border-left:1px solid var(--line);border-right:1px solid var(--line)}
+h1,h2,h3,h4{line-height:1.4;margin:1.5em 0 .6em;font-weight:650}
+h1{font-size:25px;border-bottom:1px solid var(--line);padding-bottom:10px;margin-top:.4em}
+h2{font-size:20px;border-bottom:1px solid var(--line);padding-bottom:7px}
+h3{font-size:17px}h4{font-size:15px}
+p,li{color:var(--text)}li{margin:.25em 0}
+a{color:var(--accent)}
+code{background:var(--soft);padding:1px 5px;border-radius:4px;font:12.6px ui-monospace,Consolas,monospace}
+pre{background:var(--soft);border:1px solid var(--line);border-radius:8px;padding:14px 16px;overflow:auto}
+pre code{background:none;padding:0}
+blockquote{border-left:3px solid var(--accent);background:var(--soft);margin:12px 0;padding:8px 16px;color:var(--muted)}
+blockquote p{margin:.3em 0}
+.staticnote{max-width:980px;margin:14px auto -8px;padding:9px 14px;border:1px solid var(--line);
+  border-left:3px solid var(--accent);border-radius:0 8px 8px 0;background:var(--soft);
+  font-size:12.6px;color:var(--muted)}
+.staticnote a{color:var(--accent)}
+table{border-collapse:collapse;width:100%;margin:14px 0;font-size:13.4px;display:block;overflow:auto}
+th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top}
+th{background:var(--soft);color:var(--muted);white-space:nowrap}
+tr:nth-child(even) td{background:rgba(127,150,180,.045)}
+hr{border:none;border-top:1px solid var(--line);margin:26px 0}
+strong{font-weight:650}
+</style>
+<script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']]},
+  options:{skipHtmlTags:['script','noscript','style','textarea','pre','code','annotation']}};</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+</head><body>
+<div class="bar"><a href="../index.html">← 返回资料索引</a>
+<a href="阶段5-嵌入式实现-问题回答.md">查看 Markdown 源码</a><span class="fn">07-阶段五/阶段5-嵌入式实现-问题回答.md</span></div>
+<div class="staticnote">这是 <b>静态排版副本</b>，生成于 2026-11-24 20:12。直接双击 <code>index.html</code> 时看到的就是它；若 Markdown 刚改过，请在工作区运行 <code>py build_static.py</code> 重新生成，或用 <code>start_index.bat</code> 启动本地服务查看实时渲染版。页内公式由 MathJax 渲染，需要联网。</div><main><h1>阶段 5 问题回答：嵌入式实现能不能落地</h1>
+<blockquote><p>对应 <a href="../00-总览/阅读路线.html">阅读路线阶段 5</a>「带着问题读」的四问；全部数字取自实跑，程序 <a href="../learn/5.ipynb">learn/5.ipynb</a>（25 单元 / 18 段代码 / 4 图 / 0 报错 / 347 s），机器可读汇总 <a href="../复现输出/阶段5-定点化与资源时序汇总.json">阶段5-定点化与资源时序汇总.json</a>。</p><p></p><p><strong>诚实边界</strong>：本课题无 FPGA 板、无综合报告。本阶段是<strong>定点数值仿真 + 基于 F2 实测工艺的换算 + 时序仿真图</strong>，不是板级实测。凡「时钟/资源/实时性」均标注推算依据。</p></blockquote>
+<hr>
+<h2>Q1：浮点 RK4 改成定点要留多少位宽才不丢相变？</h2>
+<p><strong>答：Q2.F 的 F=10–12 是甜点区（总位宽 12–14 bit）；F=4/6/8 三种失效模式必须认得。</strong></p>
+<p>用定点 Duffing 仿真器（状态/导数全程 Q2.F 整型乘加，策动力与噪声一起量化），无噪扫 $\lambda\in[0.70,0.84]$，取首个 $p_{\rm std}&lt;0.1$ 为等效阈值 $\lambda_c$，结果：</p>
+<table><thead><tr><th>字长</th><th>等效阈值 λc</th><th>失效模式</th></tr></thead><tbody>
+<tr><td>F=4 (W=6)</td><td>伪 λc≈0.70</td><td><strong>动力学塌缩</strong>：全程 pstd≈0，状态被量化锁死，处处"假周期"</td></tr>
+<tr><td>F=6 (W=8)</td><td>无</td><td><strong>相变消失</strong>：量化误差压过相变，整个网格都混沌（pstd 0.20–0.43）</td></tr>
+<tr><td>F=8 (W=10)</td><td>≈0.76</td><td><strong>伪周期回弹</strong>：λ=0.76 已相变，λ=0.80 又弹回混沌</td></tr>
+<tr><td>F=10/12/14/16/18</td><td>≈0.77</td><td>稳定，无回弹；F≥14 阈值不再改善，纯属浪费资源</td></tr>
+</tbody></table>
+<p><img src="../复现输出/阶段5-位宽扫描与阈值漂移.png" alt="位宽扫描" style="display:block;max-width:100%;height:auto;margin:10px 0"></p>
+<p><strong>为什么 F=4 不是「最省资源」</strong>：它的 pstd 全程≈0，看起来 everywhere 都"周期"，实际是定点锁死——用 pstd&lt;门限 判据会得到 100% 虚警。F=6 则相反，永不判周期，100% 漏检。<strong>位宽不足不是精度问题，是判据彻底失效</strong>。</p>
+<p><strong>为什么定点阈值比浮点高 3–5%</strong>（0.735 → 0.77）：量化相当于给状态注入与幅度相关的扰动能，需要更大的策动力才能压进大尺度周期态。这与阶段 2 的步长敏感性、阶段 3 的噪声助相变是同一族现象——数值实现本身参与动力学。</p>
+<hr>
+<h2>Q2：一次迭代几个时钟周期？</h2>
+<p><strong>答：基于 F2 实测工艺换算 ≈1008 ns/步 ≈ 252 时钟 @250 MHz；这是换算不是综合。</strong></p>
+<p>数清经典 RK4 单步的算子数（状态 $v=(x,y)$，$y'=-0.5y+x^3-x^5+{\rm drive}$）：</p>
+<ul><li>每级导数：$x^2,x^3,x^5$ 三次乘 + $0.5y$ 一次乘 = <strong>4 乘</strong>；$-0.5y+x^3-x^5+{\rm drive}$ = <strong>3 加</strong>；</li><li>4 级 RK4：16 乘 + 12 加；末态组合（$h/6$ 预乘进 k）：2 乘 + 6 加；</li><li><strong>单步合计 18 乘 + 18 加 = 36 op</strong>。</li></ul>
+<p>换算锚点取自 F2（曹保锋等，电子学报 2019，Zynq-7045，250 MHz）实测「一次乘 24 ns、一次加 32 ns」，其 5 级 RTRK4 双振子实测 1440 ns/步。本课题单振子、4 级 RK4、算子更少：</p>
+<p>$$18\times24 + 18\times32 = 1008\ {\rm ns/步} \approx 252\ {\rm 时钟\ @250\,MHz}$$</p>
+<blockquote><p>⚠️ F2 的 24/32 ns 是它那块板子的数，本课题未做综合。这两个数只用于<strong>量级判断</strong>；真要报时钟周期，必须在目标 FPGA 上跑综合时序报告。</p></blockquote>
+<hr>
+<h2>Q3：阵列多振子是并行例化还是时分复用？</h2>
+<p><strong>答：选 TDM 单核 + FIFO 帧缓存；因为计算根本不是瓶颈。</strong></p>
+<table><thead><tr><th>方案</th><th>DSP 乘数</th><th>帧计算（20000 步）</th><th>相对资源</th></tr></thead><tbody>
+<tr><td>三振子并行例化</td><td>54</td><td>20.2 ms</td><td>3×</td></tr>
+<tr><td><strong>TDM 单核</strong></td><td><strong>18</strong></td><td><strong>60.5 ms</strong></td><td><strong>1×</strong></td></tr>
+</tbody></table>
+<p>一帧 20000 步（对应阶段 4 的 T=400 s、h=0.02），单振子 20.2 ms、三振子 TDM 60.5 ms——而物理观测窗是 <strong>400 s</strong>，计算加速比约 19841×（单振子）。两种方案都远快于物理过程，所以<strong>资源优先</strong>：TDM 单核省 2/3 DSP。</p>
+<p>代价是需要帧缓存保证三路时间对齐（阶段 1 Q7 全相位覆盖要求同帧比较），并接受 3× 帧延迟——60.5 ms 对 400 s 窗完全可以忽略。</p>
+<p><strong>与 F2 的异同</strong>：F2 面临 10 MHz 采样率的硬实时约束（闪电脉冲 μs 级），必须数据分段并行 + FIFO 波形恢复；本课题信号周期以百秒计，采样率要求低 5 个数量级，所以<strong>不需要分段并行</strong>，只需沿用它的 FIFO 分离思想（见 Q4）。</p>
+<hr>
+<h2>Q4：判态模块放在数据流哪一级？</h2>
+<p><strong>答：三级流水——RK4 积分级（每步）→ Poincaré 抽样式判态级（每 314 步）→ 帧级 pstd 判决（每帧）；波形恢复走 FIFO 旁路，与判态分离。</strong></p>
+<p><img src="../复现输出/阶段5-时序仿真与数据流.png" alt="时序仿真与数据流" style="display:block;max-width:100%;height:auto;margin:10px 0"></p>
+<ol><li><strong>RK4 积分级</strong>：每步算一次，1008 ns，输出状态 x；</li><li><strong>Poincaré 抽样</strong>：每 $2\pi/h=314$ 步取一个点（与阶段 2/3 一致），这一步才进入判据通道；</li><li><strong>帧级 pstd 判决</strong>：攒够一帧取后半段算 pstd，与门限比较输出 0/1——判据放在这里，因为 pstd 本质是帧统计量，放在每步级没有意义；</li><li><strong>FIFO 旁路</strong>（借鉴 F2）：ADC 原始波形同时写入 FIFO，触发时才上传上位机做连续重构，判态模块<strong>不碰原始波形</strong>，避免分段/抽样造成波形畸变。</li></ol>
+<p>单步内部再分 5 拍复用一条 MAC 流水（K1→K2→K3→K4→末态组合），单拍 ≈252 ns，这是 F2「一条流水线跑 5 次」的复用思路在本课题的对应。</p>
+<hr>
+<h2>五个必须写进论文的边界</h2>
+<ol><li><strong>无板级实测</strong>：本阶段是定点数值仿真 + 工艺换算，没有综合报告、没有板卡；F2 的 24/32 ns 与 1440 ns 只作换算锚点。</li><li><strong>定点阈值要重标定</strong>：换 FPGA / 换字长 / 换采样率都要重扫 $\lambda_c$，不能沿用浮点值——这是本阶段最实用的一条工程结论。</li><li><strong>观测窗不可压缩</strong>：帧计算 20–60 ms，但物理观测 400 s；FPGA 再快只压掉"算一帧"的时间，压不掉信号本身的时标。</li><li><strong>初相盲区仍在</strong>：定点化不解决阶段 3 的 $\Delta_{\max}\approx60.69°$ 盲区，阵列全相位覆盖照旧需要。</li><li><strong>不与文献 SNR 横向比较</strong>：F2 的 −18 dB（闪电脉冲、双振子、波形相似度判据、Zynq-7045）与本课题的 −11 dB（正弦、单振子、pstd 判据、定点仿真）条件全不同，并列比较无意义。</li></ol></main></body></html>

@@ -1,0 +1,112 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>06-阶段四/阶段4-过关产出结果.md</title><style>
+:root{--bg:#f6f7f9;--panel:#fff;--line:#e3e7ec;--text:#1b232c;--muted:#63707e;--accent:#2f6fd0;--soft:#eaf1fc}
+@media(prefers-color-scheme:dark){:root{--bg:#14181d;--panel:#1d232a;--line:#303a45;--text:#e7edf3;--muted:#a7b3c0;--accent:#7fb0f5;--soft:#21334d}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.8 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+.bar{position:sticky;top:0;background:var(--panel);border-bottom:1px solid var(--line);padding:9px 24px;font-size:13px;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.bar a{color:var(--accent);text-decoration:none}.bar a:hover{text-decoration:underline}
+.bar .fn{color:var(--muted);margin-left:auto;word-break:break-all}
+main{max-width:980px;margin:0 auto;padding:26px 28px 70px;background:var(--panel);min-height:calc(100vh - 44px);
+  border-left:1px solid var(--line);border-right:1px solid var(--line)}
+h1,h2,h3,h4{line-height:1.4;margin:1.5em 0 .6em;font-weight:650}
+h1{font-size:25px;border-bottom:1px solid var(--line);padding-bottom:10px;margin-top:.4em}
+h2{font-size:20px;border-bottom:1px solid var(--line);padding-bottom:7px}
+h3{font-size:17px}h4{font-size:15px}
+p,li{color:var(--text)}li{margin:.25em 0}
+a{color:var(--accent)}
+code{background:var(--soft);padding:1px 5px;border-radius:4px;font:12.6px ui-monospace,Consolas,monospace}
+pre{background:var(--soft);border:1px solid var(--line);border-radius:8px;padding:14px 16px;overflow:auto}
+pre code{background:none;padding:0}
+blockquote{border-left:3px solid var(--accent);background:var(--soft);margin:12px 0;padding:8px 16px;color:var(--muted)}
+blockquote p{margin:.3em 0}
+.staticnote{max-width:980px;margin:14px auto -8px;padding:9px 14px;border:1px solid var(--line);
+  border-left:3px solid var(--accent);border-radius:0 8px 8px 0;background:var(--soft);
+  font-size:12.6px;color:var(--muted)}
+.staticnote a{color:var(--accent)}
+table{border-collapse:collapse;width:100%;margin:14px 0;font-size:13.4px;display:block;overflow:auto}
+th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top}
+th{background:var(--soft);color:var(--muted);white-space:nowrap}
+tr:nth-child(even) td{background:rgba(127,150,180,.045)}
+hr{border:none;border-top:1px solid var(--line);margin:26px 0}
+strong{font-weight:650}
+</style>
+<script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']]},
+  options:{skipHtmlTags:['script','noscript','style','textarea','pre','code','annotation']}};</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+</head><body>
+<div class="bar"><a href="../index.html">← 返回资料索引</a>
+<a href="阶段4-过关产出结果.md">查看 Markdown 源码</a><span class="fn">06-阶段四/阶段4-过关产出结果.md</span></div>
+<div class="staticnote">这是 <b>静态排版副本</b>，生成于 2026-11-24 20:12。直接双击 <code>index.html</code> 时看到的就是它；若 Markdown 刚改过，请在工作区运行 <code>py build_static.py</code> 重新生成，或用 <code>start_index.bat</code> 启动本地服务查看实时渲染版。页内公式由 MathJax 渲染，需要联网。</div><main><h1>阶段 4 过关产出结果：含噪检测与参数估计</h1>
+<blockquote><p><strong>验收口径</strong>：<a href="../00-总览/阅读路线.html">阅读路线阶段 4</a> 原文——「蒙特卡洛实验表——不同 SNR 下的检测概率 Pd、虚警率 Pfa、幅值估计相对误差，画出 Pd–SNR 曲线与误差–SNR 曲线。这张表直接兑现课题预期目标里要求的两项指标。」</p><p><strong>核实时点</strong>：2026-11-23｜<strong>全部数字取自实跑</strong>，程序：<a href="../learn/4.ipynb">learn/4.ipynb</a>（22 单元 / 12 段代码 / 4 张内嵌图 / 0 报错 / 237 s）。机器可读汇总：<a href="../复现输出/阶段4-检测性能与参数估计汇总.json">阶段4-检测性能与参数估计汇总.json</a>。</p><p><strong>本页四张 PNG 已逐张验真</strong>（47–117 KB，非纯白图），可直接内嵌引用。</p></blockquote>
+<hr>
+<h2>一、过关要求逐条对照</h2>
+<table><thead><tr><th>#</th><th>路线过关要求</th><th>交付实物</th><th>结果</th></tr></thead><tbody>
+<tr><td>1</td><td>不同 SNR 下的 Pd、Pfa 蒙特卡洛表</td><td>§三 S 曲线表：8 个 SNR 点 × 白噪/色噪 × Pd@Pfa 两档 + Pfa 对照，每点 100 次试验</td><td>✅</td></tr>
+<tr><td>2</td><td>幅值估计相对误差表</td><td>§四：γ 相对误差 + RMSE + θ 误差，3 个噪声档 × 白噪/色噪 × 12 次</td><td>✅</td></tr>
+<tr><td>3</td><td>Pd–SNR 曲线</td><td>§三 内嵌图，白噪/色噪两栏 S 曲线 + Pfa=0.05/0.10 门限</td><td>✅</td></tr>
+<tr><td>4</td><td>误差–SNR 曲线</td><td>§四 内嵌图，γ 相对误差与 θ 误差双轴</td><td>✅</td></tr>
+<tr><td>5</td><td>兑现两项指标</td><td>§六：最低可检测 SNR = −11.0 dB；估计精度白噪 4.2–5.0% / 色噪 7.4–8.8%</td><td>✅</td></tr>
+<tr><td>6</td><td>（附加）ROC + 融合规则</td><td>§三 ROC 图 + §五 三振子 OR / 多数表决对照</td><td>✅</td></tr>
+</tbody></table>
+<p><strong>验收结论：阶段 4 过关。</strong> 两项预期指标均已给出，但都带完整实验条件，见文末边界。</p>
+<hr>
+<h2>二、实验设计（关键决策，写进论文）</h2>
+<p><strong>一项被实测推翻又修正的设计</strong>：最初固定 γ 扫噪声 σ，Pd 全程卡 0.6–0.7、几乎不随 SNR 变。根因是相变由合成幅值 $C=\lambda+\gamma$ 决定，噪声不主导判决。改为<strong>固定 σ=0.05、扫 γ∈[0.005,0.05]</strong>，SNR 随 γ 变，才得到正确的 S 曲线。这是本阶段最重要的方法学修正。</p>
+<table><thead><tr><th>项</th><th>取值</th><th>理由</th></tr></thead><tbody>
+<tr><td>SNR 口径</td><td>$\mathrm{SNR}_E=10\lg[(\gamma^2/2)/\sigma^2]$</td><td>阶段 1 主口径，整段能量比</td></tr>
+<tr><td>检测扫描</td><td>固定 σ=0.05，扫 γ</td><td>相变由 C=λ+γ 决定，固定 γ 扫噪声会得到平坦假象</td></tr>
+<tr><td>噪声双档</td><td>白噪 α=0（基线）+ 1/f α=1（主力）</td><td>阶段 1 Q8：变尺度/低频必须用色噪</td></tr>
+<tr><td>窗长</td><td>T=400 s，burn=200 s</td><td>T=200 s 瞬态未收敛 Pd 卡 0.65；400 s 达标</td></tr>
+<tr><td>门限</td><td>固定 Pfa=0.05/0.10，H0 反解分位数</td><td>ROC 可信分水岭，绝不用 H1 调阈值</td></tr>
+<tr><td>试验次数</td><td>检测 100 点⁻¹，融合 60×3，估计 12 档⁻¹</td><td>阶段 1 纪律 ≥100</td></tr>
+<tr><td>判据</td><td>Poincaré pstd &lt; 门限</td><td>阶段 3 定的主判据</td></tr>
+</tbody></table>
+<hr>
+<h2>三、检测性能：Pd–SNR S 曲线与 ROC</h2>
+<p><img src="../复现输出/阶段4-Pd-SNR曲线.png" alt="Pd-SNR 曲线" style="display:block;max-width:100%;height:auto;margin:10px 0"></p>
+<p>条件：σ=0.05 固定、h=0.02 s、T=400 s、θ=0（同相理想上界）、每点 100 次。</p>
+<table><thead><tr><th>SNR (dB)</th><th>−23</th><th>−18.9</th><th>−17</th><th>−15.4</th><th>−13.5</th><th><strong>−11</strong></th><th>−7.4</th><th>−3</th></tr></thead><tbody>
+<tr><td>白噪 Pd@Pfa=0.05</td><td>0.15</td><td>0.12</td><td>0.09</td><td>0.14</td><td>0.62</td><td><strong>0.93</strong></td><td>0.99</td><td>1.00</td></tr>
+<tr><td>色噪 Pd@Pfa=0.05</td><td>0.11</td><td>0.20</td><td>0.38</td><td>0.44</td><td>0.76</td><td><strong>0.90</strong></td><td>1.00</td><td>1.00</td></tr>
+</tbody></table>
+<ul><li>H0 反解门限：白噪 th(0.05)=0.443、色噪 th(0.05)=0.435；</li><li>固定门限 0.08 下的 Pfa 两档均 ≈0（保守）；</li><li><strong>Pd 在 γ≈0.012–0.020 窄区间陡升</strong>（非线性开关），非平滑下降；</li><li><strong>最低可检测 SNR = −11.0 dB</strong>（两档一致，Pd 分别 0.93 / 0.90）。</li></ul>
+<p><img src="../复现输出/阶段4-ROC曲线.png" alt="ROC" style="display:block;max-width:100%;height:auto;margin:10px 0"></p>
+<p>ROC 从同一批 pstd 样本扫门限得到，星号工作点对应 Pfa=0.05 门限。</p>
+<blockquote><p>⚠️ 色噪在弱信号端（−18.9~−15.4 dB）Pd 反而略高于白噪——这是 1/f 噪声适度"助相变"的体现，与阶段 3 的观察一致；但<strong>强噪声端的估计精度色噪更差</strong>（§四）。检测与估计对噪声的响应方向不同，不可混为一谈。</p></blockquote>
+<hr>
+<h2>四、参数估计精度：误差–SNR 曲线</h2>
+<p><img src="../复现输出/阶段4-参数估计误差曲线.png" alt="估计误差" style="display:block;max-width:100%;height:auto;margin:10px 0"></p>
+<p>固定 γ=0.02，用 λ* 差分估计器（Eq.17 因灾难性相消弃用），每档 12 次蒙特卡洛。横轴 SNR 随 σ 变化（σ=0.03/0.05/0.08 → SNR 越高噪声越小）。</p>
+<table><thead><tr><th>噪声</th><th>σ</th><th>SNR (dB)</th><th>γ 相对误差</th><th>γ RMSE</th><th>θ 误差</th></tr></thead><tbody>
+<tr><td>白噪</td><td>0.03</td><td>−15.0</td><td>4.2%</td><td>0.0010</td><td>0.0°</td></tr>
+<tr><td>白噪</td><td>0.05</td><td>−11.0</td><td>5.0%</td><td>0.0012</td><td>0.0°</td></tr>
+<tr><td>白噪</td><td>0.08</td><td>−7.0</td><td>5.0%</td><td>0.0012</td><td>0.5°</td></tr>
+<tr><td>色噪</td><td>0.03</td><td>−15.0</td><td>8.7%</td><td>0.0022</td><td>2.2°</td></tr>
+<tr><td>色噪</td><td>0.05</td><td>−11.0</td><td>8.8%</td><td>0.0022</td><td>2.2°</td></tr>
+<tr><td>色噪</td><td>0.08</td><td>−7.0</td><td>7.4%</td><td>0.0017</td><td>4.2°</td></tr>
+</tbody></table>
+<p><strong>白噪满足"误差 &lt;5%"的论文写法</strong>（4.2–5.0%）；色噪约翻倍（7.4–8.8%），是必须如实报的代价。RMSE 与相对误差同向，两者都给以避免 γ 小时的失真。</p>
+<hr>
+<h2>五、附加：阵列融合规则对照</h2>
+<p><img src="../复现输出/阶段4-阵列融合对照.png" alt="融合对照" style="display:block;max-width:100%;height:auto;margin:10px 0"></p>
+<p>随机初相、γ=0.02、σ=0.05、Pfa=0.05，60 次 × 3 重复：</p>
+<table><thead><tr><th>噪声</th><th>单振子</th><th>三振子 OR</th><th>三振子 2-of-3</th></tr></thead><tbody>
+<tr><td>白噪</td><td>0.32</td><td><strong>0.53</strong></td><td>0.38</td></tr>
+<tr><td>1/f 色噪</td><td>0.33</td><td><strong>0.64</strong></td><td>0.38</td></tr>
+</tbody></table>
+<p><strong>OR 覆盖优先</strong>（Q7），随机相位下单振子被盲区拖到 0.32；Q11 的"多数表决更优"前提是各路看同一信号、仅噪声独立，场景不同，不矛盾。</p>
+<hr>
+<h2>六、两项指标兑现（课题预期目标）</h2>
+<table><thead><tr><th>指标</th><th>结果</th><th>完整条件</th></tr></thead><tbody>
+<tr><td><strong>最低可检测信噪比</strong></td><td><strong>−11.0 dB</strong></td><td>Pfa≤0.05、Pd≥0.9、白噪/1/f α=1、σ=0.05、γ=0.020、h=0.02 s、T=400 s、pstd 判据、H0 反解门限、SNR$_E$ 口径</td></tr>
+<tr><td><strong>参数估计精度</strong></td><td>γ 相对误差 4.2–5.0%（白噪）/ 7.4–8.8%（色噪）；θ 误差 ≤4.2°</td><td>γ=0.02、σ=0.03/0.05/0.08、λ* 差分估计器、12 次蒙特卡洛、同上 h/T/判据</td></tr>
+</tbody></table>
+<blockquote><p>这两个数字<strong>只能在本课题自己的口径下成立</strong>，与文献 −21/−18/−15 dB 不可比较。写论文时必须整段照抄条件列。</p></blockquote>
+<hr>
+<h2>七、边界声明与销账</h2>
+<p><strong>边界</strong>：H0/H1 均为仿真噪声（A 档白噪 + B 档 1/f α=1），C 档实测磁场数据到位后必须替换 H0 并重标全部指标；T=400 s 仍短于 ★[2] 的 3000 s，绝对数值保守；检测固定 θ=0（理想相位上界），全相位性能见 §五；H0 样本同批标门限与验 Pfa 属乐观估计，正式系统须拆标定/验证集。</p>
+<p><strong>阶段一问题销账进展</strong>：</p>
+<ul><li><strong>Q7 三振子盲区</strong>：阶段 3 封口解析式 + 本阶段用随机初相蒙特卡洛给出 OR 覆盖收益（0.32→0.53/0.64）✅</li><li><strong>Q11 OR vs 多数表决</strong>：本阶段厘清适用边界（覆盖优先 vs 同信号抗噪），两者不矛盾 ✅</li><li><strong>Q9 两个 −15 dB 口径差</strong>：本阶段全程用 SNR$_E$ 主口径并随数字报条件 ✅</li><li><strong>Q10 极低频段 / C 档实测噪声</strong>：待导师 🔴（实测数据到位后重标是必须动作）</li></ul>
+<p><strong>本阶段不交</strong>：定点化位宽、资源/时序估算、板级验证（阶段 5）；成文与参考文献核对（阶段 6）。逐问回答见 <a href="阶段4-检测与估计-问题回答.html">阶段4-检测与估计-问题回答.md</a>。</p></main></body></html>

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 680 506" width="680" height="506" role="img" xmlns="http://www.w3.org/2000/svg" style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif">
+<title>第 0 步技术路线方框图</title>
+<desc>含噪极低频磁信号输入，经变尺度预处理、Duffing 振子阵列、相变判据、幅值相位估计，到最低可检测信噪比与参数估计精度指标；下方为嵌入式实现载体，虚线为指标反馈与阈值重标定。基于阅读路线第 0 步，2026-11-13。</desc>
+<defs>
+<marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+<path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</marker>
+</defs>
+<rect x="0" y="0" width="680" height="506" fill="#FFFFFF"/>
+
+<text x="40" y="44" font-size="15" font-weight="500" fill="#0C447C" dominant-baseline="central">第 0 步 · 技术路线方框图</text>
+<text x="40" y="64" font-size="12" fill="#5F5E5A" dominant-baseline="central">半天 · 第 1 周第 1 天 · 六个环节 + 一条反馈 + 一层实现载体 · 开题报告「技术路线」雏形</text>
+
+<rect x="40" y="84" width="180" height="98" rx="10" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.5"/>
+<circle cx="60" cy="106" r="10" fill="#185FA5"/>
+<text x="60" y="106" font-size="12" font-weight="500" fill="#FFFFFF" text-anchor="middle" dominant-baseline="central">1</text>
+<text x="76" y="106" font-size="14" font-weight="500" fill="#0C447C" dominant-baseline="central">输入信号</text>
+<text x="54" y="129" font-size="12" fill="#185FA5" dominant-baseline="central">含噪极低频磁信号</text>
+<text x="54" y="146" font-size="12" fill="#185FA5" dominant-baseline="central">s(t)+n(t)，1/f 主导</text>
+<path d="M54 156 L206 156" fill="none" stroke="#B5D4F4" stroke-width="0.5"/>
+<text x="54" y="170" font-size="11.5" fill="#0C447C" dominant-baseline="central">D1 D4 D5 E1–E5 ★[3]</text>
+
+<rect x="250" y="84" width="180" height="98" rx="10" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.5"/>
+<circle cx="270" cy="106" r="10" fill="#185FA5"/>
+<text x="270" y="106" font-size="12" font-weight="500" fill="#FFFFFF" text-anchor="middle" dominant-baseline="central">2</text>
+<text x="286" y="106" font-size="14" font-weight="500" fill="#0C447C" dominant-baseline="central">变尺度预处理</text>
+<text x="264" y="129" font-size="12" fill="#185FA5" dominant-baseline="central">尺度系数 R = ω/ω_s</text>
+<text x="264" y="146" font-size="12" fill="#185FA5" dominant-baseline="central">重采样 · 归一化</text>
+<path d="M264 156 L416 156" fill="none" stroke="#B5D4F4" stroke-width="0.5"/>
+<text x="264" y="170" font-size="11.5" fill="#0C447C" dominant-baseline="central">B2 ★[2]</text>
+
+<rect x="460" y="84" width="180" height="98" rx="10" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.5"/>
+<circle cx="480" cy="106" r="10" fill="#185FA5"/>
+<text x="480" y="106" font-size="12" font-weight="500" fill="#FFFFFF" text-anchor="middle" dominant-baseline="central">3</text>
+<text x="496" y="106" font-size="14" font-weight="500" fill="#0C447C" dominant-baseline="central">Duffing 振子阵列</text>
+<text x="474" y="129" font-size="12" fill="#185FA5" dominant-baseline="central">−x³+x⁵ 改进恢复力</text>
+<text x="474" y="146" font-size="12" fill="#185FA5" dominant-baseline="central">三振子全相位覆盖</text>
+<path d="M474 156 L626 156" fill="none" stroke="#B5D4F4" stroke-width="0.5"/>
+<text x="474" y="170" font-size="11.5" fill="#0C447C" dominant-baseline="central">A1 A2 A4 C2 ★[1]★[2]</text>
+
+<rect x="460" y="238" width="180" height="98" rx="10" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.5"/>
+<circle cx="480" cy="260" r="10" fill="#185FA5"/>
+<text x="480" y="260" font-size="12" font-weight="500" fill="#FFFFFF" text-anchor="middle" dominant-baseline="central">4</text>
+<text x="496" y="260" font-size="14" font-weight="500" fill="#0C447C" dominant-baseline="central">相变判据</text>
+<text x="474" y="283" font-size="12" fill="#185FA5" dominant-baseline="central">混沌 → 大尺度周期态</text>
+<text x="474" y="300" font-size="12" fill="#185FA5" dominant-baseline="central">λ_c 标定 · Poincaré 截面</text>
+<path d="M474 310 L626 310" fill="none" stroke="#B5D4F4" stroke-width="0.5"/>
+<text x="474" y="324" font-size="11.5" fill="#0C447C" dominant-baseline="central">B1 B3 B4 ★[2]</text>
+
+<rect x="250" y="238" width="180" height="98" rx="10" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.5"/>
+<circle cx="270" cy="260" r="10" fill="#185FA5"/>
+<text x="270" y="260" font-size="12" font-weight="500" fill="#FFFFFF" text-anchor="middle" dominant-baseline="central">5</text>
+<text x="286" y="260" font-size="14" font-weight="500" fill="#0C447C" dominant-baseline="central">幅值 / 相位估计</text>
+<text x="264" y="283" font-size="12" fill="#185FA5" dominant-baseline="central">策动力补偿同步估幅</text>
+<text x="264" y="300" font-size="12" fill="#185FA5" dominant-baseline="central">相量合成与盲区消除</text>
+<path d="M264 310 L416 310" fill="none" stroke="#B5D4F4" stroke-width="0.5"/>
+<text x="264" y="324" font-size="11.5" fill="#0C447C" dominant-baseline="central">C1 C2 ★[1]★[2]</text>
+
+<rect x="40" y="238" width="180" height="98" rx="10" fill="#FAEEDA" stroke="#854F0B" stroke-width="0.5"/>
+<circle cx="60" cy="260" r="10" fill="#854F0B"/>
+<text x="60" y="260" font-size="12" font-weight="500" fill="#FFFFFF" text-anchor="middle" dominant-baseline="central">6</text>
+<text x="76" y="260" font-size="14" font-weight="500" fill="#633806" dominant-baseline="central">性能指标</text>
+<text x="54" y="283" font-size="12" fill="#854F0B" dominant-baseline="central">最低可检测 SNR</text>
+<text x="54" y="300" font-size="12" fill="#854F0B" dominant-baseline="central">参数估计精度 · ROC</text>
+<path d="M54 310 L206 310" fill="none" stroke="#FAC775" stroke-width="0.5"/>
+<text x="54" y="324" font-size="11.5" fill="#633806" dominant-baseline="central">D3 G1 G2 ★[2]</text>
+
+<path d="M220 133 L250 133" fill="none" stroke="#5F5E5A" stroke-width="1.5" marker-end="url(#arrow)"/>
+<path d="M430 133 L460 133" fill="none" stroke="#5F5E5A" stroke-width="1.5" marker-end="url(#arrow)"/>
+<path d="M550 182 L550 238" fill="none" stroke="#5F5E5A" stroke-width="1.5" marker-end="url(#arrow)"/>
+<path d="M460 287 L430 287" fill="none" stroke="#5F5E5A" stroke-width="1.5" marker-end="url(#arrow)"/>
+<path d="M250 287 L220 287" fill="none" stroke="#5F5E5A" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+<path d="M130 336 L130 360 L550 360 L550 336" fill="none" stroke="#854F0B" stroke-width="1.2" stroke-dasharray="5 4" marker-end="url(#arrow)"/>
+<text x="340" y="378" font-size="12" fill="#854F0B" text-anchor="middle" dominant-baseline="central">指标反馈：按 Pd / Pfa 重标定 λ_c、判据阈值与工作点</text>
+
+<rect x="40" y="394" width="600" height="48" rx="10" fill="#F1EFE8" stroke="#B4B2A9" stroke-width="0.5"/>
+<text x="56" y="412" font-size="13" font-weight="500" fill="#2C2C2A" dominant-baseline="central">实现载体 · 阶段 5（第 12–15 周）｜嵌入式 FPGA 定点 RK4</text>
+<text x="56" y="430" font-size="12" fill="#5F5E5A" dominant-baseline="central">承载环节 3 求解 / 4 判态 / 5 估计的实时化｜F2 · F1（链接失效、全文未到手）· F3 · E5</text>
+
+<text x="40" y="466" font-size="11.5" fill="#5F5E5A" dominant-baseline="central">实线 = 主数据流　虚线 = 指标反馈与阈值重标定　灰条 = 嵌入式实现载体　文献编号见主清单 A–G 分组</text>
+</svg>

@@ -1,0 +1,103 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>01-阶段一/阶段1-问题清单.md</title><style>
+:root{--bg:#f6f7f9;--panel:#fff;--line:#e3e7ec;--text:#1b232c;--muted:#63707e;--accent:#2f6fd0;--soft:#eaf1fc}
+@media(prefers-color-scheme:dark){:root{--bg:#14181d;--panel:#1d232a;--line:#303a45;--text:#e7edf3;--muted:#a7b3c0;--accent:#7fb0f5;--soft:#21334d}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.8 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+.bar{position:sticky;top:0;background:var(--panel);border-bottom:1px solid var(--line);padding:9px 24px;font-size:13px;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.bar a{color:var(--accent);text-decoration:none}.bar a:hover{text-decoration:underline}
+.bar .fn{color:var(--muted);margin-left:auto;word-break:break-all}
+main{max-width:980px;margin:0 auto;padding:26px 28px 70px;background:var(--panel);min-height:calc(100vh - 44px);
+  border-left:1px solid var(--line);border-right:1px solid var(--line)}
+h1,h2,h3,h4{line-height:1.4;margin:1.5em 0 .6em;font-weight:650}
+h1{font-size:25px;border-bottom:1px solid var(--line);padding-bottom:10px;margin-top:.4em}
+h2{font-size:20px;border-bottom:1px solid var(--line);padding-bottom:7px}
+h3{font-size:17px}h4{font-size:15px}
+p,li{color:var(--text)}li{margin:.25em 0}
+a{color:var(--accent)}
+code{background:var(--soft);padding:1px 5px;border-radius:4px;font:12.6px ui-monospace,Consolas,monospace}
+pre{background:var(--soft);border:1px solid var(--line);border-radius:8px;padding:14px 16px;overflow:auto}
+pre code{background:none;padding:0}
+blockquote{border-left:3px solid var(--accent);background:var(--soft);margin:12px 0;padding:8px 16px;color:var(--muted)}
+blockquote p{margin:.3em 0}
+.staticnote{max-width:980px;margin:14px auto -8px;padding:9px 14px;border:1px solid var(--line);
+  border-left:3px solid var(--accent);border-radius:0 8px 8px 0;background:var(--soft);
+  font-size:12.6px;color:var(--muted)}
+.staticnote a{color:var(--accent)}
+table{border-collapse:collapse;width:100%;margin:14px 0;font-size:13.4px;display:block;overflow:auto}
+th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top}
+th{background:var(--soft);color:var(--muted);white-space:nowrap}
+tr:nth-child(even) td{background:rgba(127,150,180,.045)}
+hr{border:none;border-top:1px solid var(--line);margin:26px 0}
+strong{font-weight:650}
+</style>
+<script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']]},
+  options:{skipHtmlTags:['script','noscript','style','textarea','pre','code','annotation']}};</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+</head><body>
+<div class="bar"><a href="../index.html">← 返回资料索引</a>
+<a href="阶段1-问题清单.md">查看 Markdown 源码</a><span class="fn">01-阶段一/阶段1-问题清单.md</span></div>
+<div class="staticnote">这是 <b>静态排版副本</b>，生成于 2026-11-24 20:12。直接双击 <code>index.html</code> 时看到的就是它；若 Markdown 刚改过，请在工作区运行 <code>py build_static.py</code> 重新生成，或用 <code>start_index.bat</code> 启动本地服务查看实时渲染版。页内公式由 MathJax 渲染，需要联网。</div><main><h1>阶段 1 过关产物 5｜问题清单</h1>
+<blockquote><p><strong>用途</strong>：驱动阶段 2 的建模选择。不是"读完有疑问"，而是<strong>每条都能指向某篇文献的某一处，或某次待做的实验</strong>。</p><p><strong>用法</strong>：阶段 2 开工时逐条对照，看哪几条已被建模回答、哪几条必须做实验、哪几条只能问导师。</p><p><strong>核实日期</strong>：2026-11-19</p><p></p><p><strong>📌 销账进度已另立文件</strong>：<a href="阶段1-问题销账.html">阶段 1 问题销账</a>（2026-11-23）——12 条里 7 条已结清、3 条部分、2 条待导师。<strong>下文 Q1 与 Q5 的"答案形态"已被该文件推翻，读时以销账文件为准</strong>（本文件保留当时的原始判断，用于追溯认识变化）。</p></blockquote>
+<hr>
+<h2>一、总览</h2>
+<p>共 <strong>12 条</strong>，其中 <strong>5 条是"论文没回答的"</strong>（★ 标记），3 条待实验、4 条待导师确认/换算。</p>
+<table><thead><tr><th>#</th><th>问题（一句话）</th><th>类型</th><th>指向</th><th>计划解决</th></tr></thead><tbody>
+<tr><td>Q1 ★</td><td>为什么大家只报 $P_d$、不报 $P_{fa}$？</td><td>论文没答</td><td>★[3] 边界</td><td>阶段 4</td></tr>
+<tr><td>Q2 ★</td><td>峰峰值噪声怎么换成噪声密度才好比？</td><td>论文没答</td><td>E3 §3.2.2</td><td>阶段 1 末~2</td></tr>
+<tr><td>Q3 ★</td><td>非线性残差在动态/温漂下还剩多少？</td><td>论文没答</td><td>E1 §4</td><td>阶段 5</td></tr>
+<tr><td>Q4 ★</td><td>SNR 在 $D\to0$ 发散，那我们该报什么？</td><td>论文没答</td><td>A5 Fig. 8</td><td>阶段 4</td></tr>
+<tr><td>Q5 ★</td><td>有没有人在 MAD 上给过完整 ROC？</td><td>论文没答</td><td>D1 结论 + D2/D3</td><td>阶段 4 前</td></tr>
+<tr><td>Q6</td><td>$\lambda_c$ 换参数会漂多少？</td><td>待实验</td><td>★[2] §4 + 本机复现</td><td>阶段 3</td></tr>
+<tr><td>Q7</td><td>三振子覆盖的盲区边界在噪声下多模糊？</td><td>待实验</td><td>★[2] 阵列节 + B4</td><td>阶段 3</td></tr>
+<tr><td>Q8</td><td>变尺度重采样会不会把噪声带宽一起缩放？</td><td>待实验</td><td>B2 + 第 0 步环节 2</td><td>阶段 2</td></tr>
+<tr><td>Q9</td><td>两个 −15 dB 之间差多少才能等价？</td><td>待换算</td><td>★[3] vs ★[2]</td><td>阶段 4</td></tr>
+<tr><td>Q10</td><td>"极低频"到底取哪一段？</td><td>待导师</td><td>D5 / E3 / 课题要求</td><td>第 1–2 周</td></tr>
+<tr><td>Q11</td><td>阵列融合用 OR 还是多数表决？</td><td>待定</td><td>★[2] / B4</td><td>阶段 3–4</td></tr>
+<tr><td>Q12</td><td>验收要 $P_d$@固定 $P_{fa}$ 还是误差棒？</td><td>待导师</td><td>课题"预期目标"</td><td>第 1–2 周</td></tr>
+</tbody></table>
+<hr>
+<h2>二、逐条展开</h2>
+<h3>Q1 ★｜为什么只报 $P_d$、不报 $P_{fa}$？</h3>
+<ul><li><strong>问题</strong>：Sun 等给出 −20/−15/−10 dB 下 23%/72%/98% 的检出概率，却没有任何虚警率、没有 ROC、没有阈值选择规则［4］。</li><li><strong>为什么重要</strong>：只有 $P_d$ 的检测器在工程上不可用——把阈值压到最低可以让 $P_d$ 接近 100%，代价是满屏虚警。<strong>"最低可检测 SNR"若不绑定 $P_{fa}$，是个没有意义的数。</strong></li><li><strong>线索</strong>：<code>阶段1-文献解读与过关清单.md</code> §4「边界」；原文的"检出"由增强因子峰位<strong>人工判读</strong>，本身就没有统计判决门限。</li><li><strong>答案形态</strong>：本课题给出 $P_d$–$P_{fa}$–SNR 曲面，并在固定 $P_{fa}=1\%$（或 10%）下报最低 SNR。</li></ul>
+<blockquote><p>⚠️ <strong>2026-11-23 更正</strong>：上面这句"最主要的方法学卖点"<strong>不成立</strong>。检索发现 $P_{fa}$ 早已有人给过——Jin &amp; Zhang（<em>Sci China Inf Sci</em>, 2011, 54: 2324-2337）给了 $P_{fa}$ 与 $P_d$ 的<strong>解析式</strong>；张悦等（高电压技术, 2016, 42(6): 2009-2016）直接报"−20 dB 时 $P_d&gt;90\%$、低于 −20 dB 时 $P_{fa}&lt;1\%$"。所以创新点只能收窄为<strong>"变尺度 + 阵列条件下的门限曲面"</strong>，并强调 $\lambda$ 的选取本身是 $P_{fa}$ 的函数（阈值带口径）。详见 <a href="阶段1-问题销账.html">销账文件</a> Q1、Q5。</p></blockquote>
+<h3>Q2 ★｜峰峰值噪声怎么换成噪声密度才好比？</h3>
+<ul><li><strong>问题</strong>：E3 报"峰峰噪声 0.5 nT（10 s / 10 点，屏蔽筒内）"，而 D5 报的是 pT/√Hz 的<strong>谱密度</strong>［2］［6］。两者量纲不同，不能并列。</li><li><strong>为什么重要</strong>：写论文时若把 0.5 nT 与 1 pT/√Hz 放同一张表，评审一眼就能看出"作者不懂噪声指标"。</li><li><strong>线索</strong>：E3 §3.2.2（本峰噪声定义与表 2）；D5 各器件的 PSD 表。</li><li><strong>待做</strong>：① 按高斯假设 $V_{pp}\approx6\sigma$ 粗估 RMS（≈0.08 nT），<strong>仅作量级</strong>；② 更好的是自己测一段噪声谱，给 PSD 曲线；③ 若都不行，则在论文里明确"本文只报峰峰值，不与谱密度类指标比较"。</li></ul>
+<h3>Q3 ★｜非线性残差在动态/温漂下还剩多少？</h3>
+<ul><li><strong>问题</strong>：E1 把 ±0.5 gauss 内的非线性误差从 100 nT 压到 20 nT，但那是<strong>静态、单台、常温</strong>标定［5］。温度变化、动态扫场、三轴交叉耦合下残差如何？</li><li><strong>为什么重要</strong>：如果残差随温漂涨到 100 nT 量级，那么任何 pT 级的"检测"都会被器件自身漂移淹没——这直接决定 SNR 门限的天花板。</li><li><strong>线索</strong>：E1 §4 补偿流程与结论；E1 明确未涉及温度与动态。</li><li><strong>待做</strong>：阶段 5 若用实测器件，加一组"升温—回温"重复标定；否则在论文的"局限"里写明借用文献值的条件。</li></ul>
+<h3>Q4 ★｜SNR 在 $D\to0$ 发散，那我们该报什么？</h3>
+<ul><li><strong>问题</strong>：A5 指出 SNR 在噪声趋零时反而发散，所以"SNR 提升 X dB"不能证明 SR 发生，也不能作为跨方法比较的尺度［3］。</li><li><strong>为什么重要</strong>：本课题若也拿"SNR 增益"当卖点，会踩同一个坑；而如果只报 $P_d$，又回到 Q1 的毛病。</li><li><strong>线索</strong>：A5 第 II 章 SNR 定义 + Fig. 8；第 VI.C 节（SR 与混沌）。</li><li><strong>答案形态</strong>：主指标用"固定 $P_{fa}$ 下的 $P_d$ vs SNR"，辅以参数估计误差棒；SNR 增益只作为<strong>描述性</strong>结果出现，且注明定义式。</li></ul>
+<h3>Q5 ★｜有没有人在 MAD 上给过完整 ROC？</h3>
+<ul><li><strong>问题</strong>：D1 说全领域"没有统一的 SNR 定义、$P_{fa}$ 或 ROC 口径"［1］，但这是 2021 年的综述。2021 年之后有没有人补上？</li><li><strong>为什么重要</strong>：如果已经有人做过完整 ROC，本课题的差异化就要改写（不能把"补 ROC"当创新点）。</li><li><strong>线索</strong>：D1 结论段；待查 D2（HOC 法，IEEE TGRS 2012）、D3（SR 法，Sens. Actuators A 2018）——这两篇目前<strong>尚未到手</strong>（🔒 订阅制）。</li><li><strong>待做</strong>：阶段 4 之前必须查清，否则创新点站不住。可先查这两篇的摘要与引用它的后续工作。</li></ul>
+<blockquote><p>⚠️ <strong>2026-11-23 已查（结论不利）</strong>：MAD 主流<strong>已有 ROC</strong>——Roignant 等（EUSIPCO 2024: 2382-2386）给出 ROC 曲线与 +2/+3/+5 dB 增益；IEEE Sensors J 2023, 23(18) 有学习类方法报 AUC/FAR。混沌振子线上 2011/2016 两篇亦已给 $P_{fa}$。<strong>"全领域无 ROC"这句已过时</strong>，空白只能收窄到"极低频周期磁信号 + 变尺度 + 三振子阵列"这一组合。详见 <a href="阶段1-问题销账.html">销账文件</a> Q5。</p></blockquote>
+<h3>Q6｜$\lambda_c$ 换参数会漂多少？</h3>
+<ul><li><strong>问题</strong>：★[2] 用 0.72 / 0.73 作工作点，本机在干净数值条件下测得跃变带约 0.734–0.740［7］。换恢复力、步长、噪声带宽、判据，阈值移多少？</li><li><strong>为什么重要</strong>：$\lambda_c$ <strong>不是普适常数</strong>。论文若写"取 0.73"而不说条件，等于没有可复现性。</li><li><strong>线索</strong>：★[2] §4；本机 <code>复现-2-混沌振子建模与临界阈值.ipynb</code> §8（阈值扫描）；<code>第0步-技术路线方框图.md</code> 的"两个坑"。</li><li><strong>待做</strong>：阶段 3 做四因素扫描（$h$、恢复力系数、噪声 $\alpha$、判据），给"阈值带"而不是"阈值点"。</li></ul>
+<h3>Q7｜三振子覆盖的盲区边界在噪声下多模糊？</h3>
+<ul><li><strong>问题</strong>：★[2] 用 0°/±120° 三振子覆盖初相位，窗口 ±60.69°，<code>360/121≈2.97</code> 的余量怎么处理？加入噪声后，"覆盖"是硬边界还是概率过渡？</li><li><strong>为什么重要</strong>：如果噪声让覆盖边界糊掉 10°，那么"全相位覆盖"这个说法在低 SNR 下就不成立。</li><li><strong>线索</strong>：★[2] 阵列节；B4《盲区消除及检测统计量构造》（已入库 0.66 MB）。</li><li><strong>待做</strong>：阶段 3 扫 $\theta$ 全周 × 3 个 SNR 档，画"检出/漏检"相位图。</li></ul>
+<h3>Q8｜变尺度重采样会不会把噪声带宽一起缩放？</h3>
+<ul><li><strong>问题</strong>：变尺度把 $\omega_s$ 映射到振子固有频率，尺度系数 $R=\omega/\omega_s$ 同时作用于信号与噪声［7］。重采样后噪声的等效带宽、等效 $\sigma$ 都变了，<strong>SNR 口径会不会跟着漂</strong>？</li><li><strong>为什么重要</strong>：如果口径漂了，那么"变尺度前后 SNR 不变"这个隐含假设就是错的，所有阈值对比都要重算。</li><li><strong>线索</strong>：B2（变尺度原始方法，已入库）；<code>第0步-技术路线方框图.md</code> 环节 2 明确写"注意重采样带来的噪声混叠"。</li><li><strong>待做</strong>：阶段 2 做一组对照：同一段噪声，直接滤波 vs 变尺度重采样，比较 PSD 与 $\sigma$。</li></ul>
+<h3>Q9｜两个 −15 dB 之间差多少才能等价？</h3>
+<ul><li><strong>问题</strong>：★[3] 的 −15 dB 是<strong>整段序列能量比</strong>（全带宽），★[2] 的 −23/−21 dB 是 <strong>0–10 Hz 带限</strong>窄带口径［4］［7］。同一段数据用两种定义算，能差几 dB？</li><li><strong>为什么重要</strong>：不换算就并列，等于把两种货币当一种花。</li><li><strong>线索</strong>：<code>阶段1-信号与噪声模型假设.md</code> §五（两套定义与换算）；★[2] 精读第 179 行（$10\lg(p_a/p_n)$ 定义）。</li><li><strong>待做</strong>：阶段 4 造一段已知数据，两套公式各算一次，得出<strong>固定的换算差</strong>并写进论文脚注。</li></ul>
+<h3>Q10｜"极低频"到底取哪一段？</h3>
+<ul><li><strong>问题</strong>：D5 说磁通门低噪声窗口 1–100 Hz［2］，E3 说频域电磁法覆盖 mHz–kHz［6］，课题要求只说"极低频"。本课题取哪一段？</li><li><strong>为什么重要</strong>：频段决定采样率、时长、变尺度系数、甚至传感器选型；不定下来，模型假设就是空中楼阁。</li><li><strong>线索</strong>：<code>阶段1-信号与噪声模型假设.md</code> §二的三处锚点表；课题要求原文（<code>index.html#brief</code>）。</li><li><strong>待做</strong>：第 1–2 周问导师：实测对象是什么、频段多少。</li></ul>
+<h3>Q11｜阵列融合用 OR 还是多数表决？</h3>
+<ul><li><strong>问题</strong>：★[2] 用三振子并联、任一判"有"即输出（OR 型），代价是虚警率随振子数上升；若改多数表决，$P_d$ 与 $P_{fa}$ 如何权衡？</li><li><strong>为什么重要</strong>：这是"多振子"从"提高覆盖率"变成"提高可靠性"的关键一步，也是 chaos-CFAR 的入口。</li><li><strong>线索</strong>：★[2] 阵列判决节；B4 的检测统计量构造。</li><li><strong>待做</strong>：阶段 3–4 在独立噪声下做 $N=1/3/5$ 的 ROC 对比。</li></ul>
+<h3>Q12｜验收要 $P_d$@固定 $P_{fa}$ 还是误差棒？</h3>
+<ul><li><strong>问题</strong>：课题"预期目标"要求"最低可检测信噪比与参数估计精度"，但没规定指标的呈现形式。</li><li><strong>为什么重要</strong>：形式不同，实验设计完全不同（前者要大量独立试验，后者要参数扫描）。</li><li><strong>线索</strong>：课题要求原文；<code>阶段1-信号与噪声模型假设.md</code> §七 第 4 条。</li><li><strong>待做</strong>：第 1–2 周与导师确认，最好两个都给。</li></ul>
+<hr>
+<h2>三、"论文没回答的"五条（★）单独汇总</h2>
+<table><thead><tr><th>#</th><th>空白</th><th>谁留下的</th><th>本课题怎么补</th></tr></thead><tbody>
+<tr><td>Q1</td><td>只有 $P_d$，无 $P_{fa}$</td><td>★[3]</td><td>给 $P_d$–$P_{fa}$–SNR 曲面</td></tr>
+<tr><td>Q2</td><td>峰峰值噪声 ≠ 谱密度</td><td>E3</td><td>补测 PSD 或明确不比较</td></tr>
+<tr><td>Q3</td><td>静态标定，无温漂/动态</td><td>E1</td><td>加温循试验或在局限中声明</td></tr>
+<tr><td>Q4</td><td>SNR 指标本身会骗人</td><td>A5</td><td>主指标改为固定 $P_{fa}$ 的 $P_d$</td></tr>
+<tr><td>Q5</td><td>全领域无统一 ROC</td><td>D1（2021 综述）</td><td>先查 2021 后文献，再决定是否作创新点</td></tr>
+</tbody></table>
+<blockquote><p>这五条合起来就是开题报告里"研究空白"那一段的骨架——<strong>不是"没人做过混沌检测"，而是"做过的人都只交了一半的指标"</strong>。</p></blockquote>
+<blockquote><p>⚠️ <strong>2026-11-23 更正</strong>：这五条里 <strong>Q2 已结清、Q4 已由 C2 复现给出实证、Q5 已被检索推翻</strong>；Q1 的"没人给 $P_{fa}$"也不成立（2016 年张悦等已把 $P_d$ 与 $P_{fa}$ 连在一起报）。上表只能作为<strong>当时</strong>的认知记录，不能再直接抄进开题。</p><p></p><p>逐条结论见 <a href="阶段1-问题销账.html">阶段 1 问题销账</a>：Q2（$\sqrt B$ 换算）、Q4（带宽比 29.9 dB / 实测 27.2 dB）、Q5（2011、2016、2024 三档证据）、Q7（$\pm60.69°$ 精确对应 $\gamma=0.02$）、Q8（白噪 $+10\lg R$、$1/f$ 仅 $+0.5$ dB）、Q9（换算差 $10\lg\frac{f_s}{2B}$）、Q11（多数表决比 OR 高 43–58 pp）。</p></blockquote>
+<hr>
+<h2>四、自查表（对应阶段 1 清单产物 5 的验收项）</h2>
+<ul><li>[x] ≥8 条具体问题（实际 12 条），每条指向某篇文献或某次待做实验</li><li>[x] 至少 3 条是"论文没回答的"（实际 5 条，均标 ★）</li><li>[x] 每条标注"在哪篇/哪节能找到线索"</li><li>[x] 给出计划解决阶段，便于阶段 2 开工时逐条销账</li></ul>
+<hr>
+<p><em>相关文档：<a href="阶段1-现状综述草稿.html">现状综述草稿</a> · <a href="阶段1-信号与噪声模型假设.html">信号与噪声模型假设</a> · <a href="阶段1-文献卡片.html">文献卡片</a> · <a href="阶段1-E1E3获取记录.html">E1/E3 获取记录</a></em></p></main></body></html>

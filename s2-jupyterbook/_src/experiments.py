@@ -10,6 +10,12 @@
   table3  参数估计：三路扫 λ 得 λ1/λ2/λ3 -> Eq.17 -> γ,θ 与误差
   nu      ν 与 R 的关系、盲测扫 R、频率分辨率
   snr     SNR 门限：已知频率单点 vs 未知频率扫 R
+
+全部实验都调同一个内核 s2sim.simulate_seq（数据驱动，只吃采样序列 + 尺度系数 R）。
+需要"已知频率"的验模台架（sweep/fig1/fig2/fig5/fig7_9/fig10_11/table3/nu 的前半段）
+先用 s2sim.tone() 按真值造一段样本，再交给同一个 - 检测端只看到样本与 dt，
+看不到造样本时用的 ω。这正是"验证模式"与"检测模式"的区别：区别在喂什么，
+不在积分器——积分器自始至终只有一个。
 """
 from __future__ import annotations
 
@@ -33,6 +39,7 @@ GAM, THETA = 0.02, math.radians(-120)
 BETAS = np.deg2rad([0.0, -120.0, 120.0])
 DT = 0.005          # 数据驱动模式的采样间隔
 FS = 1 / DT
+HP = S.H            # 论文工作步长 2π/300 ≈ 0.020944 s
 
 
 def dump(name, obj):
@@ -49,11 +56,16 @@ def curve(r, step=20):
                 y=np.round(r["Y"][::step], 4).tolist())
 
 
+def nsteps(t_end, h=HP):
+    return int(round(t_end / h)) + 1
+
+
 # ---------------------------------------------------------------- sweep
 def exp_sweep():
     print("[sweep] 扫 λ")
     lam = np.round(np.arange(0.700, 0.7601, 0.002), 4)
-    r = S.simulate(lam, gamma=0.0, t_end=600.0, burn=300.0)
+    r = S.simulate_seq(S.SIG0, S.R0, HP, lam=lam,
+                       n_cycles=600.0 / TWOPI, burn_frac=0.5)
     pstd = r["pstd"]
     per = pstd < 0.02
     jump = next(([float(lam[i]), float(lam[i + 1])] for i in range(len(lam) - 1)
@@ -67,8 +79,9 @@ def exp_sweep():
 # ---------------------------------------------------------------- fig1
 def exp_fig1():
     print("[fig1] 混沌 / 大周期相图")
-    r0 = S.simulate(LAM_WORK, gamma=0.0, trace=True, t_end=400.0, burn=200.0)
-    r1 = S.simulate(0.78, gamma=0.0, trace=True, t_end=400.0, burn=200.0)
+    kw = dict(R=S.R0, dt=HP, n_cycles=400.0 / TWOPI, burn_frac=0.5, trace=True)
+    r0 = S.simulate_seq(S.SIG0, lam=LAM_WORK, **kw)
+    r1 = S.simulate_seq(S.SIG0, lam=0.78, **kw)
     dump("fig1", dict(chaos=curve(r0, 4), periodic=curve(r1, 4),
                       pstd=[float(r0["pstd"][0]), float(r1["pstd"][0])]))
 
@@ -79,26 +92,40 @@ def exp_fig2():
     ths = np.deg2rad([0, 45, 90, 135, 180])
     out = {}
     for th in ths:
-        r = S.simulate(LAM_WORK, 0.0, GAM, th, t_end=400.0, burn=200.0, trace=True)
+        sig = S.tone(GAM, th, omega=1.0, n=nsteps(400.0), dt=HP)
+        r = S.simulate_seq(sig, S.R0, HP, lam=LAM_WORK, beta=0.0,
+                           n_cycles=400.0 / TWOPI, burn_frac=0.5, trace=True)
         out[f"{int(np.rad2deg(th))}"] = dict(pstd=float(r["pstd"][0]),
-                                            cur=curve(r, 6))
+                                             cur=curve(r, 6))
     dump("fig2", out)
 
 
 # ---------------------------------------------------------------- fig5
 def exp_fig5():
     print("[fig5] 四幅消融")
+    # (采样间隔 dt, 尺度 R)：两者之积 h1 恒为 HP，保证与其余实验同一步长
     cases = {
-        "no_signal": dict(lam=LAM_WORK, beta=0.0, gamma=0.0, theta=0.0, nu=1.0),
-        "R1_b-120": dict(lam=LAM_WORK, beta=np.deg2rad(-120), gamma=GAM,
-                         theta=THETA, nu=10.0),
-        "R10_b0": dict(lam=LAM_WORK, beta=0.0, gamma=GAM, theta=THETA, nu=1.0),
-        "R10_b-120": dict(lam=LAM_WORK, beta=np.deg2rad(-120), gamma=GAM,
-                          theta=THETA, nu=1.0),
+        # 无信号：喂全零序列，R=1 → h1 = dt
+        "no_signal": dict(sig=None, R=S.R0, dt=HP, beta=0.0),
+        # 信号本来就 10 rad/s，不缩放：R=1，dt=HP
+        "R1_b-120": dict(sig=("tone", 10.0, HP), R=1.0, dt=HP,
+                         beta=np.deg2rad(-120)),
+        # 信号 10 rad/s，要靠 R=10 折到 1 rad/s：dt 缩到 HP/10 保持 h1=HP
+        "R10_b0": dict(sig=("tone", 10.0, HP / 10), R=10.0, dt=HP / 10, beta=0.0),
+        "R10_b-120": dict(sig=("tone", 10.0, HP / 10), R=10.0, dt=HP / 10,
+                          beta=np.deg2rad(-120)),
     }
     out = {}
     for name, kw in cases.items():
-        r = S.simulate(trace=True, t_end=400.0, burn=200.0, **kw)
+        dt, R = kw["dt"], kw["R"]
+        spec, beta = kw["sig"], kw.pop("beta")
+        if spec is None:
+            sig = S.SIG0
+        else:
+            _, om, sdt = spec
+            sig = S.tone(GAM, THETA, omega=om, n=nsteps(400.0, dt), dt=sdt)
+        r = S.simulate_seq(sig, R, dt, lam=LAM_WORK, beta=beta,
+                           n_cycles=400.0 / TWOPI, burn_frac=0.5, trace=True)
         out[name] = dict(pstd=float(r["pstd"][0]), cur=curve(r, 6))
         print(f"   {name:12s} pstd={r['pstd'][0]:.4f} "
               f"{'周期' if r['pstd'][0] < 0.02 else '混沌'}")
@@ -109,14 +136,19 @@ def exp_fig5():
 def exp_fig7_9():
     print("[fig7_9] 门限附近的相图")
     out = {}
+    n = nsteps(1200.0)
+    idx = np.arange(n) * HP
     for snr in (-23, -21):
         D = 0.0002 / 10 ** (snr / 10)
-        sig = math.sqrt(D)
-        r = S.simulate(LAM_WORK, BETAS, GAM, np.full(3, THETA),
-                       sigma=sig, seed=100 + snr, t_end=1200.0, burn=600.0,
-                       trace=True)
+        sg = math.sqrt(D)
+        rng = np.random.default_rng(100 + snr)
+        # 三路独立噪声（与旧实现一致：每路一个噪声实现）
+        sig = (GAM * np.cos(idx[:, None] + THETA)
+               + sg * math.sqrt(HP) * rng.standard_normal((n, 3)))
+        r = S.simulate_seq(sig, S.R0, HP, lam=LAM_WORK, beta=BETAS,
+                           n_cycles=1200.0 / TWOPI, burn_frac=0.5, trace=True)
         out[str(snr)] = dict(pstd=np.round(r["pstd"], 5).tolist(),
-                             sigma=sig, cur=[curve_chan(r, j, 8) for j in range(3)])
+                             sigma=sg, cur=[curve_chan(r, j, 8) for j in range(3)])
         print(f"   SNR={snr} dB  pstd={np.round(r['pstd'],4)}")
     dump("fig7_9", out)
 
@@ -133,11 +165,13 @@ def curve_chan(r, j, step=8):
 def exp_fig10_11():
     print("[fig10_11] 输出项时域")
     out = {}
+    n = nsteps(1200.0)
     for snr in (-23, -21):
         D = 0.0002 / 10 ** (snr / 10)
-        r = S.simulate(LAM_WORK, np.deg2rad(-120), GAM, THETA,
-                       sigma=math.sqrt(D), seed=7, t_end=1200.0, burn=600.0,
-                       trace=True)
+        sig = S.tone(GAM, THETA, omega=1.0, n=n, dt=HP,
+                     sigma=math.sqrt(D), seed=7)
+        r = S.simulate_seq(sig, S.R0, HP, lam=LAM_WORK, beta=np.deg2rad(-120),
+                           n_cycles=1200.0 / TWOPI, burn_frac=0.5, trace=True)
         st = 10
         out[str(snr)] = dict(t=np.round(r["t"][::st] * 1e3, 2).tolist(),
                              x=np.round(r["X"][::st, 0], 4).tolist(),
@@ -148,9 +182,11 @@ def exp_fig10_11():
 # ---------------------------------------------------------------- table3
 def crit_lambda(beta, theta, gamma, lam_lo=0.715, lam_hi=0.760, n=46,
                 t_end=1200.0, burn=600.0):
-    """扫内驱幅值，找刚好相变的那一点（二分细化）。"""
+    """扫内驱幅值，找刚好相变的那一点（二分细化）。信号与内驱同频（ν=1）。"""
     lams = np.round(np.linspace(lam_lo, lam_hi, n), 4)
-    r = S.simulate(lams, beta, gamma, theta, t_end=t_end, burn=burn)
+    sig = S.tone(gamma, theta, omega=1.0, n=nsteps(t_end), dt=HP)
+    kw = dict(R=S.R0, dt=HP, n_cycles=t_end / TWOPI, burn_frac=burn / t_end)
+    r = S.simulate_seq(sig, lam=lams, beta=beta, **kw)
     per = r["pstd"] < 0.02
     if not per.any():
         return None, lams, r["pstd"]
@@ -160,7 +196,7 @@ def crit_lambda(beta, theta, gamma, lam_lo=0.715, lam_hi=0.760, n=46,
     lo, hi = lams[i - 1], lams[i]
     for _ in range(6):
         mid = round((lo + hi) / 2, 6)
-        v = S.simulate(mid, beta, gamma, theta, t_end=t_end, burn=burn)["pstd"][0]
+        v = S.simulate_seq(sig, lam=mid, beta=beta, **kw)["pstd"][0]
         if v < 0.02:
             hi = mid
         else:
@@ -212,23 +248,28 @@ def exp_table3():
 def exp_nu():
     print("[nu] ν / R / 盲测")
     dt = DT
-    # 1) 固定 R=10，扫 nu，看分支连续性与选择带宽
+    # 1) 固定 R=10 扫 ν∈[0.96,1.04]：等价于"每个 ν 造一段真值 10ν 的样本，
+    #    再让检测端只用 R=10 去读"。h1 = 10*(HP/10) = HP，与其余实验同步长。
     nus = np.round(np.arange(0.96, 1.041, 0.005), 4)
-    r = S.simulate(LAM_WORK, np.deg2rad(-120), GAM, THETA, nu=nus,
-                   t_end=600.0, burn=300.0)
-    # 2) 盲测：只给采样序列
+    dtn = HP / 10.0
+    idxn = np.arange(nsteps(600.0)) * dtn
+    SIGN = GAM * np.cos((10.0 * nus)[None, :] * idxn[:, None] + THETA)
+    r = S.simulate_seq(SIGN, 10.0, dtn, lam=np.full(nus.size, LAM_WORK),
+                       beta=np.deg2rad(-120), n_cycles=600.0 / TWOPI,
+                       burn_frac=0.5)
+    # 2) 盲测：只给采样序列（检测端拿不到 ω，扫的是 R）
     ks = np.arange(900000)
     sig = GAM * np.cos(10.0 * ks * dt + THETA)
     Rs = np.round(np.arange(8.0, 12.01, 0.05), 3)
     blind = [S.simulate_seq(sig, R, dt, lam=LAM_WORK, beta=np.deg2rad(-120),
-                            n_cycles=150)["pstd"] for R in Rs]
+                            n_cycles=150)["pstd"][0] for R in Rs]
     # 3) 三个真值，看定位
     loc = {}
     for w in (10.0, 7.3, 3.7):
         s2 = GAM * np.cos(w * ks * dt + THETA)
         grid = np.round(np.arange(0.85 * w, 1.15 * w, 0.05), 3)
         v = [S.simulate_seq(s2, R, dt, lam=LAM_WORK, beta=np.deg2rad(-120),
-                            n_cycles=150)["pstd"] for R in grid]
+                            n_cycles=150)["pstd"][0] for R in grid]
         v = np.array(v)
         i = int(np.nanargmin(v))
         loc[str(w)] = dict(grid=grid.tolist(), pstd=np.round(v, 5).tolist(),
@@ -254,7 +295,8 @@ def exp_snr():
         # 基线：同强度纯噪声
         base = np.median([S.simulate_seq(sg * rng.standard_normal(ks.size),
                                          10.0, dt, lam=LAM_WORK,
-                                         beta=np.deg2rad(-120), n_cycles=150)["pstd"]
+                                         beta=np.deg2rad(-120),
+                                         n_cycles=150)["pstd"][0]
                           for _ in range(4)])
         thr = 0.5 * base
         hit1 = hit2 = corr = 0
@@ -262,11 +304,11 @@ def exp_snr():
         for _ in range(NREP):
             sig = GAM * np.cos(10.0 * ks * dt + THETA) + sg * rng.standard_normal(ks.size)
             v1 = S.simulate_seq(sig, 10.0, dt, lam=LAM_WORK,
-                                beta=np.deg2rad(-120), n_cycles=150)["pstd"]
+                                beta=np.deg2rad(-120), n_cycles=150)["pstd"][0]
             hit1 += (v1 < thr)
             grid = np.round(np.arange(9.4, 10.61, 0.1), 2)
             vs = [S.simulate_seq(sig, R, dt, lam=LAM_WORK,
-                                 beta=np.deg2rad(-120), n_cycles=150)["pstd"]
+                                 beta=np.deg2rad(-120), n_cycles=150)["pstd"][0]
                   for R in grid]
             vs = np.array(vs)
             good = grid[vs < thr]

@@ -427,7 +427,7 @@
 </tr>
 <tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\nu\)</span></p></td>
 <td><p>变尺度后信号与内驱的<strong>频率比</strong> <span class="math notranslate nohighlight">\(\omega/R\)</span></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">nu=omega/R</span></code> 或由采样序列隐式产生</p></td>
+<td><p><strong>不出现</strong>（由 <span class="math notranslate nohighlight">\(R\)</span> 与采样序列隐式产生）</p></td>
 <td><p>由 <span class="math notranslate nohighlight">\(R\)</span> 与信号共同决定</p></td>
 </tr>
 </tbody>
@@ -453,7 +453,9 @@ transformation coefficient at this time is the frequency value of the characteri
 是<strong>同一个方程</strong>：前者是后者的解析近似。用真值 <span class="math notranslate nohighlight">\(\omega\)</span> 构造 <span class="math notranslate nohighlight">\(\nu\)</span> 只适合”验证模式”
 （已知答案、检查方法能否复现），不能用于”检测模式”——检测模式下 <span class="math notranslate nohighlight">\(\omega\)</span> 是未知的，
 写 <code class="docutils literal notranslate"><span class="pre">nu=omega/R</span></code> 等于把答案先塞进输入。</p>
-<p>本书两种模式都做，并且证明它们在无噪声下给出同一个 <span class="math notranslate nohighlight">\(R\)</span>。</p>
+<p>本书两种用法都做——验模时按真值逐点造样本，检测时只给一条样本——但<strong>积分器自始至终只有一个</strong>
+<code class="docutils literal notranslate"><span class="pre">simulate_seq(sig,</span> <span class="pre">R,</span> <span class="pre">dt)</span></code>：区别在喂什么，不在算法。3.4 节的扫描就说明，同一段样本、换个 <span class="math notranslate nohighlight">\(R\)</span>，
+读数从混沌跳到周期，<span class="math notranslate nohighlight">\(R\)</span> 就是频率。</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">sys</span><span class="o">,</span><span class="w"> </span><span class="nn">json</span><span class="o">,</span><span class="w"> </span><span class="nn">pathlib</span>
@@ -503,7 +505,7 @@ transformation coefficient at this time is the frequency value of the characteri
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="_images/ad26881aea37ebd2b208803b77dc2ec1d5f8903a79e6ccdbfde941da61c679dc.png" src="_images/ad26881aea37ebd2b208803b77dc2ec1d5f8903a79e6ccdbfde941da61c679dc.png" />
+<img alt="_images/3101bab00c41c59d1ae456e0fec541f4c3acf63fb33959282afb8efb53b4c1d7.png" src="_images/3101bab00c41c59d1ae456e0fec541f4c3acf63fb33959282afb8efb53b4c1d7.png" />
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>图已保存: ..\复现输出\s2-figs\s2-03-nu容差.png
 pstd&lt;0.02 的 ν 取值: [1.]
 选择带宽：仅 ν=1  （相对 0.0%）

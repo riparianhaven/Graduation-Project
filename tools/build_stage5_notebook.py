@@ -164,7 +164,7 @@ print('Q2.12 量化误差 max =', round(float(np.abs(from_q(to_q(np.array([-1.5,
 ''')
 
 code(r'''
-# 0.5 定点 RK4 仿真器：与阶段 2 的 simulate 同方程，状态/导数全程 Q2.F
+# 0.5 定点 RK4 仿真器：与阶段 2 的 simulate_seq 同方程（本文件是它的定点复刻，用于嵌入式验证），状态/导数全程 Q2.F
 def simulate_fixed(lam, gamma, theta, sigma, noise, F,
                    h=H, t_end=T_SIM, burn=BURN_SIM):
     """定点 Duffing + RK4，返回 Poincaré 截面后半段的 pstd（每路一条）。

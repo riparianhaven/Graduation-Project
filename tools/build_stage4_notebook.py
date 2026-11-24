@@ -23,6 +23,8 @@ from pathlib import Path
 
 import nbformat as nbf
 
+from kernel_src import KERNEL_SRC  # 全项目唯一内核源码，见 tools/kernel_src.py
+
 ROOT = Path(__file__).resolve().parent.parent
 TARGET = ROOT / 'learn' / '4.ipynb'
 
@@ -47,7 +49,7 @@ md(r'''
 
 | 节 | 内容 | 对应产出 |
 |---|---|---|
-| 0 | 环境、噪声生成器、含噪仿真器 | 可复用的 `make_noise()` / `simulate_mc()` |
+| 0 | 环境、噪声生成器、含噪仿真器 | 可复用的 `make_noise()` / `pstd_mc()` |
 | 1 | 门限标定纪律：固定 $P_{fa}$ 从 H0 反解 | 可信 ROC 的前提 |
 | 2 | 检测主实验：固定噪声扫信号，白噪 + 1/f 色噪 | $P_d$–SNR 曲线、最低可检测 SNR |
 | 3 | 阵列融合：单振子 / OR / 2-of-3 多数表决 | 融合规则对照（覆盖优先 vs 性能优先） |
@@ -73,7 +75,7 @@ md(r'''
 md(r'''
 ## 0｜环境与公共工具
 
-下面几段依次完成：**导入设置 → 路径/存图 → 参数 → 噪声生成器 → 含噪仿真器**。按顺序跑一次即可，后面所有实验复用 `make_noise()` 与 `simulate_mc()`。
+下面几段依次完成：**导入设置 → 路径/存图 → 参数 → 噪声生成器 → 含噪仿真器**。按顺序跑一次即可，后面所有实验复用 `make_noise()` 与 `pstd_mc()`。
 
 > **口径提醒**：仿真在归一化模型单位下进行；SNR 用主口径 $\mathrm{SNR}_E=10\lg[(\gamma^2/2)/\sigma^2]$（与阶段 1 一致），$\sigma$ 是噪声幅度参数，离散噪声增量为 $\sigma\sqrt{h}\,\varepsilon$。
 ''')
@@ -168,60 +170,46 @@ def make_noise(steps, m, alpha, seed):
 ''')
 
 md(r'''
-### 0.5 含噪仿真器：向量化 RK4 + Poincaré 截面
+### 0.5 含噪仿真器：把「信号 + 噪声」折成采样序列，交给唯一内核
 
-`simulate_mc()` 复用阶段 2/3 的相量合成与 RK4 结构，新增 `noise` 参数：`noise[i, j]` 是第 j 路在第 i 步的噪声增量（已含 $\sqrt{h}$），驱动项为 $\sigma\,\text{noise}[i,j]$。lam/beta/gamma/theta 可为标量或长度 m 数组，一次并行跑完 m 路。返回 `pstd`（Poincaré 后半段标准差）——与阶段 2/3 完全同口径。
+本阶段**不再另写积分器**。`pstd_mc()` 只做两件事：把同频待测信号与噪声增量折成一条采样序列
+`sig[i] = γcos(i·h+θ) + σ·noise[i]`，再把 `t_end/burn` 换成 `n_cycles/burn_frac`，
+交给阶段 2/3 的同一个 `simulate_seq()`（$R=1$，故 $h_1=h$，数值时间轴与物理时间轴重合）。
+
+`noise[i, j]` 是第 j 路在第 i 步的噪声增量（已含 $\sqrt{h}$），与阶段 2 的
+$\sigma\sqrt h\,N(0,1)$ 同口径。噪声数组**由调用方预先生成并传入**，因此 $H_0$/$H_1$
+可以共用同一批随机数（公共随机数法），比较才干净。lam/beta/gamma/theta 可为标量或长度
+m 数组，一次并行跑完 m 路；返回 `pstd`（Poincaré 后半段标准差，逐路）——与阶段 2/3 完全同口径。
 ''')
 
 code(r'''
-def simulate_mc(lam, beta, gamma, theta, sigma, noise,
-                h=H, t_end=T, burn=BURN):
-    """向量化 RK4：x'' = -DAMP*x' + x³ - x⁵ + A cos t - B sin t + σ·noise[i]。
-    同频相量合成 A=lam cosβ+γ cosθ, B=lam sinβ+γ sinθ。
-    noise: (steps, m)，每个元素为噪声增量（含 √h）；sigma 为幅度参数。
-    返回 pstd（Poincaré 后半段标准差，逐路）。"""
+K = DAMP                       # 内核约定的阻尼符号（本笔记本里叫 DAMP）
+R0 = 1.0                       # 本阶段不做变尺度：h1 = R0*H = H
+SIG0 = np.zeros(1)             # 全零序列 = 没有待测信号，只剩内驱
+TWOPI = 2.0 * math.pi
+
+
+''' + KERNEL_SRC + r'''
+
+def pstd_mc(lam, beta, gamma, theta, sigma, noise, h=H, t_end=T, burn=BURN):
+    """蒙特卡洛入口：造采样序列 → 交给唯一内核 simulate_seq → 返回逐路 pstd。
+
+    积分、Poincaré 2π 插值、标量/数组两条路径都在 simulate_seq 里，本函数不含 RK4。
+    """
     lam, beta, gamma, theta = [np.ravel(a).astype(float) for a in
         np.broadcast_arrays(np.asarray(lam, float), np.asarray(beta, float),
                             np.asarray(gamma, float), np.asarray(theta, float))]
-    m = lam.size
     steps = int(round(t_end / h))
-    burn_steps = int(round(burn / h))
-    A = lam * np.cos(beta) + gamma * np.cos(theta)
-    B = lam * np.sin(beta) + gamma * np.sin(theta)
-    x = np.zeros(m); y = np.zeros(m)
-    poincare = []
-    TWOPI = 2 * math.pi
-    idx_prev = 0
-    for i in range(steps):
-        t = i * h
-        nz = sigma * noise[i]
-        f1 = A * math.cos(t)       - B * math.sin(t)       + nz
-        fh = A * math.cos(t + h/2) - B * math.sin(t + h/2) + nz
-        f4 = A * math.cos(t + h)   - B * math.sin(t + h)   + nz
-        k1x = y;            k1y = -DAMP*y   + x**3   - x**5   + f1
-        x2, y2 = x + h/2*k1x, y + h/2*k1y
-        k2x = y2;           k2y = -DAMP*y2  + x2**3  - x2**5  + fh
-        x3, y3 = x + h/2*k2x, y + h/2*k2y
-        k3x = y3;           k3y = -DAMP*y3  + x3**3  - x3**5  + fh
-        x4, y4 = x + h*k3x,     y + h*k3y
-        k4x = y4;           k4y = -DAMP*y4  + x4**3  - x4**5  + f4
-        x_prev = x.copy()                      # 更新前存档，供 2π 时刻插值
-        x += h/6*(k1x + 2*k2x + 2*k3x + k4x)
-        y += h/6*(k1y + 2*k2y + 2*k3y + k4y)
-        if i >= burn_steps:
-            # 精确落在 τ=2πk 上取截面（按步数取整会引入相位漂移伪 pstd）
-            idx = int(math.floor((t + h) / TWOPI + 1e-12))
-            if idx != idx_prev and idx > 0:
-                frac = min(max((TWOPI * idx - t) / h, 0.0), 1.0)
-                poincare.append(x_prev + frac * (x - x_prev))
-                idx_prev = idx
-    p = np.asarray(poincare)
-    return p[len(p)//2:].std(axis=0) if p.size else np.full(m, np.nan)
+    idx = np.arange(steps) * h
+    # 同频信号 + 噪声增量 → 一条采样序列（第 i 个样本对应物理时刻 i*h）
+    sig = gamma[None, :] * np.cos(idx[:, None] + theta[None, :]) + sigma * noise[:steps]
+    return simulate_seq(sig, R0, h, lam=lam, beta=beta,
+                        n_cycles=t_end / TWOPI, burn_frac=burn / t_end)['pstd']
 
 # 冒烟：干净条件下两态方向应正确
 steps_smoke = int(round(T / H))
 nz0 = np.zeros((steps_smoke, 2))
-ps = simulate_mc([LAM0, 0.76], 0.0, 0.0, 0.0, 0.0, nz0)
+ps = pstd_mc([LAM0, 0.76], 0.0, 0.0, 0.0, 0.0, nz0)
 print('冒烟 pstd:', np.round(ps, 4), '->', ['周期' if v < PSTD_TH else '混沌' for v in ps])
 ''')
 
@@ -255,7 +243,7 @@ det = {}
 for alpha, tag in [(0.0, 'white'), (ALPHA_COLOR, 'color')]:
     # H0 一次标定（与 γ 无关）
     noise0 = SQRT_H * make_noise(steps, NMC, alpha, seed=1000 + int(alpha * 10))
-    h0 = simulate_mc(np.full(NMC, LAM0), np.zeros(NMC), np.zeros(NMC),
+    h0 = pstd_mc(np.full(NMC, LAM0), np.zeros(NMC), np.zeros(NMC),
                      np.zeros(NMC), SIGMA_DET, noise0)
     th05 = np.quantile(h0, PFA_LEVELS[0])
     th10 = np.quantile(h0, PFA_LEVELS[1])
@@ -264,7 +252,7 @@ for alpha, tag in [(0.0, 'white'), (ALPHA_COLOR, 'color')]:
     h1_store = []
     for j, g in enumerate(GAMMAS):
         noise1 = SQRT_H * make_noise(steps, NMC, alpha, seed=2000 + 100 * j + int(alpha * 10))
-        h1 = simulate_mc(np.full(NMC, LAM0), np.zeros(NMC), np.full(NMC, g),
+        h1 = pstd_mc(np.full(NMC, LAM0), np.zeros(NMC), np.full(NMC, g),
                          np.zeros(NMC), SIGMA_DET, noise1)
         h1_store.append(h1)
         pd05.append((h1 < th05).mean())
@@ -341,7 +329,7 @@ for alpha, tag in [(0.0, 'white'), (ALPHA_COLOR, 'color')]:
         rng = np.random.default_rng(4000 + rr)
         th = rng.uniform(0, 2 * math.pi, 2 * m)          # 每次试验独立初相
         g = np.concatenate([np.zeros(m), np.full(m, GAMMA_FUS)])
-        p = simulate_mc(np.full(2 * m, LAM0), np.tile(betas3, 2 * NMC_FUS), g,
+        p = pstd_mc(np.full(2 * m, LAM0), np.tile(betas3, 2 * NMC_FUS), g,
                         th, SIGMA_DET, noise)
         h0 = p[:m].reshape(NMC_FUS, 3)
         h1 = p[m:].reshape(NMC_FUS, 3)
@@ -402,7 +390,7 @@ for alpha, tag in [(0.0, 'white'), (ALPHA_COLOR, 'color')]:
                                         seed=6000 + 1000 * kk + r)
             lam_all = np.tile(lam_grid, 4)
             beta_all = np.repeat(betas4, lam_grid.size)
-            p = simulate_mc(lam_all, beta_all, GAMMA_EST, 0.0, s, noise)
+            p = pstd_mc(lam_all, beta_all, GAMMA_EST, 0.0, s, noise)
             p = p.reshape(4, lam_grid.size)
             lam_star = []
             for b in range(4):

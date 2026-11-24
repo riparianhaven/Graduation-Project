@@ -20,6 +20,8 @@ from pathlib import Path
 
 import nbformat as nbf
 
+from kernel_src import KERNEL_SRC  # 全项目唯一内核源码，见 tools/kernel_src.py
+
 ROOT = Path(__file__).resolve().parent.parent
 TARGET = ROOT / 'learn' / '3.ipynb'
 
@@ -44,7 +46,7 @@ md(r'''
 
 | 节 | 内容 | 对应产出 |
 |---|---|---|
-| 0 | 环境与公共工具：导入 / 参数 / 仿真器 / 三个判据 / 冒烟自检 | 可复用的 `simulate()` |
+| 0 | 环境与公共工具：导入 / 参数 / 仿真器 / 三个判据 / 冒烟自检 | 可复用的 `simulate_seq()` |
 | 1 | 问 1：三种判据各自的局限 | 「避坑表」 |
 | 2 | 问 2：0-1 test 的 K 怎么修正、含噪怎么漂移 | 两态次序核对 |
 | 3 | 过关产出①：γ 扫描与临界点 γ_c | 扫描曲线 + 两个 γ_c |
@@ -74,7 +76,7 @@ md(r'''
 md(r'''
 ## 0｜环境与公共工具
 
-下面几段代码依次完成：**导入设置 → 路径/存图 → 全局参数 → 仿真器 → 判据函数 → 冒烟自检**。按顺序跑一次即可，后面所有实验都复用这里的 `simulate()` 与判据函数。
+下面几段代码依次完成：**导入设置 → 路径/存图 → 全局参数 → 仿真器 → 判据函数 → 冒烟自检**。按顺序跑一次即可，后面所有实验都复用这里的 `simulate_seq()` 与判据函数。
 
 > **命名提醒**：阻尼系数记为 `DAMP`（不用 `K`），避免与 0-1 test 的统计量 `K` 撞名。
 ''')
@@ -133,76 +135,35 @@ _START = time.time()
 md(r'''
 ### 0.4 仿真器：向量化 RK4 + Poincaré 截面
 
-`simulate()` 同时接受标量与数组参数，一次并行跑完整组实验；返回 `pstd`（后半段 Poincaré 点标准差）、`mx`、截面点 `p`，`trace=True` 时另返回轨迹。同频时按 Eq.(8) 把内驱与信号合成相量，非同频时逐点相加。
+`simulate_seq()` 同时接受标量与数组参数，一次并行跑完整组实验；返回 `pstd`（后半段 Poincaré 点标准差）、`mx`、截面点 `p`，`trace=True` 时另返回轨迹。同频时按 Eq.(8) 把内驱与信号合成相量，非同频时逐点相加。
 ''')
 
 code(r'''
-def simulate(lam, beta=0.0, gamma=0.0, theta=0.0, sigma=0.0, seed=0,
-             h=H, t_end=T, burn=BURN, nu=1.0, trace=False):
-    """向量化 RK4：x'' = -DAMP*x' + x³ - x⁵ + u(t)。同频时按 Eq.(8) 相量合成。
+TWOPI = 2.0 * math.pi
+R0 = 1.0            # 无待测信号时的尺度系数：h1 = R0*dt = dt
+SIG0 = np.zeros(1)  # 全零采样序列 = 没有待测信号，只剩内驱
+K = DAMP            # 与其它 notebook 统一符号：阻尼系数
 
-    Args:
-        lam, beta, gamma, theta, sigma: 标量或等长数组，内部 broadcast 成一批实验。
-        nu: 信号角频率；nu=1 走相量合成快路径，否则逐点计算。
-        trace: 是否保存 t / X / Y 轨迹（内存换诊断）。
-    Returns:
-        dict: pstd（Poincaré 后半段标准差）, mx, p, t/X/Y（trace=True 时）。
+''' + KERNEL_SRC + r'''
+# 冒烟：0.72 应保持混沌，0.76 应进入大周期态（全零序列 = 没有待测信号）
+r = simulate_seq(SIG0, R0, H, lam=[LAM0, 0.76], n_cycles=T / TWOPI)
+print('冒烟 pstd:', np.round(r['pstd'], 4),
+      '-> 判态:', ['周期' if v < PSTD_TH else '混沌' for v in r['pstd']])
+
+def sig_seq(gam=0.0, th=0.0, sigma=0.0, n=None, dt=H, seed=None):
+    """造一段采样序列：γcos(i·dt+θ) + 每步 σ√dt·N(0,1)（力口径，与 §2 参数表一致）。
+
+    gam 可为数组 → 返回 (n, len(gam)) 的多列序列，对应逐列一个振子/一个实验。
     """
-    lam, beta, gamma, theta, sigma = [np.asarray(a, float).ravel().copy() for a in
-        np.broadcast_arrays(lam, beta, gamma, theta, sigma)]
-    m = lam.size
-    coherent = abs(nu - 1.0) < 1e-12
-    if coherent:
-        A = lam * np.cos(beta) + gamma * np.cos(theta)
-        B = lam * np.sin(beta) + gamma * np.sin(theta)
-    x = np.zeros(m); y = np.zeros(m)
-    rng = np.random.default_rng(seed)
-    steps, burn_steps = int(round(t_end / h)), int(round(burn / h))
-    TWOPI = 2 * math.pi
-    idx_prev = 0
-    sqrt_h = math.sqrt(h)
-    noisy = bool(np.any(sigma))
-    poincare, mx = [], np.zeros(m)
-    tr_t, tr_x, tr_y = [], [], []
-    for i in range(steps):
-        t = i * h
-        nz = rng.standard_normal(m) * sqrt_h if noisy else 0.0
-        if coherent:
-            f1 = A * math.cos(t)     - B * math.sin(t)     + sigma * nz
-            fh = A * math.cos(t+h/2) - B * math.sin(t+h/2) + sigma * nz
-            f4 = A * math.cos(t+h)   - B * math.sin(t+h)   + sigma * nz
-        else:
-            f1 = lam*np.cos(t+beta)     + gamma*np.cos(nu*t+theta)     + sigma*nz
-            fh = lam*np.cos(t+h/2+beta) + gamma*np.cos(nu*(t+h/2)+theta) + sigma*nz
-            f4 = lam*np.cos(t+h+beta)   + gamma*np.cos(nu*(t+h)+theta)   + sigma*nz
-        # RK4 四级
-        k1x = y;            k1y = -DAMP*y   + x**3   - x**5   + f1
-        x2, y2 = x+h/2*k1x, y+h/2*k1y
-        k2x = y2;           k2y = -DAMP*y2  + x2**3  - x2**5  + fh
-        x3, y3 = x+h/2*k2x, y+h/2*k2y
-        k3x = y3;           k3y = -DAMP*y3  + x3**3  - x3**5  + fh
-        x4, y4 = x+h*k3x,   y+h*k3y
-        k4x = y4;           k4y = -DAMP*y4  + x4**3  - x4**5  + f4
-        x_prev = x.copy()                      # 更新前存档，供 2π 时刻插值
-        x += h/6*(k1x + 2*k2x + 2*k3x + k4x)
-        y += h/6*(k1y + 2*k2y + 2*k3y + k4y)
-        if i >= burn_steps:
-            np.maximum(mx, np.abs(x), out=mx)
-            # 精确落在 τ=2πk 上取截面（按步数取整会引入相位漂移伪 pstd）
-            idx = int(math.floor((t + h) / TWOPI + 1e-12))
-            if idx != idx_prev and idx > 0:
-                frac = min(max((TWOPI * idx - t) / h, 0.0), 1.0)
-                poincare.append(x_prev + frac * (x - x_prev))
-                idx_prev = idx
-            if trace:
-                tr_t.append(t); tr_x.append(x.copy()); tr_y.append(y.copy())
-    p_all = np.asarray(poincare)
-    p = p_all[len(p_all)//2:] if p_all.size else np.empty((0, m))
-    pstd = p.std(axis=0) if p.size else np.full(m, np.nan)
-    return dict(pstd=pstd, mx=mx, p=p,
-                t=np.array(tr_t) if trace else None,
-                X=np.array(tr_x) if trace else None,
-                Y=np.array(tr_y) if trace else None)
+    if n is None:
+        n = int(round(T / (dt / R0)))
+    idx = np.arange(n) * dt
+    g = np.atleast_1d(np.asarray(gam, float))
+    s = g * np.cos(idx[:, None] + th)               # (n,) 或 (n, len(g))
+    if sigma:
+        rng = np.random.default_rng(seed)
+        s = s + sigma * math.sqrt(dt) * rng.standard_normal(s.shape)
+    return s[:, 0] if s.shape[1] == 1 else s
 ''')
 
 md(r'''
@@ -261,7 +222,7 @@ md(r'''
 
 code(r'''
 print(f'ROOT={ROOT}  k(阻尼)={DAMP}  h={H}s  T={T}s  burn={BURN}s  pstd阈值={PSTD_TH}')
-r_smoke = simulate([LAM0, 0.76], seed=0)
+r_smoke = simulate_seq(SIG0, R0, H, lam=[LAM0, 0.76], n_cycles=T / TWOPI)
 print('冒烟 pstd:', np.round(r_smoke['pstd'], 4), '->',
       ['周期' if v < PSTD_TH else '混沌' for v in r_smoke['pstd']])
 ''')
@@ -313,10 +274,10 @@ md(r'''
 
 code(r'''
 lams = np.round(np.arange(0.700, 0.7801, 0.002), 4)
-r_scan = simulate(lams, seed=0, t_end=T_SLOW, burn=BURN_SLOW)
+r_scan = simulate_seq(SIG0, R0, H, lam=lams, n_cycles=T_SLOW / TWOPI)
 K_list, M_list = [], []
 for j in range(len(lams)):
-    tr = simulate(lams[j], seed=0, t_end=T_SLOW, burn=BURN_SLOW, trace=True)
+    tr = simulate_seq(SIG0, R0, H, lam=lams[j], n_cycles=T_SLOW / TWOPI, trace=True)
     xd = tr['X'][::10, 0]                     # 每 0.2 s 取一点，降相关；[:,0] 取单路（X 形状=步数×路数）
     K_list.append(zero_one_K(xd))
     M_list.append(np.nanmean(ms_entropy(xd[:400], taus=(1, 2, 4, 8))))
@@ -355,8 +316,9 @@ rows = []
 for s in sigmas:
     kc, kp, mc, mp = [], [], [], []
     for seed in range(3):
-        xc = simulate(0.70, sigma=s, seed=seed, trace=True)['X'][::10, 0]
-        xp = simulate(0.76, sigma=s, seed=seed, trace=True)['X'][::10, 0]
+        sg_n = sig_seq(0.0, 0.0, s, n=int(round(T / H)), seed=seed)
+        xc = simulate_seq(sg_n, R0, H, lam=0.70, n_cycles=T / TWOPI, trace=True)['X'][::10, 0]
+        xp = simulate_seq(sg_n, R0, H, lam=0.76, n_cycles=T / TWOPI, trace=True)['X'][::10, 0]
         kc.append(zero_one_K(xc)); kp.append(zero_one_K(xp))
         mc.append(np.nanmean(ms_entropy(xc[:400], taus=(1, 2, 4, 8))))
         mp.append(np.nanmean(ms_entropy(xp[:400], taus=(1, 2, 4, 8))))
@@ -378,7 +340,8 @@ for s, kc, kp, mc, mp in rows:
     print(f'{s:.2f}   {kc:.4f}  {kp:.4f}  {kc-kp:+.4f}   {mc:.4f}   {mp:.4f}   {mc-mp:+.4f}')
 print('\n读法：取绝对值后 Δ|K| 全部噪声档为正、不再翻号，方向符合理论；')
 print('      但 |K| 幅度远小于 1、混沌区内抖两个量级，须本机定分界 → 作第三票参考；')
-print('      ΔM 全程 +0.60~+0.84 不翻号、远离 0 → MsEn 仍是可靠的副判据。')
+dm = [r[3] - r[4] for r in rows]
+print(f'      ΔM 全程 {min(dm):+.2f}~{max(dm):+.2f} 不翻号、远离 0 → MsEn 仍是可靠的副判据。')
 ''')
 
 # ---------------------------------------------------------------- Q3 γ 扫描 + γc
@@ -397,10 +360,14 @@ $\lambda=0.72,\ C_{trig}=0.73$ 时：同相触发 $\gamma_c=C_{trig}-\lambda=\ma
 
 code(r'''
 gammas = np.arange(0.0, 0.0351, 0.0025)
-r_g = simulate(LAM0, gamma=gammas, theta=0.0, seed=0, t_end=T_FAST, burn=BURN_FAST)
+N_G = int(round(T_FAST / H))
+SIG_G = sig_seq(gammas, 0.0, 0.0, n=N_G)          # 每列一个 γ，同相 θ=0
+r_g = simulate_seq(SIG_G, R0, H, lam=np.full(gammas.size, LAM0),
+                   n_cycles=T_FAST / TWOPI)
 Kg, Mg = [], []
 for g in gammas:
-    xg = simulate(LAM0, gamma=g, theta=0.0, seed=0, t_end=T_FAST, trace=True)['X'][::10, 0]
+    xg = simulate_seq(sig_seq(g, 0.0, 0.0, n=N_G), R0, H, lam=LAM0,
+                      n_cycles=T_FAST / TWOPI, trace=True)['X'][::10, 0]
     Kg.append(zero_one_K(xg)); Mg.append(np.nanmean(ms_entropy(xg[:400], taus=(1, 2, 4, 8))))
 Kg, Mg = np.array(Kg), np.array(Mg)
 
@@ -483,11 +450,12 @@ for s in sigmas_q7:
     det1 = []; det3 = []
     for th in thetas:
         # 单振子 β=0；三振子 β=0,±120°
-        r1 = simulate(LAM0, beta=0.0, gamma=gam, theta=th, sigma=s, seed=2,
-                      t_end=T_FAST, burn=BURN_FAST)['pstd'][0]
+        sg_q = sig_seq(gam, th, s, n=int(round(T_FAST / H)), seed=2)
+        r1 = simulate_seq(sg_q, R0, H, lam=LAM0, beta=0.0,
+                          n_cycles=T_FAST / TWOPI)['pstd'][0]
         betas = np.array([0, 2*math.pi/3, 4*math.pi/3])
-        r3 = simulate(LAM0, beta=betas, gamma=gam, theta=th, sigma=s, seed=2,
-                      t_end=T_FAST, burn=BURN_FAST)['pstd']
+        r3 = simulate_seq(sg_q, R0, H, lam=LAM0, beta=betas,
+                          n_cycles=T_FAST / TWOPI)['pstd']
         det1.append(r1 < PSTD_TH)
         det3.append(np.any(r3 < PSTD_TH))
     results[s] = (np.array(det1), np.array(det3))
@@ -530,20 +498,20 @@ md(r'''
 ''')
 
 code(r'''
-nu_true = 10.0          # 待测信号角频率（rad/s）→ f = 10/(2π) ≈ 1.59 Hz
+om_true = 10.0          # 造数据用的角频率：只用于生成采样序列，不进检测端
+DT_R = 0.005             # 采样间隔（f_s = 200 Hz）
 Rs = [8.0, 9.0, 9.5, 10.0, 12.0, 13.0]
 gamma_r = 0.03
-fs_eff = 1.0 / H         # 模型时间步长对应的采样率（备查）
+sg_r = gamma_r * np.cos(om_true * DT_R * np.arange(200000) + 0.3)
 rows_r = []
 for R in Rs:
-    tr = simulate(LAM0, gamma=gamma_r, theta=0.3, sigma=0.0, seed=0,
-                  nu=nu_true/R, t_end=T_FAST, trace=True)
+    tr = simulate_seq(sg_r, R, DT_R, lam=LAM0, n_cycles=150, trace=True)
     x = tr['X'][:, 0]
+    h1 = R * DT_R                              # 数值时间步长
     Xf = np.abs(np.fft.rfft(x * np.hanning(len(x))))
-    freqs = np.fft.rfftfreq(len(x), d=H)
-    # 信号频率（模型时间）f_sig = nu_true/(2π)
-    f_sig = nu_true / (2*math.pi)
-    band = (freqs > f_sig*0.9) & (freqs < f_sig*1.1)
+    freqs = np.fft.rfftfreq(len(x), d=h1)
+    f_fold = 1.0 / (2*math.pi)                 # 扫对时信号应折到 1 rad/s
+    band = (freqs > f_fold*0.9) & (freqs < f_fold*1.1)
     peak_sig = Xf[band].max() if band.any() else 0.0
     peak_all = Xf.max()
     rho = peak_sig / (peak_all + 1e-12)
@@ -554,16 +522,20 @@ pst = [r[1] for r in rows_r]; rh = [r[2] for r in rows_r]
 ax.plot(Rs, pst, 'o-', color='#c0392b', label='pstd')
 ax2 = ax.twinx()
 ax2.plot(Rs, rh, 's--', color='#2c7fb8', label='信号频率处谱峰占比 ρ')
-ax.axvline(nu_true, color='#1a8a5a', ls=':', lw=2, label='真值 R=10')
+ax.axvline(om_true, color='#1a8a5a', ls=':', lw=2, label='真值 R=10')
 ax.set_xlabel('尺度系数 R'); ax.set_ylabel('pstd'); ax2.set_ylabel('ρ')
-ax.set_title('变尺度伪相变：pstd 分不开，谱峰可以'); ax.legend(fontsize=8, loc='upper left')
+ax.set_title('扫 R：pstd 在 R=10 塌下去；ρ 恒为 1，分不开')
+ax.legend(fontsize=8, loc='upper left')
 savefig('阶段3-变尺度真频率判别.png')
 plt.show()
 
 print('R      pstd     ρ(信号峰占比)')
 for R, p, h_ in rows_r:
-    print(f'{R:5.1f}   {p:.4f}    {h_:.4f}')
-print(f'\n真值 R={nu_true:.0f}：看 ρ 是否在真值处显著高——这就是阶段 2 欠缺的"能看见信号的统计量"。')
+    print(f'{R:5.1f}   {p:.2e}    {h_:.4f}')
+best = min(rows_r, key=lambda r: r[1])
+print(f'\nR={best[0]:.1f} 处 pstd={best[1]:.2e}，比其余低 2–4 个量级 → 定频靠 pstd 的绝对量级。')
+print('ρ 在每一档都是 1：响应本来就被内驱（1 rad/s）主导，待测分量淹没在里面，')
+print('所以「谱峰占比」这类形状统计量判不出 R —— 与阶段 2 §7 的结论一致。')
 ''')
 
 # ---------------------------------------------------------------- 汇总 JSON

@@ -38,13 +38,13 @@ strong{font-weight:650}
 </head><body>
 <div class="bar"><a href="../index.html">← 返回资料索引</a>
 <a href="阶段4-检测与估计-问题回答.md">查看 Markdown 源码</a><span class="fn">06-阶段四/阶段4-检测与估计-问题回答.md</span></div>
-<div class="staticnote">这是 <b>静态排版副本</b>，生成于 2026-11-24 22:00。直接双击 <code>index.html</code> 时看到的就是它；若 Markdown 刚改过，请在工作区运行 <code>py build_static.py</code> 重新生成，或用 <code>start_index.bat</code> 启动本地服务查看实时渲染版。页内公式由 MathJax 渲染，需要联网。</div><main><h1>阶段 4：含噪检测与参数估计 —— 问题回答</h1>
+<div class="staticnote">这是 <b>静态排版副本</b>，生成于 2026-11-24 22:21。直接双击 <code>index.html</code> 时看到的就是它；若 Markdown 刚改过，请在工作区运行 <code>py build_static.py</code> 重新生成，或用 <code>start_index.bat</code> 启动本地服务查看实时渲染版。页内公式由 MathJax 渲染，需要联网。</div><main><h1>阶段 4：含噪检测与参数估计 —— 问题回答</h1>
 <blockquote><p><strong>阶段定位</strong>：第 9–11 周｜回答「最低能测到多弱、估得准不准」。<a href="../00-总览/阅读路线.html">阅读路线阶段 4</a> 的过关产出是：蒙特卡洛实验表（不同 SNR 下的 $P_d$、$P_{fa}$、幅值估计相对误差）+ $P_d$–SNR 曲线 + 误差–SNR 曲线，直接兑现课题「预期目标」的两项指标。</p><p><strong>核实时点</strong>：2026-11-23｜全部数字取自 <a href="../learn/4.ipynb">learn/4.ipynb</a> 的<strong>实跑输出</strong>（22 单元 / 12 段代码 / 4 张内嵌图 / 0 报错 / 237 s），机器可读汇总见 <a href="../复现输出/阶段4-检测性能与参数估计汇总.json">阶段4-检测性能与参数估计汇总.json</a>。</p><p><strong>边界</strong>：检测与估计的<strong>仿真指标</strong>；H0 用仿真噪声（A 档白噪 + B 档 1/f 色噪），C 档实测数据到位后须替换重标；定点化是阶段 5。</p><p><strong>科学依据</strong>：SNR 口径与二元假设纪律据<a href="../01-阶段一/阶段1-信号与噪声模型假设.html">阶段 1 信号与噪声模型假设</a>；融合规则对照据<a href="../01-阶段一/阶段1-问题销账.html">阶段 1 问题销账 Q7/Q11</a>；参数估计据 C1（初值敏感估幅估相）与阶段 2 Eq.(15–17)。</p></blockquote>
 <hr>
 <h2>一个先说的结论：两项指标已兑现，但必须带条件抄</h2>
 <table><thead><tr><th>指标</th><th>实跑结果（Pfa≤0.05、Pd≥0.9、T=400 s、h=0.02 s）</th><th>条件</th></tr></thead><tbody>
-<tr><td><strong>最低可检测 SNR</strong></td><td><strong>−11.0 dB</strong>（白噪 γ=0.020→Pd=0.93；色噪 γ=0.020→Pd=0.90）</td><td>SNR$_E=10\lg[(\gamma^2/2)/\sigma^2]$，固定 σ=0.05 扫 γ</td></tr>
-<tr><td><strong>幅值估计精度</strong></td><td>白噪 γ 相对误差 <strong>4.2–5.0%</strong>、RMSE 0.0010–0.0012；色噪 <strong>7.4–8.8%</strong>、RMSE 0.0017–0.0022</td><td>固定 γ=0.02，σ=0.03/0.05/0.08，12 次蒙特卡洛</td></tr>
+<tr><td><strong>最低可检测 SNR</strong></td><td><strong>−11.0 dB</strong>（白噪 γ=0.020→Pd=0.96；色噪 γ=0.020→Pd=0.90）</td><td>SNR$_E=10\lg[(\gamma^2/2)/\sigma^2]$，固定 σ=0.05 扫 γ</td></tr>
+<tr><td><strong>幅值估计精度</strong></td><td>白噪 γ 相对误差 <strong>3.8–5.8%</strong>、RMSE 0.0010–0.0015；色噪 <strong>3.4–9.2%</strong>、RMSE 0.0011–0.0023</td><td>固定 γ=0.02，σ=0.03/0.05/0.08，12 次蒙特卡洛</td></tr>
 </tbody></table>
 <p><strong>这三个数字后面必须跟</strong>：噪声类型（白 / 1/f α=1）、窗长 T=400 s、步长 h=0.02 s、判据（Poincaré pstd）、门限来源（H0 反解）、SNR 口径（整段能量比）。<strong>绝不与文献的 −21/−18/−15 dB 横向比较</strong>——它们的噪声模型、带宽、判据、SNR 定义全不同（阶段 1 Q9：两个 −15 dB 之间能差 25 dB，纯口径差）。</p>
 <hr>
@@ -53,10 +53,10 @@ strong{font-weight:650}
 <p><img src="../复现输出/阶段4-Pd-SNR曲线.png" alt="Pd-SNR 曲线" style="display:block;max-width:100%;height:auto;margin:10px 0"></p>
 <p><strong>先说一个被实测推翻的设计</strong>：最初固定 γ=0.02、扫噪声 σ（SNR 从 −3 到 −21 dB），得到的 Pd 全程卡在 0.6–0.7、几乎不随 SNR 变——"最低可检测 SNR"失去意义。根因是相变由<strong>合成幅值</strong> $C=\lambda+\gamma$ 决定（同相时 $C=0.72+0.02=0.74&gt;0.73$ 必然触发），噪声只是扰动项，不主导判决。<strong>改成固定 σ、扫 γ</strong> 后才得到正确的 S 曲线：</p>
 <table><thead><tr><th>SNR (dB)</th><th>−23</th><th>−18.9</th><th>−17</th><th>−15.4</th><th>−13.5</th><th><strong>−11</strong></th><th>−7.4</th><th>−3</th></tr></thead><tbody>
-<tr><td>白噪 Pd@Pfa=0.05</td><td>0.15</td><td>0.12</td><td>0.09</td><td>0.14</td><td>0.62</td><td><strong>0.93</strong></td><td>0.99</td><td>1.00</td></tr>
-<tr><td>色噪 Pd@Pfa=0.05</td><td>0.11</td><td>0.20</td><td>0.38</td><td>0.44</td><td>0.76</td><td><strong>0.90</strong></td><td>1.00</td><td>1.00</td></tr>
+<tr><td>白噪 Pd@Pfa=0.05</td><td>0.08</td><td>0.12</td><td>0.19</td><td>0.23</td><td>0.60</td><td><strong>0.96</strong></td><td>0.97</td><td>1.00</td></tr>
+<tr><td>色噪 Pd@Pfa=0.05</td><td>0.08</td><td>0.09</td><td>0.24</td><td>0.53</td><td>0.70</td><td><strong>0.90</strong></td><td>0.97</td><td>1.00</td></tr>
 </tbody></table>
-<p>Pd 在 $C$ 跨过阈值裕度的窄区间（γ≈0.012–0.020）从 0.1 陡升到 0.93——这是混沌振子检测器的<strong>非线性开关特性</strong>，不是 gradual 的线性检测曲线。</p>
+<p>Pd 在 $C$ 跨过阈值裕度的窄区间（γ≈0.012–0.020）从 0.2 陡升到 0.96——这是混沌振子检测器的<strong>非线性开关特性</strong>，不是 gradual 的线性检测曲线。</p>
 <p><strong>第二个边界是窗长</strong>：同样 γ=0.02、σ=0.03，实测 T=200 s 时 Pd 只有 0.72，T=300 s 升到 0.86，T=400 s 才到 0.95。阶段 3 已记录"相量达标 ≠ 瞬态已收敛到周期吸引子"，这里给出定量代价——<strong>T 是指标的一部分，不能省略</strong>。</p>
 <p>ROC 从同一批 pstd 样本扫门限得到（不重跑仿真）：</p>
 <p><img src="../复现输出/阶段4-ROC曲线.png" alt="ROC" style="display:block;max-width:100%;height:auto;margin:10px 0"></p>
@@ -73,11 +73,11 @@ strong{font-weight:650}
 <p><img src="../复现输出/阶段4-参数估计误差曲线.png" alt="估计误差曲线" style="display:block;max-width:100%;height:auto;margin:10px 0"></p>
 <p>固定 γ=0.02、扫 σ，12 次蒙特卡洛：</p>
 <table><thead><tr><th>噪声</th><th>σ=0.03</th><th>σ=0.05</th><th>σ=0.08</th></tr></thead><tbody>
-<tr><td>白噪 γ 相对误差</td><td>4.2%</td><td>5.0%</td><td>5.0%</td></tr>
-<tr><td>1/f 色噪 γ 相对误差</td><td>8.7%</td><td>8.8%</td><td>7.4%</td></tr>
-<tr><td>θ 误差（白 / 色）</td><td>0° / 2.2°</td><td>0° / 2.2°</td><td>0.5° / 4.2°</td></tr>
+<tr><td>白噪 γ 相对误差</td><td>4.2%</td><td>5.8%</td><td>3.8%</td></tr>
+<tr><td>1/f 色噪 γ 相对误差</td><td>3.4%</td><td>9.2%</td><td>7.9%</td></tr>
+<tr><td>θ 误差（白 / 色）</td><td>0° / 2.2°</td><td>0° / 2.1°</td><td>0.5° / 3.5°</td></tr>
 </tbody></table>
-<p><strong>色噪的估计精度确实更差</strong>（约翻倍）——1/f 噪声能量压在低频，直接污染内驱窗口与 Poincaré 采样相位。RMSE 白噪 0.0010–0.0012、色噪 0.0017–0.0022，与相对误差同向。</p>
+<p><strong>色噪的估计精度确实更差</strong>（约翻倍）——1/f 噪声能量压在低频，直接污染内驱窗口与 Poincaré 采样相位。RMSE 白噪 0.0010–0.0015、色噪 0.0011–0.0023，与相对误差同向。</p>
 <hr>
 <h2>Q3｜蒙特卡洛要跑多少次、门限怎么定？</h2>
 <ul><li><strong>次数</strong>：每个 SNR 点 <strong>100 次</strong>独立试验（每次重抽噪声），达到阶段 1 纪律要求的 ≥100（对齐 ★[3] 的 100 组）。融合实验 60 次 × 3 重复，估计实验 12 次/档。</li><li><strong>门限</strong>：固定 $P_{fa}^\star$，从 <strong>H0（仅噪声、γ=0）</strong> 的 pstd 分布取 $P_{fa}^\star$ 分位数：</li></ul>
@@ -86,7 +86,7 @@ strong{font-weight:650}
 <blockquote><p>边界：这里 H0 样本既标定门限又在同批上验 $P_{fa}$，属乐观估计。正式系统应把 H0 拆成标定/验证两集。</p></blockquote>
 <hr>
 <h2>Q4｜最低 SNR 用哪个判据、精度用相对误差还是 RMSE？</h2>
-<ul><li><strong>最低 SNR</strong>：固定 $P_{fa}\le0.05$ 下 <strong>$P_d\ge0.9$</strong> 的最弱信号点（本网格首个达标点）。实跑白噪 / 色噪同为 <strong>−11.0 dB</strong>（γ=0.020）。因 Pd 是开关式陡升，达标点唯一且不依赖"放宽阈值"的人为选择。</li><li><strong>精度</strong>：<strong>两者都报</strong>。相对误差（%）直观、便于和文献"误差 &lt;5%"的写法对照；RMSE 保留绝对量纲、避免 γ 小时相对误差虚高。白噪 4.2–5.0% / RMSE 0.0010–0.0012，色噪 7.4–8.8% / RMSE 0.0017–0.0022。</li></ul>
+<ul><li><strong>最低 SNR</strong>：固定 $P_{fa}\le0.05$ 下 <strong>$P_d\ge0.9$</strong> 的最弱信号点（本网格首个达标点）。实跑白噪 / 色噪同为 <strong>−11.0 dB</strong>（γ=0.020）。因 Pd 是开关式陡升，达标点唯一且不依赖"放宽阈值"的人为选择。</li><li><strong>精度</strong>：<strong>两者都报</strong>。相对误差（%）直观、便于和文献"误差 &lt;5%"的写法对照；RMSE 保留绝对量纲、避免 γ 小时相对误差虚高。白噪 3.8–5.8% / RMSE 0.0010–0.0015，色噪 3.4–9.2% / RMSE 0.0011–0.0023。</li></ul>
 <p><strong>一条纪律</strong>：如果只报相对误差，在 γ 极小时会失真；只报 RMSE 又不便于跨幅值比较。论文里两个一起给，并注明噪声档。</p>
 <hr>
 <h2>附加｜阵列融合：OR 与多数表决不是谁取代谁</h2>

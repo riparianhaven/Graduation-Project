@@ -468,19 +468,19 @@
 </div>
 <div class="cell_output docutils container">
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>三路刚好相变的驱动幅值：
-  β=    0°   λ_c = 0.7440
-  β=  180°   λ_c = 0.7233
+  β=    0°   λ_c = 0.7431
+  β=  180°   λ_c = 0.7238
   β=   90°   λ_c = 0.7429
 
-本书 λ = [0.744, 0.7233, 0.7429]
+本书 λ = [0.7431, 0.7238, 0.7429]
 原文 λ = [0.7414, 0.7183, 0.7447]
 
-幅值：真值 0.02   估计 0.0139   相对误差 -30.7%
-初相：真值 -120°   估计 -138.3°   误差 -18.3°
-三路等效 C_trig: {'0': 0.7342, '180': 0.7335, '90': 0.7256}   极差 0.0086
+幅值：真值 0.02   估计 0.0135   相对误差 -32.4%
+初相：真值 -120°   估计 -135.7°   误差 -15.7°
+三路等效 C_trig: {'0': 0.7333, '180': 0.734, '90': 0.7256}   极差 0.0083
 </pre></div>
 </div>
-<img alt="_images/a8bb53bc1482d438cdc908c0c5af9d978992ce9df77f60d05b2370c391665e39.png" src="_images/a8bb53bc1482d438cdc908c0c5af9d978992ce9df77f60d05b2370c391665e39.png" />
+<img alt="_images/fbd3c70dab0f23a6fbc3f3f0a5838fa57634cd26577e64c093a3e48a1c744dab.png" src="_images/fbd3c70dab0f23a6fbc3f3f0a5838fa57634cd26577e64c093a3e48a1c744dab.png" />
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>图已保存: ..\复现输出\s2-figs\s2-06-三路扫lambda.png
 </pre></div>
 </div>
@@ -501,15 +501,15 @@
 <tbody>
 <tr class="row-even"><td><p>1</p></td>
 <td><p>0°</p></td>
-<td><p><strong>0.7440</strong></p></td>
+<td><p><strong>0.7431</strong></p></td>
 <td><p>0.7414</p></td>
-<td><p>0.7342</p></td>
+<td><p>0.7333</p></td>
 </tr>
 <tr class="row-odd"><td><p>2</p></td>
 <td><p>180°</p></td>
-<td><p><strong>0.7233</strong></p></td>
+<td><p><strong>0.7238</strong></p></td>
 <td><p>0.7183</p></td>
-<td><p>0.7335</p></td>
+<td><p>0.7340</p></td>
 </tr>
 <tr class="row-even"><td><p>3</p></td>
 <td><p>90°</p></td>
@@ -520,10 +520,10 @@
 </tbody>
 </table>
 </div>
-<p>前两路一致（0.7342 / 0.7335），第三路低 <strong>0.0086</strong>。这 0.0086 就是误差的全部来源：</p>
+<p>前两路一致（0.7333 / 0.7340），第三路低 <strong>0.0084</strong>。这 0.0084 就是误差的全部来源：</p>
 <ul class="simple">
-<li><p>γ 估计 <strong>0.0139</strong>（真值 0.02，<strong>−31%</strong>）</p></li>
-<li><p>θ 估计 <strong>−138.3°</strong>（真值 −120°，偏 <strong>18°</strong>）</p></li>
+<li><p>γ 估计 <strong>0.0135</strong>（真值 0.02，<strong>−32%</strong>）</p></li>
+<li><p>θ 估计 <strong>−135.7°</strong>（真值 −120°，偏 <strong>16°</strong>）</p></li>
 </ul>
 <p>论文报的是 −6% 与 −6.7%。差距不在算错，而在一条被当成恒等式的近似。</p>
 </section>
@@ -533,7 +533,7 @@
 这句话是<strong>近似</strong>。Duffing 的相变由吸引域决定，而 δ 会改变轨道进入吸引域的方向。
 β=90°、θ=−120° 时相位差 150°，合成驱动的初相把轨道推向”不容易被抓住”的那一侧，
 于是要更大的合成幅值才能稳定在大周期态上。</p>
-<p><strong>代价可以算出来</strong>：<span class="math notranslate nohighlight">\(C_{trig}\)</span> 的 1.2% 偏差，经 Eq.(17) 放大成 γ 的 31%。
+<p><strong>代价可以算出来</strong>：<span class="math notranslate nohighlight">\(C_{trig}\)</span> 的 1.1% 偏差，经 Eq.(17) 放大成 γ 的 32%。
 原因还是那个减法：<span class="math notranslate nohighlight">\(\gamma^2=C^2-\lambda_1\lambda_2\)</span>，两个 0.53 量级的数相减，
 剩 0.0002 量级的差。<strong>这是”用临界点当标尺”的固有病，不是实现 bug。</strong></p>
 </section>

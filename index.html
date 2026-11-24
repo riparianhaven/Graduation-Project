@@ -291,7 +291,7 @@ footer{border-top:1px solid var(--line);padding:20px 0 34px;color:var(--faint);f
     <a class="card item" data-search="变尺度 nu R omega 频率未知 盲测 扫R 频率分辨率 多重检验 采样伪迹 0.733 Poincaré 插值 论文2" href="02-阶段二/变尺度中ν与R的辨析.md" target="_blank">
       <div class="kicker">专题 · 一个被符号卡住的问题</div>
       <h3>变尺度里的 ν：不是输入，是 ω/R 的别名</h3>
-      <p>回答三问：扫 R 时 ν 有没有问题、待测 ω 未知时 ν 怎么定、代价是什么。结论：<b>ν 不需要预设</b>，扫 R 到相变点，<b>R = ω</b>；解析写法 <span class="mono">nu=omega/R</span> 只是"验证模式"，真检测必须用采样序列盲测。三份实跑 notebook（<span class="mono">learn/2</span>、<span class="mono">learn/all</span>、根目录 <span class="mono">复现-2</span>）的扫 R 段已<b>全部改成数据驱动</b>——检测函数签名里没有 ω、没有 ν，三个真值 10 / 7.3 / 3.7 定位误差 ≤0.05%（抛物插值后 ≤0.01%）。另记三条代价：<b>频率选择带宽仅 ±0.1%</b>（按 4.9%/格全域穷举必漏，须先用 FFT 给初值再局部细扫）、扫 R 是多重复检验（N=41 时总虚警 88%）、压缩时间轴会抬高噪声 PSD（同 SNR 下 pstd 高一个量级）。附论文表 2 与步骤 3 的数值不自洽（R=10 → 每周期 6.28 步，RK4 发散）。</p>
+      <p>回答三问：扫 R 时 ν 有没有问题、待测 ω 未知时 ν 怎么定、代价是什么。结论：<b>ν 不需要预设</b>，扫 R 到相变点，<b>R = ω</b>；解析写法 <span class="mono">nu=omega/R</span> 只是"验证模式"、只作为公式存在（<b>项目代码里已无此实现</b>），真检测必须用采样序列盲测。三份实跑 notebook（<span class="mono">learn/2</span>、<span class="mono">learn/all</span>、根目录 <span class="mono">复现-2</span>）的扫 R 段已<b>全部改成数据驱动</b>——检测函数签名里没有 ω、没有 ν，三个真值 10 / 7.3 / 3.7 定位误差 ≤0.05%（抛物插值后 ≤0.01%）。另记三条代价：<b>频率选择带宽仅 ±0.1%</b>（按 4.9%/格全域穷举必漏，须先用 FFT 给初值再局部细扫）、扫 R 是多重复检验（N=41 时总虚警 88%）、压缩时间轴会抬高噪声 PSD（同 SNR 下 pstd 高一个量级）。附论文表 2 与步骤 3 的数值不自洽（R=10 → 每周期 6.28 步，RK4 发散）。</p>
       <div class="foot"><span>Markdown · 含实测表与盲测协议</span><span class="go">打开 →</span></div>
     </a>
 

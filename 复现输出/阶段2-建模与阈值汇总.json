@@ -61,6 +61,7 @@
   },
   "rescale": {
     "blind": true,
+    "kernel": "single data-driven integrator simulate_seq(sig, R, dt); threshold calibration also runs through it with a zero sequence (R=1)",
     "implementation": "data-driven: step h1 = R*dt, reads sig[i]; no omega and no nu in the detector",
     "dt_s": 0.005,
     "n_samples": 900000,

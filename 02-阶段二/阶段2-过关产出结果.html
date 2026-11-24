@@ -38,16 +38,16 @@ strong{font-weight:650}
 </head><body>
 <div class="bar"><a href="../index.html">← 返回资料索引</a>
 <a href="阶段2-过关产出结果.md">查看 Markdown 源码</a><span class="fn">02-阶段二/阶段2-过关产出结果.md</span></div>
-<div class="staticnote">这是 <b>静态排版副本</b>，生成于 2026-11-24 20:56。直接双击 <code>index.html</code> 时看到的就是它；若 Markdown 刚改过，请在工作区运行 <code>py build_static.py</code> 重新生成，或用 <code>start_index.bat</code> 启动本地服务查看实时渲染版。页内公式由 MathJax 渲染，需要联网。</div><main><h1>阶段 2 过关产出结果：建模与相变</h1>
+<div class="staticnote">这是 <b>静态排版副本</b>，生成于 2026-11-24 22:00。直接双击 <code>index.html</code> 时看到的就是它；若 Markdown 刚改过，请在工作区运行 <code>py build_static.py</code> 重新生成，或用 <code>start_index.bat</code> 启动本地服务查看实时渲染版。页内公式由 MathJax 渲染，需要联网。</div><main><h1>阶段 2 过关产出结果：建模与相变</h1>
 <blockquote><p><strong>验收口径</strong>：<a href="../00-总览/阅读路线.html">阅读路线阶段 2</a> 原文——「Python 单振子 RK4 仿真程序，能画出两幅并列相图（混沌态 / 大尺度周期态）+ x(t) 时序图；记录一组可复现的参数表。<strong>这是整个毕设的地基，务必跑通再往下走。</strong>」</p><p><strong>核实时点</strong>：2026-11-23｜<strong>全部数字取自实跑</strong>，非手写估计。程序：<a href="../learn/2.ipynb">learn/2.ipynb</a>（18 单元 / 8 段代码 / 6 张内嵌图 / 0 报错）。机器可读汇总：<a href="../复现输出/阶段2-建模与阈值汇总.json">阶段2-建模与阈值汇总.json</a>。</p><p><strong>修复记录</strong>：本页五张 PNG 曾因「<code>plt.show()</code> 在 <code>savefig()</code> 之前」存成纯白图，2026-11-23 已调换顺序重跑，现已逐张验色（每张含数百至数千种颜色），可放心引用。</p></blockquote>
 <hr>
 <h2>一、过关要求逐条对照</h2>
 <table><thead><tr><th>#</th><th>路线过关要求</th><th>交付实物</th><th>结果</th></tr></thead><tbody>
-<tr><td>1</td><td>单振子 RK4 仿真程序，可跑通</td><td><a href="../learn/2.ipynb">learn/2.ipynb</a> §2 <code>simulate()</code>：支持标量 / 数组并行、同频相量合成、双频直接积分；冒烟 $p_{std}=[0.4841,\ 0.0149]$</td><td>✅</td></tr>
+<tr><td>1</td><td>单振子 RK4 仿真程序，可跑通</td><td><a href="../learn/2.ipynb">learn/2.ipynb</a> §2 <code>simulate_seq(sig, R, dt)</code>：唯一内核、数据驱动；无信号时喂全零序列（$R=1$）做阈值标定，有信号时喂采样序列做检测；冒烟 $p_{std}=[0.3522,\ 0]$</td><td>✅</td></tr>
 <tr><td>2</td><td>两幅并列相图（混沌态 / 大尺度周期态）</td><td>下图上排：$\lambda=0.70$ 与 $\lambda=0.76$ 的 $(x,\dot x)$ 相图</td><td>✅</td></tr>
 <tr><td>3</td><td>x(t) 时序图</td><td>下图下排：同两条轨迹的时序，200–400 s 稳态段</td><td>✅</td></tr>
 <tr><td>4</td><td>一组可复现的参数表</td><td>本页 §二 + notebook §2 顶部 <code>CONFIG</code>，逐项注明出处与条件</td><td>✅</td></tr>
-<tr><td>5</td><td>（附加）阈值曲线</td><td>§四 粗扫 / 精扫两图，标出跃变带 0.734–0.736</td><td>✅</td></tr>
+<tr><td>5</td><td>（附加）阈值曲线</td><td>§四 粗扫 / 精扫两图，标出跨越区间 0.7334–0.7336（$\lambda_c\approx0.7335$）</td><td>✅</td></tr>
 <tr><td>6</td><td>（附加）步长稳定性佐证</td><td>§五 四种步长重扫，跃变均落在 0.730–0.740</td><td>✅</td></tr>
 </tbody></table>
 <p><strong>验收结论：阶段 2 过关。</strong> 但阈值带与变尺度各有必须写进论文的边界，见 §六。</p>

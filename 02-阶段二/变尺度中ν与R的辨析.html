@@ -38,7 +38,7 @@ strong{font-weight:650}
 </head><body>
 <div class="bar"><a href="../index.html">← 返回资料索引</a>
 <a href="变尺度中ν与R的辨析.md">查看 Markdown 源码</a><span class="fn">02-阶段二/变尺度中ν与R的辨析.md</span></div>
-<div class="staticnote">这是 <b>静态排版副本</b>，生成于 2026-11-24 20:56。直接双击 <code>index.html</code> 时看到的就是它；若 Markdown 刚改过，请在工作区运行 <code>py build_static.py</code> 重新生成，或用 <code>start_index.bat</code> 启动本地服务查看实时渲染版。页内公式由 MathJax 渲染，需要联网。</div><main><h1>变尺度里的 ν 到底是什么：R、ν、ω 三者的关系</h1>
+<div class="staticnote">这是 <b>静态排版副本</b>，生成于 2026-11-24 22:00。直接双击 <code>index.html</code> 时看到的就是它；若 Markdown 刚改过，请在工作区运行 <code>py build_static.py</code> 重新生成，或用 <code>start_index.bat</code> 启动本地服务查看实时渲染版。页内公式由 MathJax 渲染，需要联网。</div><main><h1>变尺度里的 ν 到底是什么：R、ν、ω 三者的关系</h1>
 <blockquote><p><strong>回答三个问题</strong>：① 扫 R 时 ν 是不是有问题？② 待测 ω 未知，ν 怎么确定？③ 这么做的代价是什么？</p><p></p><p><strong>蓝本</strong>：Yang Y, Ding Q, Gao Y, Chen J. <em>Chaotic Effect-Based Array Duffing Systems with Improved Nonlinear Restoring Force for Weak Signal Detection in Dynamic MWD</em>[J]. Sensors, 2023, 23(17): 7598. DOI: <a href="https://doi.org/10.3390/s23177598">10.3390/s23177598</a></p><p></p><p><strong>可执行版本</strong>：[★[2] 完整复现 · 第 3 章](../s2-jupyterbook/_build/html/03-变尺度与nu.html) · 数值内核 <a href="../s2-jupyterbook/_src/s2sim.py"><code>s2sim.py</code></a> · 数据 <a href="../s2-jupyterbook/_data/nu.json"><code>nu.json</code></a></p><p></p><p><strong>核实日期</strong>：2026-11-24</p></blockquote>
 <hr>
 <h2>一句话结论</h2>
@@ -48,7 +48,7 @@ strong{font-weight:650}
 <table><thead><tr><th>符号</th><th>物理含义</th><th>谁定的</th><th>在代码里</th></tr></thead><tbody>
 <tr><td>$\omega$</td><td>待测信号的真实角频率</td><td>物理世界</td><td><strong>不出现</strong>（盲测时）</td></tr>
 <tr><td>$R$</td><td>变尺度系数</td><td>算法扫描</td><td><code>for R in grid:</code></td></tr>
-<tr><td>$\nu$</td><td>变尺度后信号与内驱的频率比</td><td>由 $R$ 与信号共同决定</td><td>解析写法 <code>nu=omega/R</code>；数据写法由采样序列隐式产生</td></tr>
+<tr><td>$\nu$</td><td>变尺度后信号与内驱的频率比</td><td>由 $R$ 与信号共同决定</td><td>由采样序列 + $R$ 隐式产生；<strong>项目代码里没有 <code>nu=omega/R</code> 这一行</strong></td></tr>
 </tbody></table>
 <p>原文 2.2.1 节的变换：设 $t_1=Nt$（$N$ 即后文的 $R$）、$\omega=N$，则</p>
 <p>$$a(t_1)=\gamma\cos(\omega t)=\gamma\cos\!\left(\frac{\omega}{N}t_1\right)=\gamma\cos(t_1)$$</p>
@@ -61,9 +61,10 @@ strong{font-weight:650}
 <blockquote><p>我已经知道 $\omega=10$，所以我给每个候选 $R$ 配一个 $\nu=10/R$；当 $R=10$ 时 $\nu=1$，必然共振。</p></blockquote>
 <p>这在<strong>验证模式</strong>下完全正当——你要检查的是"方法在 $R=\omega$ 时是否真的相变"，而不是"能不能找到 $\omega$"。<br>数值上它与"逐点读原采样序列、把步长放大 $R$ 倍"是同一个方程的不同参数化：</p>
 <table><thead><tr><th>实现</th><th>信号来源</th><th>步长</th><th>是否用了 $\omega$</th></tr></thead><tbody>
-<tr><td>解析写法</td><td>$\gamma\cos(\nu\tau+\theta)$</td><td>固定 $h$</td><td><strong>用了</strong>（$\nu=\omega/R$）</td></tr>
-<tr><td>数据写法（盲测）</td><td>采样序列第 $i$ 点 <code>sig[i]</code></td><td>$h_1=R\,\Delta t$</td><td><strong>没用</strong></td></tr>
+<tr><td>解析写法（仅存在于公式里）</td><td>$\gamma\cos(\nu\tau+\theta)$</td><td>固定 $h$</td><td><strong>用了</strong>（$\nu=\omega/R$）</td></tr>
+<tr><td>数据写法（盲测，项目唯一实现）</td><td>采样序列第 $i$ 点 <code>sig[i]</code></td><td>$h_1=R\,\Delta t$</td><td><strong>没用</strong></td></tr>
 </tbody></table>
+<p><code>learn/2.ipynb</code>、<code>learn/all.ipynb</code>、<code>复现-2-…ipynb</code> 现在<strong>只剩数据写法</strong>：解析内核 <code>simulate()</code> 已删除，<br>阈值标定也改走同一函数（喂全零序列、$R=1$，此时 $h_1=\Delta t$，等价于"只有内驱"）。</p>
 <p>数据写法里，第 $i$ 步的数值时间是 $\tau_i=iR\Delta t$，而它读的是物理时间 $i\Delta t$ 处的采样值，<br>于是信号在新时间轴上的频率自动变成 $\omega/R$ —— 这就是 ν，但代码里从未出现 $\omega$。</p>
 <p>【实测】两种写法在无噪声下给出同一个 $R$：</p>
 <table><thead><tr><th>$\omega$ 真值</th><th>解析写法命中</th><th>数据写法（盲测）命中</th><th>误差</th></tr></thead><tbody>

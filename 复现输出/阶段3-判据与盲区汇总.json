@@ -36,7 +36,7 @@
     "theory_cover_triple_pct": 100.0,
     "noise_sweep": {
       "0.0": {
-        "single_detected": 4,
+        "single_detected": 3,
         "triple_or_detected": 15,
         "total": 36
       },
@@ -46,7 +46,7 @@
         "total": 36
       },
       "0.15": {
-        "single_detected": 2,
+        "single_detected": 4,
         "triple_or_detected": 16,
         "total": 36
       }
@@ -55,38 +55,38 @@
   "rescale_true_frequency": [
     {
       "R": 8.0,
-      "pstd": 0.5236,
-      "signal_peak_ratio": 0.0001
+      "pstd": 0.3917,
+      "signal_peak_ratio": 1.0
     },
     {
       "R": 9.0,
-      "pstd": 0.3337,
-      "signal_peak_ratio": 0.0001
+      "pstd": 0.4028,
+      "signal_peak_ratio": 1.0
     },
     {
       "R": 9.5,
-      "pstd": 0.3857,
-      "signal_peak_ratio": 0.0001
+      "pstd": 0.3747,
+      "signal_peak_ratio": 1.0
     },
     {
       "R": 10.0,
-      "pstd": 0.2802,
-      "signal_peak_ratio": 0.0004
+      "pstd": 0.0,
+      "signal_peak_ratio": 1.0
     },
     {
       "R": 12.0,
-      "pstd": 0.3048,
-      "signal_peak_ratio": 0.0002
+      "pstd": 0.3856,
+      "signal_peak_ratio": 1.0
     },
     {
       "R": 13.0,
-      "pstd": 0.166,
-      "signal_peak_ratio": 0.0004
+      "pstd": 0.4028,
+      "signal_peak_ratio": 1.0
     }
   ],
   "stage1_questions": {
     "Q7": "盲区解析式 + 噪声退化已量化",
     "Q11": "多数表决优于 OR（销账已答），本阶段给出伪代码融合"
   },
-  "runtime_s": 423.8
+  "runtime_s": 115.5
 }

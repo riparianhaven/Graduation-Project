@@ -38,7 +38,7 @@ strong{font-weight:650}
 </head><body>
 <div class="bar"><a href="../index.html">← 返回资料索引</a>
 <a href="阶段2-建模与相变-问题回答.md">查看 Markdown 源码</a><span class="fn">02-阶段二/阶段2-建模与相变-问题回答.md</span></div>
-<div class="staticnote">这是 <b>静态排版副本</b>，生成于 2026-11-24 20:56。直接双击 <code>index.html</code> 时看到的就是它；若 Markdown 刚改过，请在工作区运行 <code>py build_static.py</code> 重新生成，或用 <code>start_index.bat</code> 启动本地服务查看实时渲染版。页内公式由 MathJax 渲染，需要联网。</div><main><h1>阶段 2：建模与相变 —— 问题回答与过关清单</h1>
+<div class="staticnote">这是 <b>静态排版副本</b>，生成于 2026-11-24 22:00。直接双击 <code>index.html</code> 时看到的就是它；若 Markdown 刚改过，请在工作区运行 <code>py build_static.py</code> 重新生成，或用 <code>start_index.bat</code> 启动本地服务查看实时渲染版。页内公式由 MathJax 渲染，需要联网。</div><main><h1>阶段 2：建模与相变 —— 问题回答与过关清单</h1>
 <blockquote><p><strong>阶段定位</strong>：第 3–5 周｜回答「方程是什么、相图怎么变」。<a href="../00-总览/阅读路线.html">阅读路线阶段 2</a> 的过关产出是：单振子 RK4 仿真程序 + 混沌态/大尺度周期态两幅并列相图 + x(t) 时序图 + 一张可复现参数表。</p><p><strong>核实时点</strong>：2026-11-23，全部数字取自 <a href="../learn/2.ipynb">learn/2.ipynb</a> 的<strong>实跑输出</strong>（8 个代码单元、6 张内嵌图、0 报错），可复核 JSON 见 <a href="../复现输出/阶段2-建模与阈值汇总.json">阶段2-建模与阈值汇总.json</a>。</p><p><strong>边界</strong>：本阶段做到「模型 + 相变 + 阈值带 + 变尺度原理」为止。判态伪代码与初相位盲区是阶段 3；$P_d/P_{fa}$、ROC、门限是阶段 4；定点化是阶段 5。</p></blockquote>
 <hr>
 <h2>一、五个问题，逐条回答</h2>
@@ -103,7 +103,7 @@ strong{font-weight:650}
 </tbody></table>
 <hr>
 <h2>三、过关产出对照（逐条打勾）</h2>
-<ul><li>[x] <strong>单振子 RK4 仿真程序</strong>：<code>simulate()</code> 支持标量/数组并行、同频相量合成与双频直接积分；冒烟 $p_{std}=[0.4841,0.0149]$，判混沌/周期正确</li><li>[x] <strong>两幅并列相图</strong>：$\lambda=0.70/0.76$ 的 $(x,\dot x)$ 相图并排，<a href="../复现输出/阶段2-混沌与周期相图时序.png">PNG</a></li><li>[x] <strong>x(t) 时序图</strong>：同一图下半部分，<a href="../复现输出/阶段2-混沌与周期相图时序.png">PNG</a></li><li>[x] <strong>可复现参数表</strong>：本页 §一 Q2 与 notebook §2</li><li>[x] <strong>阈值曲线 + 步长敏感性</strong>：<a href="../复现输出/阶段2-临界阈值扫描.png">阈值扫描</a> · <a href="../复现输出/阶段2-步长敏感性.png">步长敏感性</a> · <a href="../复现输出/阶段2-Poincare截面散点.png">截面散点</a></li><li>[x] <strong>变尺度反例</strong>：<a href="../复现输出/阶段2-变尺度扫描.png">扫 R 曲线</a></li><li>[ ] <strong>判态伪代码 / 初相位盲区</strong>：阶段 3</li><li>[ ] <strong>$P_d/P_{fa}$ / ROC / 门限</strong>：阶段 4</li></ul>
+<ul><li>[x] <strong>单振子 RK4 仿真程序</strong>：<code>simulate_seq(sig, R, dt)</code> 数据驱动（盲测），支持标量/数组并行；没有信号时喂全零序列（$R=1$）等价于「只有内驱」，做检测时喂真实采样，标定与检测同一段代码；冒烟 $p_{std}=[0.3522,0]$，判混沌/周期正确</li><li>[x] <strong>两幅并列相图</strong>：$\lambda=0.70/0.76$ 的 $(x,\dot x)$ 相图并排，<a href="../复现输出/阶段2-混沌与周期相图时序.png">PNG</a></li><li>[x] <strong>x(t) 时序图</strong>：同一图下半部分，<a href="../复现输出/阶段2-混沌与周期相图时序.png">PNG</a></li><li>[x] <strong>可复现参数表</strong>：本页 §一 Q2 与 notebook §2</li><li>[x] <strong>阈值曲线 + 步长敏感性</strong>：<a href="../复现输出/阶段2-临界阈值扫描.png">阈值扫描</a> · <a href="../复现输出/阶段2-步长敏感性.png">步长敏感性</a> · <a href="../复现输出/阶段2-Poincare截面散点.png">截面散点</a></li><li>[x] <strong>变尺度反例</strong>：<a href="../复现输出/阶段2-变尺度扫描.png">扫 R 曲线</a></li><li>[ ] <strong>判态伪代码 / 初相位盲区</strong>：阶段 3</li><li>[ ] <strong>$P_d/P_{fa}$ / ROC / 门限</strong>：阶段 4</li></ul>
 <p><strong>本阶段不交</strong>：Duffing 之外的判据实现（0-1 test、多尺度熵）、参数估计公式、FPGA 位宽、任何 SNR 门限数字。</p>
 <hr>
 <h2>四、写进论文的表述（示范，数字已填）</h2>

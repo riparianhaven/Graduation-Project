@@ -2,8 +2,9 @@
 """生成 learn/2.ipynb（阶段 2：建模与相变，回答「带着问题读」的五问）。
 
 写法参考 learn/0.ipynb 与 learn/1.ipynb：markdown 讲条件 + 代码给可复核数字。
-内核代码改编自 复现-2-混沌振子建模与临界阈值.ipynb 的 simulate()，只取阶段 2 地基部分；
-§7 的变尺度反例保留，因为它是「相变 ≠ 频率估计」的关键证据。
+内核只有一个函数 simulate_seq()：数据驱动（盲测），只吃采样序列 + 尺度系数 R。
+阈值标定（§5–§6）与扫 R 定频（§7）走同一条代码路径，检测端没有 omega_s、也没有 nu；
+没有待测信号时喂一条全零序列（R=1，数值轴与物理轴重合），等价于「只有内驱」。
 
 运行：
     .venv\\Scripts\\python.exe tools\\build_stage2_notebook.py
@@ -89,10 +90,14 @@ BURN     = 200.0    # 丢弃瞬态（s）
 T_FAST   = 200.0    # 批量扫描短时长
 BURN_FAST= 100.0
 PSTD_TH  = 0.08     # Poincaré 离散度判态阈值（本机条件）
+TWOPI    = 2.0 * math.pi
+R0       = 1.0           # 无待测信号时的尺度系数：h1 = R0*dt = dt，数值轴与物理轴重合
+SIG0     = np.zeros(1)   # 全零采样序列（长度 1，按振子数广播）= 没有待测信号，只剩内驱
 _START = time.time()
 
 print(f'ROOT = {ROOT}')
 print(f'k={K}, ω={OMEGA} rad/s, λ0={LAM0}, h={H}s, T={T}s, burn={BURN}s, pstd阈值={PSTD_TH}')
+print(f'内核：simulate_seq(sig, R, dt) —— 数据驱动；无信号时用全零序列 SIG0、R0={R0}')
 ''')
 
 # ---------------------------------------------------------------- Q1
@@ -158,85 +163,137 @@ md(r'''
 | 判态量 | Poincaré 截面 $x(2\pi n)$ 后半段标准差 $p_{std}$ | 【本号】周期态约 0.01、混沌态 0.16–0.63，阈值 0.08 |
 | 噪声离散 | $\sigma\sqrt h\,N(0,1)$ | 【本号】$\sigma$ 为连续强度；§1–§6 先不注入噪声 |
 
-**求解器**：一次循环并行跑多路参数，支持同频相量合成（$\nu=1$ 走 Eq.(8)）与双频直接积分（$\nu\neq1$，变尺度用）。
+**求解器**：只有一个 `simulate_seq(sig, R, dt)` —— 数据驱动（盲测）。它不支持"直接把 $\gamma\cos(\nu\tau+\theta)$ 代进去"的解析写法，因为那需要先知道 $\omega_s$；它只接受一条采样序列，加一个尺度系数 $R$。标定阈值时喂全零序列（$R=1$，$h_1=dt$），做检测时喂真实采样。**标定与检测走同一段代码，没有第二套积分器。**
 ''')
 
 code(r'''
-def simulate(lam, beta=0.0, gamma=0.0, theta=0.0, sigma=0.0, seed=0,
-             h=H, t_end=T, burn=BURN, nu=1.0, trace=False):
-    """向量化 RK4 积分 x'' = -k x' + x³ - x⁵ + u(t)。
+TWOPI = 2.0 * math.pi
 
-    lam/beta/gamma/theta/sigma 可为标量或等长数组，一次循环并行跑完整组实验。
-    nu = 变尺度后的待测信号角频率 = 物理角频率 / 尺度系数 = omega_s/R；
-         nu=1 走相量合成 A cos t − B sin t，否则双频直接积分。
-         注意 nu 不是独立参数：它是 R 的函数，扫 R 就是在扫 nu。
-    返回 pstd（Poincaré 后半段标准差）、mx（稳态最大 |x|）、轨迹（可选）。
+
+def simulate_seq(sig, R=R0, dt=H, lam=LAM0, beta=0.0,
+                 n_cycles=150.0, burn_frac=0.5, trace=False):
+    """数据驱动（盲测）RK4：x'' = -k x' + x³ - x⁵ + λcos(τ+β) + s(τ)
+
+    sig  : 采样序列，(N,) 或 (N, m)；第 i 个样本是物理时刻 i*dt 的值。
+           传 SIG0（长度 1 的全零序列）表示「没有待测信号」，只留内驱。
+    R    : 变尺度系数。数值步长 h1 = R*dt —— 第 i 步在数值时间轴上走 h1，
+           读的却是物理时刻 i*dt 的样本。于是序列里角频率 ω 的分量在新时间
+           轴上变成 ω/R。本函数里既没有 ω，也没有 ν：ν 只是 ω/R 的别名。
+    lam, beta : 内驱幅值与初相，可为标量或等长数组（阵列并行）。
+    n_cycles  : 积分多少个内驱周期（数值轴上的周期恒为 2π）。
+    burn_frac : 前多少比例的样本当作瞬态丢掉（默认前一半）。
+    返回 dict(pstd, mx, p, t, X, Y)；t/X/Y 仅在 trace=True 时非 None。
+
+    单振子（m=1）走标量快路径：同一套 RK4，只把 numpy 小数组换成 Python
+    float，快约 10 倍；阵列（m>1）走向量路径。两条路径公式逐行一致，只有
+    驱动项取值用 math.cos 还是 np.cos 的区别，结果在 1 ulp 内相同。
     """
-    lam, beta, gamma, theta, sigma = [a.ravel().astype(float).copy() for a in
-        np.broadcast_arrays(np.asarray(lam, float), np.asarray(beta, float),
-                            np.asarray(gamma, float), np.asarray(theta, float),
-                            np.asarray(sigma, float))]
+    lam, beta = [a.ravel().astype(float) for a in np.broadcast_arrays(
+        np.asarray(lam, float), np.asarray(beta, float))]
     m = lam.size
-    coherent = abs(nu - 1.0) < 1e-12
-    if coherent:   # Eq.(8)：两路同频余弦合成相量，顺带验证推导
-        A = lam * np.cos(beta) + gamma * np.cos(theta)
-        B = lam * np.sin(beta) + gamma * np.sin(theta)
+    scalar = (m == 1)
 
-    x = np.zeros(m); y = np.zeros(m)
-    rng = np.random.default_rng(seed)
-    steps, burn_steps = int(round(t_end / h)), int(round(burn / h))
-    TWOPI = 2 * math.pi
-    idx_prev = 0                      # 已采到的内驱周期序号（Poincaré 截面）
-    sqrt_h = math.sqrt(h)
-    noisy = bool(np.any(sigma))
-    poincare, mx = [], np.zeros(m)
-    tr_t, tr_x, tr_y = [], [], []
+    sig = np.asarray(sig, float)
+    if sig.ndim == 1:
+        sig = sig.reshape(-1, 1)
+    if sig.shape[1] == 1 and not scalar:            # 单列按振子数广播
+        sig = np.broadcast_to(sig, (sig.shape[0], m))
+    elif sig.shape[1] != m:
+        raise ValueError(f'sig 有 {sig.shape[1]} 列，与振子数 {m} 不符')
+    n = sig.shape[0]
+
+    h1 = R * dt
+    steps = int(round(n_cycles * TWOPI / h1))
+    bsteps = int(round(steps * burn_frac))
+
+    if scalar:
+        lam_s, beta_s = float(lam[0]), float(beta[0])
+        col = sig[:, 0]
+        x = y = x_prev = 0.0
+        mx = 0.0
+    else:
+        zero = np.zeros(m)
+        x, y = np.zeros(m), np.zeros(m)
+        mx, x_prev = np.zeros(m), np.zeros(m)
+    idx_prev = 0
+    pts, tr_t, tr_x, tr_y = [], [], [], []
 
     for i in range(steps):
-        t = i * h
-        nz = rng.standard_normal(m) * sqrt_h if noisy else 0.0
-        if coherent:
-            f1 = A * math.cos(t)       - B * math.sin(t)       + sigma * nz
-            fh = A * math.cos(t+h/2)   - B * math.sin(t+h/2)   + sigma * nz
-            f4 = A * math.cos(t+h)     - B * math.sin(t+h)     + sigma * nz
+        tau = i * h1
+        # ---- 驱动项：内驱 + 第 i 个样本（零阶保持，中点取相邻两样本均值）
+        if i < n:
+            s0 = col[i] if scalar else sig[i]
+            s1 = (col[i + 1] if scalar else sig[i + 1]) if i + 1 < n else s0
+        elif scalar:
+            s0 = s1 = 0.0
         else:
-            f1 = lam*np.cos(t+beta)       + gamma*np.cos(nu*t+theta)       + sigma*nz
-            fh = lam*np.cos(t+h/2+beta)   + gamma*np.cos(nu*(t+h/2)+theta) + sigma*nz
-            f4 = lam*np.cos(t+h+beta)     + gamma*np.cos(nu*(t+h)+theta)   + sigma*nz
+            s0 = s1 = zero
+        if scalar:
+            f1 = lam_s * math.cos(tau + beta_s) + s0
+            fh = lam_s * math.cos(tau + h1 / 2 + beta_s) + 0.5 * (s0 + s1)
+            f4 = lam_s * math.cos(tau + h1 + beta_s) + s1
+        else:
+            f1 = lam * np.cos(tau + beta) + s0
+            fh = lam * np.cos(tau + h1 / 2 + beta) + 0.5 * (s0 + s1)
+            f4 = lam * np.cos(tau + h1 + beta) + s1
 
-        k1x = y;            k1y = -K*y  + x**3  - x**5  + f1
-        x2, y2 = x+h/2*k1x, y+h/2*k1y
-        k2x = y2;           k2y = -K*y2 + x2**3 - x2**5 + fh
-        x3, y3 = x+h/2*k2x, y+h/2*k2y
-        k3x = y3;           k3y = -K*y3 + x3**3 - x3**5 + fh
-        x4, y4 = x+h*k3x,   y+h*k3y
-        k4x = y4;           k4y = -K*y4 + x4**3 - x4**5 + f4
-        x_prev = x.copy()                      # 更新前存档，供 2π 时刻插值
-        x += h/6*(k1x + 2*k2x + 2*k3x + k4x)
-        y += h/6*(k1y + 2*k2y + 2*k3y + k4y)
+        # ---- RK4：标量与数组共用同一段公式
+        k1x = y;              k1y = -K * y + x ** 3 - x ** 5 + f1
+        x2, y2 = x + h1 / 2 * k1x, y + h1 / 2 * k1y
+        k2x = y2;             k2y = -K * y2 + x2 ** 3 - x2 ** 5 + fh
+        x3, y3 = x + h1 / 2 * k2x, y + h1 / 2 * k2y
+        k3x = y3;             k3y = -K * y3 + x3 ** 3 - x3 ** 5 + fh
+        x4, y4 = x + h1 * k3x, y + h1 * k3y
+        k4x = y4;             k4y = -K * y4 + x4 ** 3 - x4 ** 5 + f4
+        x_prev = x                                  # 更新前存档，供 2π 时刻插值
+        x = x + h1 / 6 * (k1x + 2 * k2x + 2 * k3x + k4x)
+        y = y + h1 / 6 * (k1y + 2 * k2y + 2 * k3y + k4y)
 
-        if i >= burn_steps:
-            np.maximum(mx, np.abs(x), out=mx)
-            # 精确落在 τ=2πk 上取截面：h 不整除 2π（如 2π/0.02=314.159）时，
-            # 按步数取整会让采样相位每周期漂，pstd 凭空多出 1e-2 量级。
-            idx = int(math.floor((t + h) / TWOPI + 1e-12))
+        if i % 256 == 0 and not (math.isfinite(x) if scalar
+                                 else np.all(np.isfinite(x))):
+            return dict(pstd=np.full(m, np.nan), mx=np.atleast_1d(mx),
+                        p=np.empty((0, m)), t=None, X=None, Y=None)
+
+        if i >= bsteps:
+            if scalar:
+                mx = max(mx, abs(x))
+            else:
+                np.maximum(mx, np.abs(x), out=mx)
+            # 精确落在 τ=2πk 上取截面：h1 不整除 2π（2π/0.02=314.159）时，
+            # 按「每 314 步取一次」会让采样相位每周期漂 0.003 rad，
+            # 周期态 pstd 被凭空抬到 1e-2 量级，阈值标定随之失真。
+            idx = int(math.floor((tau + h1) / TWOPI + 1e-12))
             if idx != idx_prev and idx > 0:
-                frac = min(max((TWOPI * idx - t) / h, 0.0), 1.0)
-                poincare.append(x_prev + frac * (x - x_prev))
+                frac = min(max((TWOPI * idx - tau) / h1, 0.0), 1.0)
+                pts.append(x_prev + frac * (x - x_prev))
                 idx_prev = idx
             if trace:
-                tr_t.append(t); tr_x.append(x.copy()); tr_y.append(y.copy())
+                tr_t.append(tau)
+                tr_x.append(x if scalar else x.copy())
+                tr_y.append(y if scalar else y.copy())
 
-    p_all = np.asarray(poincare)
-    p = p_all[len(p_all)//2:] if p_all.size else np.empty((0, m))
-    pstd = p.std(axis=0) if p.size else np.full(m, np.nan)
-    return dict(pstd=pstd, mx=mx, p=p,
-                t=np.array(tr_t) if trace else None,
-                X=np.array(tr_x) if trace else None,
-                Y=np.array(tr_y) if trace else None)
+    p_all = np.asarray(pts)
+    if p_all.size:
+        p = p_all[len(p_all) // 2:]
+        if p.ndim == 1:
+            p = p.reshape(-1, 1)
+        pstd = p.std(axis=0)
+    else:
+        p = np.empty((0, m))
+        pstd = np.full(m, np.nan)
+    if trace:
+        T_ = np.asarray(tr_t)
+        X_ = np.asarray(tr_x)
+        Y_ = np.asarray(tr_y)
+        if scalar:
+            X_ = X_.reshape(-1, 1)
+            Y_ = Y_.reshape(-1, 1)
+    else:
+        T_ = X_ = Y_ = None
+    return dict(pstd=pstd, mx=np.atleast_1d(mx), p=p, t=T_, X=X_, Y=Y_)
 
-# 冒烟：0.72 应保持混沌，0.76 应进入大周期态
-r = simulate([LAM0, 0.76], seed=0)
+# 冒烟：0.72 应保持混沌，0.76 应进入大周期态（全零序列 = 没有待测信号）
+r = simulate_seq(SIG0, R0, H, lam=[LAM0, 0.76], n_cycles=T / TWOPI)
 print('冒烟 pstd:', np.round(r['pstd'], 4),
       '-> 判态:', ['周期' if v < PSTD_TH else '混沌' for v in r['pstd']])
 ''')
@@ -263,7 +320,7 @@ md(r'''
 ''')
 
 code(r'''
-r_tr = simulate([0.70, 0.76], seed=1, trace=True)
+r_tr = simulate_seq(SIG0, R0, H, lam=[0.70, 0.76], n_cycles=T / TWOPI, trace=True)
 
 fig, axes = plt.subplots(2, 2, figsize=(11, 8), constrained_layout=True)
 names = ['λ=0.70（混沌侧）', 'λ=0.76（周期侧）']
@@ -304,12 +361,12 @@ md(r'''
 | $\lambda_0$ | 检测时预置的工作点（略低于 $\lambda_c$） | 0.72 | 0.72 |
 | $C_{trig}$ | 内驱 + 待测信号相量合成后刚好越界的总幅值 | 0.73 | 见下方精扫 |
 
-**标定流程**：固定 $k,\omega,h,T,\beta=0$、无噪声、$\gamma=0$ → 在 $[0.60,0.85]$ 以 0.005 粗扫 → 找连续三点进入周期态的位置 → 附近加密到 0.001 精扫，再用 0.0002 网格 + 1200 s 长时窗复核 → 报「跨越区间 + 中点 $\lambda_c$」。
+**标定流程**：喂一条全零采样序列（没有待测信号）× $R=1$、$h_1=dt=0.02$、$\beta=0$ → 在 $[0.60,0.85]$ 以 0.005 粗扫 → 找连续三点进入周期态的位置 → 附近加密到 0.001 精扫，再用 0.0002 网格 + 1200 s 长时窗复核 → 报「跨越区间 + 中点 $\lambda_c$」。
 ''')
 
 code(r'''
 lams = np.round(np.arange(0.60, 0.8501, 0.005), 4)
-rA = simulate(lams, seed=1)
+rA = simulate_seq(SIG0, R0, H, lam=lams, n_cycles=T / TWOPI)
 periodic = rA['pstd'] < PSTD_TH
 first = next((i for i in range(len(lams)-2)
               if periodic[i] and periodic[i+1] and periodic[i+2]), None)
@@ -325,7 +382,7 @@ if first:
 
 # 精扫 1：0.001 网格，定位跨越发生在哪个 0.001 区间
 fine = np.round(np.arange(LC-0.012, LC+0.0051, 0.001), 4)
-rF = simulate(fine, seed=11)
+rF = simulate_seq(SIG0, R0, H, lam=fine, n_cycles=T / TWOPI)
 per_f = rF['pstd'] < PSTD_TH
 ip = int(np.argmax(per_f))
 first_p = float(fine[ip])
@@ -337,7 +394,7 @@ if ip > 0:
 # 精扫 2：0.0002 网格 + 长时窗。λc 附近瞬态很长，
 # T=400 会把 λ=0.7345/0.735 误判成混沌；跑到 1200 s 才收敛。
 sub = np.round(np.arange(first_p-0.0014, first_p+0.00101, 0.0002), 4)
-rS = simulate(sub, seed=3, t_end=1200.0, burn=600.0)
+rS = simulate_seq(SIG0, R0, H, lam=sub, n_cycles=1200.0 / TWOPI)
 per_s = rS['pstd'] < PSTD_TH
 LC_LO = float(sub[~per_s].max()) if (~per_s).any() else float('nan')
 LC_HI = float(sub[per_s].min()) if per_s.any() else float('nan')
@@ -381,7 +438,7 @@ hs = [0.1, 0.05, 0.02, 0.01]
 probe = np.round(np.arange(0.720, 0.7601, 0.005), 4)
 step_results, step_jumps = {}, []
 for h in hs:
-    rr = simulate(probe, h=h, t_end=T, burn=BURN, seed=5)
+    rr = simulate_seq(SIG0, R0, h, lam=probe, n_cycles=T / TWOPI)
     step_results[h] = rr['pstd']
     per = rr['pstd'] < PSTD_TH
     jump = next((f'{probe[i]:.3f}→{probe[i+1]:.3f}' for i in range(len(probe)-1)
@@ -412,59 +469,16 @@ md(r'''
 
 **关键：$\nu$ 不是输入参数，它只是 $\omega_s/R$ 的别名。** 待测 $\omega_s$ 未知时，$\nu$ 既不能也不该事先设定——你能设的只有 $R$。扫到相变那一点的 $R$，就是 $\omega_s$。本节用**完全不出现 $\omega_s$ 的代码**把这件事做实。
 
-| 实现 | 信号来源 | 步长 | 代码里有没有 $\omega_s$ |
+| 环节 | 信号来源 | 步长 | 代码里有没有 $\omega_s$ |
 |---|---|---|---|
-| 解析写法（验证模式）| $\gamma\cos(\nu\tau+\theta)$，$\nu=\omega_s/R$ | 固定 $h$ | **有**——先把答案写进输入 |
-| 数据写法（盲测，本节）| 采样序列 `sig[i]` | $h_1=R\Delta t$ | **没有**——只吃样本与 $R$ |
+| 阈值标定（§5–§6）| 全零序列 `SIG0`，只剩内驱 | $h_1=dt$（$R=1$）| **没有** |
+| 扫 $R$ 定频（本节）| 采样序列 `sig[i]` | $h_1=R\Delta t$ | **没有** |
 
-解析写法能验证公式、能画图，但它无法说明「频率是测出来的」，因为 $\omega_s$ 在推导之前就已经躺在代码里了。下面整节改成数据写法：**先有一段采样序列，再看它能不能被定位。**
+整个 notebook 只有内核 `simulate_seq(sig, R, dt)`，它永远从一段采样序列出发：没有信号时喂全零序列，有信号时喂真实采样。**解析写法 $\nu=\omega_s/R$ 只作为公式出现在正文里，没有对应的代码路径**——那正是"先把答案写进输入"的写法，能验证公式，却说明不了"频率是测出来的"。下面用数据写法把这件事做实。
 ''')
 
 code(r'''
-TWOPI = 2.0 * math.pi
-
-def simulate_seq(sig, R, dt, lam=LAM0, beta=0.0, n_cycles=150, burn_frac=0.5):
-    """数据驱动（盲测）：只给采样序列 sig 与采样间隔 dt。
-
-    第 i 步在数值时间轴上走 h1 = R*dt，读的是 sig[i]（物理时刻 i*dt 的样本）。
-    于是 sig 中角频率 omega 的分量在新时间轴上变成 omega/R —— 这正是 nu，
-    但本函数的签名与函数体里都没有 omega，也没有 nu。
-    """
-    h1 = R * dt
-    steps = int(round(n_cycles * TWOPI / h1))
-    bsteps = int(steps * burn_frac)
-    n = len(sig)
-    x = y = 0.0
-    x_prev, idx_prev, pts = 0.0, -1, []
-    for i in range(steps):
-        tau = i * h1
-        s0 = sig[i] if i < n else 0.0
-        s1 = sig[i + 1] if i + 1 < n else s0
-        f1 = lam * math.cos(tau + beta) + s0
-        fh = lam * math.cos(tau + h1 / 2 + beta) + 0.5 * (s0 + s1)
-        f4 = lam * math.cos(tau + h1 + beta) + s1
-        x_prev = x
-        k1x = y;              k1y = -K * y + x ** 3 - x ** 5 + f1
-        x2, y2 = x + h1 / 2 * k1x, y + h1 / 2 * k1y
-        k2x = y2;             k2y = -K * y2 + x2 ** 3 - x2 ** 5 + fh
-        x3, y3 = x + h1 / 2 * k2x, y + h1 / 2 * k2y
-        k3x = y3;             k3y = -K * y3 + x3 ** 3 - x3 ** 5 + fh
-        x4, y4 = x + h1 * k3x, y + h1 * k3y
-        k4x = y4;             k4y = -K * y4 + x4 ** 3 - x4 ** 5 + f4
-        x += h1 / 6 * (k1x + 2 * k2x + 2 * k3x + k4x)
-        y += h1 / 6 * (k1y + 2 * k2y + 2 * k3y + k4y)
-        if not np.isfinite(x) or abs(x) > 100:
-            return np.nan
-        if i >= bsteps:
-            idx = int(math.floor((tau + h1) / TWOPI + 1e-12))
-            if idx != idx_prev and idx > 0:
-                frac = min(max((TWOPI * idx - tau) / h1, 0.0), 1.0)
-                pts.append(x_prev + frac * (x - x_prev))
-                idx_prev = idx
-    p = np.asarray(pts)
-    if p.size > 4:
-        p = p[len(p) // 2:]
-    return float(p.std()) if p.size else np.nan
+# 内核已在 §2 定义，这里不再重复（全 notebook 只有一个 simulate_seq）
 
 
 # ---- 待测信号源：全节唯一出现 omega 的地方，它在「造数据」，不在「做检测」
@@ -486,7 +500,7 @@ code(r'''
 # 同一段信号，只把 R 上下挪 ±0.3%（0.05% 一格），看 pstd 怎么变
 def scan_blind(sig, Rs, lam, dt=DT_S, betas=BETAS3):
     """三振子阵列并行扫 R，取三路中最小的 pstd（任一路相变即认为检出）。"""
-    return np.array([min(simulate_seq(sig, R, dt, lam=lam, beta=b) for b in betas)
+    return np.array([min(simulate_seq(sig, R, dt, lam=lam, beta=b)['pstd'][0] for b in betas)
                      for R in Rs])
 
 BAND_TH = 1e-2        # 判「峰内」的物理门限
@@ -496,7 +510,7 @@ curves, widths = {}, []
 for om in (10.0, 7.3, 3.7):
     sg = make_signal(om)
     Rs = np.round(om * (1 + np.arange(-6, 7) * 5e-4), 6)
-    ps = np.array([simulate_seq(sg, R, DT_S, lam=0.73, beta=np.deg2rad(-120.0))
+    ps = np.array([simulate_seq(sg, R, DT_S, lam=0.73, beta=np.deg2rad(-120.0))['pstd'][0]
                    for R in Rs])
     bd = Rs[ps < BAND_TH]
     curves[om] = (Rs, ps, bd)
@@ -544,7 +558,7 @@ print(f'      按门限 {DET_TH:g} 判：全域穷举 {"检出" if p_glob[i_g] <
 # 阵列分解：真值 R=10 处只有与信号同相的那一路收敛（复现论文图 5 的消融）
 print('\n[阵列分解] R=10 处三路各自的 pstd：')
 for b in BETAS3:
-    pv = simulate_seq(make_signal(10.0), 10.0, DT_S, lam=0.73, beta=b)
+    pv = simulate_seq(make_signal(10.0), 10.0, DT_S, lam=0.73, beta=b)['pstd'][0]
     print(f'  β={math.degrees(b):+6.0f}°   pstd={pv:.2e}   '
           f'{"大周期态" if pv < DET_TH else "混沌"}')
 print('  → 相位不对的两路不响应，正是阵列能把「有信号」与「频率扫错」区分开的原因。')
@@ -571,16 +585,17 @@ print('  (2) 定位精度上限 = R 网格间距；抛物线插值只能把误�
 ''')
 
 code(r'''
-# ---- 第 3 步：两种写法是同一件事 —— 用解析模式复核同一个 R
-om, R = 10.0, 10.0
-nu = om / R                 # ← 只有解析模式才写得出这一行，因为 omega 已知
-ra = simulate(np.full(3, 0.73), BETAS3, np.full(3, 0.02), np.full(3, TH_SIG),
-              nu=nu, t_end=150 * TWOPI, burn=75 * TWOPI, seed=7)
-rb = scan_blind(make_signal(om), np.array([R]), 0.73)
-print(f'解析写法  nu=omega/R={nu:.3f}   → pstd={ra["pstd"].min():.2e}')
-print(f'数据写法  sig[i], h1=R*dt      → pstd={rb[0]:.2e}')
-print('两者绝对数值因步长不同差几倍，判读一致（都远低于 1e-2），说明它们描述同一件事。')
-print('差别只在认识论：解析写法里 nu 是「你设的」，数据写法里 nu 是「扫出来才知道的」。')
+# ---- 第 3 步：nu = omega/R 是时间标签的换算，不是输入参数
+# 同一段样本，只改「时间标签」再量一次频率 —— 两个读数之比就是 R
+om_phys = fft_guess(sig)                       # 时间标签 = dt
+om_scaled = fft_guess(sig, dt=DT_S * 10.0)     # 时间标签 = R*dt（R=10）
+print(f'标签 dt    → {om_phys:.4f} rad/s')
+print(f'标签 R*dt  → {om_scaled:.4f} rad/s     比值 {om_phys/om_scaled:.4f}')
+print('→ nu = omega/R 就是这么冒出来的：换了时间标签，同一序列的频率读数除以 R。')
+print('  代码里没有 omega、也没有 nu，只有 R 与样本；nu 是「扫到 R 之后」才知道的比值。')
+
+rb = scan_blind(make_signal(10.0), np.array([10.0]), 0.73)
+print(f'\n数据写法 sig[i], h1=R*dt（R=10） → pstd={rb[0]:.2e}，判为大周期态。')
 
 fig, axes = plt.subplots(1, 2, figsize=(12.4, 4.0), constrained_layout=True)
 
@@ -663,6 +678,8 @@ summary = {
     'step_sensitivity': {str(h): {'first_jump': jump} for h, jump in zip(hs, step_jumps)},
     'rescale': {
         'blind': True,
+        'kernel': 'single data-driven integrator simulate_seq(sig, R, dt); '
+                  'threshold calibration also runs through it with a zero sequence (R=1)',
         'implementation': 'data-driven: step h1 = R*dt, reads sig[i]; no omega and no nu in the detector',
         'dt_s': DT_S, 'n_samples': N_SAMP, 'lambda_work': 0.73,
         'selection_bandwidth_pct': round(float(w_mean), 3),

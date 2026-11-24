@@ -60,46 +60,56 @@
     }
   },
   "rescale": {
-    "true_omega_rad_s": 10.0,
-    "R_grid": [
-      6.0,
-      7.0,
-      8.0,
-      9.0,
-      9.5,
-      10.0,
-      10.5,
-      11.0,
-      12.0,
-      13.0,
-      14.0
+    "blind": true,
+    "implementation": "data-driven: step h1 = R*dt, reads sig[i]; no omega and no nu in the detector",
+    "dt_s": 0.005,
+    "n_samples": 900000,
+    "lambda_work": 0.73,
+    "selection_bandwidth_pct": 0.2,
+    "selection_bandwidth_by_freq": {
+      "10.0": 0.2,
+      "7.3": 0.2,
+      "3.7": 0.2
+    },
+    "detect_threshold": 0.001,
+    "full_sweep": {
+      "relative_step_pct": 4.9,
+      "min_pstd": 0.01367,
+      "nearest_grid_to_truth_pct": -0.885,
+      "hit": false,
+      "verdict": "fails: the peak is only +-0.1% wide, a 4.9%/grid sweep steps over it"
+    },
+    "localization": [
+      {
+        "true_omega": 10.0,
+        "fft_guess": 10.00004,
+        "grid_best": 10.00004,
+        "parabolic": 9.99891,
+        "grid_err_pct": 0.0004,
+        "parabolic_err_pct": -0.0109,
+        "pstd_min": 0.000163
+      },
+      {
+        "true_omega": 7.3,
+        "fft_guess": 7.29967,
+        "grid_best": 7.29967,
+        "parabolic": 7.29916,
+        "grid_err_pct": -0.0046,
+        "parabolic_err_pct": -0.0115,
+        "pstd_min": 0.000122
+      },
+      {
+        "true_omega": 3.7,
+        "fft_guess": 3.7001,
+        "grid_best": 3.7001,
+        "parabolic": 3.69976,
+        "grid_err_pct": 0.0026,
+        "parabolic_err_pct": -0.0065,
+        "pstd_min": 5.57e-05
+      }
     ],
-    "pstd_at_lambda0p73": [
-      0.394995,
-      0.301848,
-      0.070497,
-      0.087734,
-      0.029553,
-      3.1e-05,
-      0.090392,
-      0.09684,
-      0.061485,
-      0.064605,
-      0.340997
-    ],
-    "spurious_low_pstd_R": [
-      8.0,
-      9.5,
-      12.0,
-      13.0
-    ],
-    "tight_1e-3_pass": [
-      10.0
-    ],
-    "coherence_r_true": 0.9954,
-    "coherence_others_max": 0.9931,
-    "verdict": "frequency IS identifiable, but only via the absolute pstd level (spurious >= 3e-2 vs true ~3e-5, about 3 orders of magnitude); coherence rho does NOT separate them (0.9954 vs 0.9931)",
-    "note": "nu=omega/R here is verification mode (omega assumed known); blind data-driven test is in s2-jupyterbook chapter 3"
+    "verdict": "frequency IS identifiable blind, but only with an initial guess from the sample sequence (FFT) plus a local sweep at <=0.05% relative steps; brute-force sweeping over the whole band must miss the peak",
+    "note": "coherence rho does NOT separate true from spurious (0.9954 vs 0.9931), so the decision must use the absolute pstd level; the +-0.05% resolution here is the noise-free limit and does not transfer to the -23 dB case (see s2 chapter 5)"
   },
   "stage1_questions_answered": [
     "Q6 (step-size dimension only)",

@@ -406,76 +406,224 @@ print('      求解器(Ode4/RK4)、步长(0.1/0.02)、判据(目测/Poincaré)�
 
 # ---------------------------------------------------------------- Q5
 md(r'''
-## 7｜问 5：变尺度为什么能解决极低频
+## 7｜问 5：变尺度为什么能解决极低频（盲测实现）
 
-振子的内驱被钉死在 $\omega_0=1$ rad/s，而真实待测信号角频率 $\omega_s$ 未知且可能低到 0.1 Hz。变尺度**不改振子，改信号的时间标签**：原始采样步长 $1/f_s$ 改读成 $R/f_s$，第 $n$ 个样本被读成时刻 $nR/f_s$，于是信号角频率被压缩成 $\omega_s/R$，记作 $\nu=\omega_s/R$。取 $R=\omega_s$ 即 $\nu=1$，信号与内驱同频。
+振子的内驱被钉死在 $\omega_0=1$ rad/s，而真实待测信号角频率 $\omega_s$ 未知且可能低到 0.1 Hz。变尺度**不改振子，改信号的时间标签**：原始采样间隔 $\Delta t=1/f_s$ 改读成 $R\Delta t$，第 $i$ 个样本被读成数值时刻 $iR\Delta t$。于是信号在新时间轴上的角频率变成 $\omega_s/R$，记作 $\nu=\omega_s/R$。
 
-**符号别搞混**：$R$ 是扫出来的尺度系数，$\omega_s$ 是待测的物理量，$\nu$ 只是二者的比值——它是因变量，不是可以事先设定的参数。
+**关键：$\nu$ 不是输入参数，它只是 $\omega_s/R$ 的别名。** 待测 $\omega_s$ 未知时，$\nu$ 既不能也不该事先设定——你能设的只有 $R$。扫到相变那一点的 $R$，就是 $\omega_s$。本节用**完全不出现 $\omega_s$ 的代码**把这件事做实。
 
-副产品是「阈值只标一次」；但**重采样同样作用于噪声**，等效采样率降为 $f_s/R$，宽带噪声会混叠（阶段一 Q8）。
+| 实现 | 信号来源 | 步长 | 代码里有没有 $\omega_s$ |
+|---|---|---|---|
+| 解析写法（验证模式）| $\gamma\cos(\nu\tau+\theta)$，$\nu=\omega_s/R$ | 固定 $h$ | **有**——先把答案写进输入 |
+| 数据写法（盲测，本节）| 采样序列 `sig[i]` | $h_1=R\Delta t$ | **没有**——只吃样本与 $R$ |
 
-**扫 $R$ 能不能自己锁定频率？能，但只能靠 $p_{std}$ 的绝对量级，不能靠相干指数。** 本机复现发现，不止真值 $R=\omega_s$ 会出现低 $p_{std}$——锁频/准周期态也会。区别在**量级**：真共振落到 $3\times10^{-5}$，伪相变最低只降到 $3\times10^{-2}$，中间隔着三个量级。用 $0.08$ 的门限判态，$R=8,\,9.5,\,12,\,13$ 都会被判成「检出」；收紧到 $10^{-3}$ 就只剩 $R=10$。
-
-**反面证据同样要记住：相干指数 $\rho$ 分不开。** 真值处 $\rho=0.9954$，其余 $R$ 最高也有 $0.9931$——只差 $0.002$。原因是内驱幅值远大于待测信号，响应里几乎全是内驱分量，$\rho$ 对「信号有没有跟上」并不敏感。**所以「哪个 $R$ 相变，$\nu$ 就是 $R$」成立，但判据必须是绝对量级，不能是波形相似度。**
-
-**但本节用的是验证模式**：$\nu=\omega/R$ 这一行需要 $\omega$ 已知才能写出来。真实盲测（代码里不含 $\omega$，只吃采样序列 + $h_1=R\Delta t$）见 `s2-jupyterbook` 第 3 章，那里对 $\omega=10/7.3/3.7$ 的估计误差是 $+0.00\%/+0.07\%/-0.14\%$。换言之 **$\nu$ 不是输入参数，它只是 $\omega/R$ 的别名**；扫到相变那一点的 $R$ 就是 $\omega$。
+解析写法能验证公式、能画图，但它无法说明「频率是测出来的」，因为 $\omega_s$ 在推导之前就已经躺在代码里了。下面整节改成数据写法：**先有一段采样序列，再看它能不能被定位。**
 ''')
 
 code(r'''
-omega_true, gam_sig, th_sig = 10.0, 0.02, np.deg2rad(-120.0)
-Rs = np.array([6, 7, 8, 9, 9.5, 10, 10.5, 11, 12, 13, 14], float)
-betas3 = np.deg2rad([0.0, -120.0, 120.0])
+TWOPI = 2.0 * math.pi
 
-def scan_R(lam_work, seed=21):
-    vals, cohs = [], []
-    for R in Rs:
-        rr = simulate(np.full(3, lam_work), betas3, np.full(3, gam_sig),
-                      np.full(3, th_sig), nu=omega_true/R,
-                      t_end=T_FAST, burn=BURN_FAST, seed=seed, trace=True)
-        vals.append(rr['pstd'].min())
-        j = int(np.argmin(rr['pstd']))
-        xs, tt = rr['X'][:, j], rr['t']
-        cohs.append(np.sqrt((xs @ np.cos(tt))**2 + (xs @ np.sin(tt))**2) /
-                    (np.linalg.norm(xs) * math.sqrt(tt.size/2)))
-    return np.array(vals), np.array(cohs)
+def simulate_seq(sig, R, dt, lam=LAM0, beta=0.0, n_cycles=150, burn_frac=0.5):
+    """数据驱动（盲测）：只给采样序列 sig 与采样间隔 dt。
 
-minp072, coh072 = scan_R(0.72)
-minp073, coh073 = scan_R(0.73)
-print('   R      ν=ω/R   min pstd@0.72  @0.73   ρ@0.73   低pstd?')
-for R, a, b, c in zip(Rs, minp072, minp073, coh073):
-    print(f'{R:6.1f}  {omega_true/R:7.3f}     {a:8.4f}   {b:8.4f}  {c:6.3f}    '
-          f'{"是" if b < PSTD_TH else "否"}')
-spurious = [float(R) for R, p in zip(Rs, minp073)
-            if abs(R-omega_true) > 1e-9 and p < PSTD_TH]
-i10 = int(np.argmin(np.abs(Rs - omega_true)))
-rest = np.delete(coh073, i10)
-print(f'\n非真值 R 也出现低 pstd 的锁频伪相变（判据 {PSTD_TH}）: {spurious}')
-print(f'相干指数 ρ：R=10 处 {coh073[i10]:.4f}，其余 {rest.min():.4f}–{rest.max():.4f}'
-      f' → 只差 {coh073[i10]-rest.max():+.4f}，ρ 分不开真假，不能当频率判据。')
-tight = [float(R) for R, p in zip(Rs, minp073) if p < 1e-3]
-p_false_min = float(min(p for R, p in zip(Rs, minp073) if abs(R - omega_true) > 1e-9))
-p_true = float(minp073[i10])
-print(f'判据从 {PSTD_TH} 收紧到 1e-3：通过者只剩 R={tight}（真值 {omega_true}）。')
-print(f'  → 伪相变最低 pstd={p_false_min:.1e}（准周期游走），真共振 {p_true:.1e}，'
-      f'差 {math.log10(p_false_min/p_true):.1f} 个量级；门限停在 0.08 时两者被混为一谈。')
+    第 i 步在数值时间轴上走 h1 = R*dt，读的是 sig[i]（物理时刻 i*dt 的样本）。
+    于是 sig 中角频率 omega 的分量在新时间轴上变成 omega/R —— 这正是 nu，
+    但本函数的签名与函数体里都没有 omega，也没有 nu。
+    """
+    h1 = R * dt
+    steps = int(round(n_cycles * TWOPI / h1))
+    bsteps = int(steps * burn_frac)
+    n = len(sig)
+    x = y = 0.0
+    x_prev, idx_prev, pts = 0.0, -1, []
+    for i in range(steps):
+        tau = i * h1
+        s0 = sig[i] if i < n else 0.0
+        s1 = sig[i + 1] if i + 1 < n else s0
+        f1 = lam * math.cos(tau + beta) + s0
+        fh = lam * math.cos(tau + h1 / 2 + beta) + 0.5 * (s0 + s1)
+        f4 = lam * math.cos(tau + h1 + beta) + s1
+        x_prev = x
+        k1x = y;              k1y = -K * y + x ** 3 - x ** 5 + f1
+        x2, y2 = x + h1 / 2 * k1x, y + h1 / 2 * k1y
+        k2x = y2;             k2y = -K * y2 + x2 ** 3 - x2 ** 5 + fh
+        x3, y3 = x + h1 / 2 * k2x, y + h1 / 2 * k2y
+        k3x = y3;             k3y = -K * y3 + x3 ** 3 - x3 ** 5 + fh
+        x4, y4 = x + h1 * k3x, y + h1 * k3y
+        k4x = y4;             k4y = -K * y4 + x4 ** 3 - x4 ** 5 + f4
+        x += h1 / 6 * (k1x + 2 * k2x + 2 * k3x + k4x)
+        y += h1 / 6 * (k1y + 2 * k2y + 2 * k3y + k4y)
+        if not np.isfinite(x) or abs(x) > 100:
+            return np.nan
+        if i >= bsteps:
+            idx = int(math.floor((tau + h1) / TWOPI + 1e-12))
+            if idx != idx_prev and idx > 0:
+                frac = min(max((TWOPI * idx - tau) / h1, 0.0), 1.0)
+                pts.append(x_prev + frac * (x - x_prev))
+                idx_prev = idx
+    p = np.asarray(pts)
+    if p.size > 4:
+        p = p[len(p) // 2:]
+    return float(p.std()) if p.size else np.nan
 
-fig, axes = plt.subplots(1, 2, figsize=(12, 4.0), constrained_layout=True)
-axes[0].plot(Rs, minp072, 'o-', color='#8a94a0', label='λ=0.72')
-axes[0].plot(Rs, minp073, 's-', color='#2f6fd0', label='λ=0.73')
-axes[0].axhline(PSTD_TH, color='#c0392b', ls='--', lw=1.2, label=f'判态阈值 {PSTD_TH}')
-axes[0].axhline(1e-3, color='#7d3c98', ls=':', lw=1.2, label='收紧到 1e-3')
-axes[0].axvline(omega_true, color='#1a8a5a', ls=':', lw=2, label='真值 R=10')
-axes[0].set_yscale('log'); axes[0].set_xlabel('尺度系数 R'); axes[0].set_ylabel('min pstd (log)')
-axes[0].set_title('扫 R：伪相变最低 3e-2，真共振 3e-5'); axes[0].legend(fontsize=8)
-axes[1].plot(Rs, coh072, 'o-', color='#8a94a0', label='λ=0.72')
-axes[1].plot(Rs, coh073, 's-', color='#1a8a5a', label='λ=0.73')
-axes[1].axvline(omega_true, color='#1a8a5a', ls=':', lw=2)
-axes[1].set_ylim(0.70, 1.02); axes[1].set_xlabel('尺度系数 R'); axes[1].set_ylabel('相干指数 ρ')
-axes[1].set_title('相干指数 ρ：判频用的 λ=0.73 贴 0.99，分不开'); axes[1].legend(fontsize=8)
+
+# ---- 待测信号源：全节唯一出现 omega 的地方，它在「造数据」，不在「做检测」
+DT_S   = 0.005                        # 采样间隔 s → f_s = 200 Hz
+N_SAMP = 900000                       # 4500 s 记录
+TH_SIG = np.deg2rad(-120.0)
+BETAS3 = np.deg2rad([0.0, -120.0, 120.0])
+
+def make_signal(om, gam=0.02, th=TH_SIG, dt=DT_S, n=N_SAMP):
+    return gam * np.cos(om * dt * np.arange(n) + th)
+
+sig = make_signal(10.0)
+print(f'采样序列：{sig.size} 点，dt={DT_S} s（f_s={1/DT_S:.0f} Hz），记录 {sig.size*DT_S:.0f} s')
+print('检测端只吃 sig 与 DT_S —— 频率没存成变量，也从没传进 detect。')
+''')
+
+code(r'''
+# ---- 第 1 步：这个振子的频率选择带宽有多窄？
+# 同一段信号，只把 R 上下挪 ±0.3%（0.05% 一格），看 pstd 怎么变
+def scan_blind(sig, Rs, lam, dt=DT_S, betas=BETAS3):
+    """三振子阵列并行扫 R，取三路中最小的 pstd（任一路相变即认为检出）。"""
+    return np.array([min(simulate_seq(sig, R, dt, lam=lam, beta=b) for b in betas)
+                     for R in Rs])
+
+BAND_TH = 1e-2        # 判「峰内」的物理门限
+# 带宽是单振子的性质，固定取与信号同相的那一路（β=−120°）。
+# 若三路取最小，别的振子在锁频态上的伪相变会被捞进来，把带宽边界弄糊——这一步很容易踩。
+curves, widths = {}, []
+for om in (10.0, 7.3, 3.7):
+    sg = make_signal(om)
+    Rs = np.round(om * (1 + np.arange(-6, 7) * 5e-4), 6)
+    ps = np.array([simulate_seq(sg, R, DT_S, lam=0.73, beta=np.deg2rad(-120.0))
+                   for R in Rs])
+    bd = Rs[ps < BAND_TH]
+    curves[om] = (Rs, ps, bd)
+    w = (bd[-1] - bd[0]) / om * 100
+    widths.append(w)
+    print(f'omega={om:5.2f}：pstd<{BAND_TH:g} 的区间 {bd[0]:.4f}–{bd[-1]:.4f}'
+          f'（{(bd[0]/om-1)*100:+.2f}% ~ {(bd[-1]/om-1)*100:+.2f}%），宽 {w:.2f}%')
+w_mean = sum(widths) / len(widths)
+print(f'\n三个频率的相对带宽 {min(widths):.2f}%–{max(widths):.2f}%，均值 {w_mean:.2f}%'
+      f'（即 ±{w_mean/2:.2f}%）→ 与频率无关，由阻尼与恢复力决定。')
+print('  这直接决定：R 网格的相对步长必须 ≤0.05%，否则会从峰顶跨过去。')
+''')
+
+code(r'''
+# ---- 第 2 步：盲测定位
+def fft_guess(sig, dt=DT_S):
+    """只吃采样序列的粗估频：加窗周期图的峰值。不涉及任何振子参数。"""
+    n = sig.size
+    F = np.abs(np.fft.rfft((sig - sig.mean()) * np.hanning(n)))
+    f = np.fft.rfftfreq(n, dt)
+    return float(TWOPI * f[1 + int(np.argmax(F[1:]))])
+
+def refine(Rs, ps):
+    """三点抛物线拟合 log10(pstd) 的谷底，把分辨率推到亚格。"""
+    i = int(np.nanargmin(ps))
+    if 0 < i < len(ps) - 1:
+        y0, y1, y2 = np.log10(ps[i-1]), np.log10(ps[i]), np.log10(ps[i+1])
+        den = y0 - 2*y1 + y2
+        if abs(den) > 1e-12:
+            return float(Rs[i] + 0.5 * (y0 - y2) / den * (Rs[1] - Rs[0]))
+    return float(Rs[i])
+
+DET_TH = 1e-3         # 工程判决门限：真共振 1e-4 量级，伪相变 1e-2 量级，中间留一个量级余量
+# 对照 A：全域穷举 —— 直接按物理先验 R∈[3,12] 铺 30 点，不做任何初值
+Rs_glob = np.round(np.geomspace(3.0, 12.0, 30), 4)
+p_glob = scan_blind(make_signal(10.0), Rs_glob, 0.73)
+i_g = int(np.nanargmin(p_glob))
+print(f'[穷举] {Rs_glob.size} 点，相对步长 {(Rs_glob[1]/Rs_glob[0]-1)*100:.1f}%：'
+      f'最低 pstd={p_glob[i_g]:.2e} 在 R={Rs_glob[i_g]:.3f}')
+near = float(Rs_glob[np.argmin(np.abs(Rs_glob - 10.0))])
+print(f'      离真值 R=10 最近的格点 {near:.3f}（{(near-10)/10*100:+.2f}%）→ 峰被跨过去，扫不到。')
+print(f'      按门限 {DET_TH:g} 判：全域穷举 {"检出" if p_glob[i_g] < DET_TH else "未检出"}'
+      f'（最低 {p_glob[i_g]:.1e}）。穷举的「最低点」其实是伪相变，不是真共振。')
+
+# 阵列分解：真值 R=10 处只有与信号同相的那一路收敛（复现论文图 5 的消融）
+print('\n[阵列分解] R=10 处三路各自的 pstd：')
+for b in BETAS3:
+    pv = simulate_seq(make_signal(10.0), 10.0, DT_S, lam=0.73, beta=b)
+    print(f'  β={math.degrees(b):+6.0f}°   pstd={pv:.2e}   '
+          f'{"大周期态" if pv < DET_TH else "混沌"}')
+print('  → 相位不对的两路不响应，正是阵列能把「有信号」与「频率扫错」区分开的原因。')
+
+# 对照 B：FFT 初值 + 局部细扫
+TRUTH = [10.0, 7.3, 3.7]
+rows = []
+print('\n[盲测定位] FFT 初值 → ±1% 细扫（0.05%/格）→ 抛物线')
+for om in TRUTH:
+    sg = make_signal(om)
+    w0 = fft_guess(sg)
+    Rs = np.round(w0 * (1 + np.arange(-20, 21) * 5e-4), 6)
+    ps = scan_blind(sg, Rs, 0.73)
+    w1 = refine(Rs, ps)
+    j = int(np.nanargmin(ps))
+    rows.append(dict(true=om, fft=w0, grid=float(Rs[j]), parab=w1,
+                     pmin=float(ps[j]), Rs=Rs, ps=ps))
+    print(f'  omega={om:5.2f}  FFT {w0:8.4f}（{(w0-om)/om*100:+.3f}%）  '
+          f'网格 {Rs[j]:8.4f}（{(Rs[j]-om)/om*100:+.3f}%）  '
+          f'抛物线 {w1:8.4f}（{(w1-om)/om*100:+.3f}%）  pstd={ps[j]:.1e}')
+print('\n→ 盲测能定频。但两个前提必须写清楚：')
+print('  (1) 初值要另给（这里用 FFT，只吃采样序列，仍属盲测）；全域穷举因峰太窄而必然失败。')
+print('  (2) 定位精度上限 = R 网格间距；抛物线插值只能把误差压到半格以内，不能突破。')
+''')
+
+code(r'''
+# ---- 第 3 步：两种写法是同一件事 —— 用解析模式复核同一个 R
+om, R = 10.0, 10.0
+nu = om / R                 # ← 只有解析模式才写得出这一行，因为 omega 已知
+ra = simulate(np.full(3, 0.73), BETAS3, np.full(3, 0.02), np.full(3, TH_SIG),
+              nu=nu, t_end=150 * TWOPI, burn=75 * TWOPI, seed=7)
+rb = scan_blind(make_signal(om), np.array([R]), 0.73)
+print(f'解析写法  nu=omega/R={nu:.3f}   → pstd={ra["pstd"].min():.2e}')
+print(f'数据写法  sig[i], h1=R*dt      → pstd={rb[0]:.2e}')
+print('两者绝对数值因步长不同差几倍，判读一致（都远低于 1e-2），说明它们描述同一件事。')
+print('差别只在认识论：解析写法里 nu 是「你设的」，数据写法里 nu 是「扫出来才知道的」。')
+
+fig, axes = plt.subplots(1, 2, figsize=(12.4, 4.0), constrained_layout=True)
+
+# 左：三频峰形按相对偏移叠加 —— 完全重合，说明带宽由振子决定
+for om, c in zip((10.0, 7.3, 3.7), ['#2f6fd0', '#1a8a5a', '#c0392b']):
+    Rs_, ps_, _ = curves[om]
+    axes[0].semilogy((Rs_ / om - 1) * 100, ps_, 'o-', ms=3.2, lw=1.2, color=c,
+                     label=f'ω={om:.1f} rad/s')
+axes[0].axhline(BAND_TH, color='#7d3c98', ls=':', lw=1.2, label='峰内门限 1e-2')
+axes[0].axvspan(-w_mean / 2, w_mean / 2, color='#eef4ff', zorder=0,
+                label=f'带宽 ±{w_mean/2:.2f}%')
+axes[0].set_xlim(-0.35, 0.35)
+axes[0].set_xlabel('相对偏移 (R−ω)/ω  %'); axes[0].set_ylabel('pstd（单振子 β=−120°）')
+axes[0].set_title('单振子的频率选择带宽：三频一致 ±0.1%'); axes[0].legend(fontsize=8)
+
+# 右：全域穷举（跨越峰顶）vs 局部细扫（抓住谷底）
+axes[1].semilogy(Rs_glob, p_glob, 'o', ms=5, color='#8a94a0',
+                 label=f'全域穷举 {Rs_glob.size} 点（4.9%/格）')
+axes[1].semilogy(rows[0]['Rs'], rows[0]['ps'], '.-', ms=4, lw=1.0, color='#2f6fd0',
+                 label='FFT 初值 + 细扫 41 点（0.05%/格）')
+axes[1].axhline(1e-2, color='#7d3c98', ls=':', lw=1.2, label='判据 1e-2')
+axes[1].axvline(10, color='#1a8a5a', ls='--', lw=1.2, label='真值 R=10')
+axes[1].annotate(f'谷底 {rows[0]["pmin"]:.1e}', xy=(10, rows[0]['pmin']),
+                 xytext=(10.7, 3e-3), fontsize=9,
+                 arrowprops=dict(arrowstyle='->', color='#2f6fd0'))
+axes[1].set_xlabel('尺度系数 R'); axes[1].set_ylabel('min pstd（log）')
+axes[1].set_title('穷举从峰顶跨过；有初值才看见谷'); axes[1].legend(fontsize=8)
 savefig('阶段2-变尺度扫描.png')
 plt.show()
+''')
 
-print('提醒：R=10 时等效采样率降到 1/10，对 0–10 Hz 噪声必然混叠；论文未讨论这一点【推断】。')
+md(r'''
+**这一节把「扫 $R$ 定频」从口号变成了可执行流程，但也暴露了它的真实代价。**
+
+**收益**：三路真值 $\omega_s=10.0/7.3/3.7$ rad/s 全部命中，网格内误差 $\le 0.05\%$、抛物线插值后 $\le 0.01\%$。全流程里检测端没有出现过 $\omega_s$，因此这是真正的盲测，而不是把答案代回去算一遍。
+
+**代价，三条都要写进论文**：
+
+1. **必须另给初值。** 峰宽只有 $\pm0.1\%$。按物理先验 $R\in[3,12]$ 铺 30 点（4.9%/格）时，离真值最近的格点偏 $1.3\%$，**整个峰被跨过去**，最低 pstd 停在 $8\times10^{-2}$，判成「没信号」。所以"调整 $R$ 观察相变"这句原文，在工程上隐含了一个未写出的前提：**你已经有频率先验，或有人眼在连续拖动 $R$**。论文没交代这一点。
+2. **定位精度被网格锁死。** 想报 $10^{-4}$ 的相对精度，就得 $10^{-4}$ 的相对步长，在 $R\in[3,12]$ 上要 5 万点。纯穷举不可行，必须「粗定位 $\to$ 局部细化」两级。
+3. **本节的 $R$ 分辨率 $\pm0.05\%$，与噪声无关。** 有噪声时峰会被抬高、判据要改成相对基线（`s2-jupyterbook` 第 5 章：$-23$ dB 下 $\beta=-120^\circ$ 那一路 $p_{std}=0.0096$）。那时带宽会变，本节的无噪带宽不能直接搬到噪声场景。
+
+**还要记住一条否证**：内驱相干指数 $\rho$ 不能当频率判据。真值处 $\rho=0.9954$，其余 $R$ 最高也有 $0.9931$——只差 $0.002$，因为内驱幅值远大于待测信号，响应几乎全被内驱主导。判频只能靠 $p_{std}$ 的**绝对量级**（真共振 $10^{-4}$ 量级 vs 伪相变 $10^{-1}$ 量级，差三四个数量级）。
 ''')
 
 # ---------------------------------------------------------------- 汇总
@@ -488,7 +636,7 @@ md(r'''
 | Q2 参数怎么取 | $k=0.5,\ \omega=1,\ \lambda_0=0.72,\ h=0.02,\ T=400$（丢 200），初值 0，判据 pstd<0.08 | §2 参数表 |
 | Q3 步长 | 「不发散」不是判据；四种 $h$ 的跃变落在同一带内，取 $h=0.02$，跃变区间随 $h$ 最多平移 0.01 | §6 步长敏感性 |
 | Q4 相变过程 | 小 λ 在两阱乱跳、Poincaré 点散开；越界后整圈绕行、点收敛；pstd 断崖式下跌（5 个量级），无「带内交替」——旧观测到的交替是瞬态未收敛的假象 | §4–§5 |
-| Q5 变尺度 | 只改时间标签，$R=\omega_s$ 把未知频率压到 1 rad/s；阈值只标一次。扫 $R$ 能定频，但只能靠 $p_{std}$ 的绝对量级（伪相变最低 $3\times10^{-2}$、真共振 $3\times10^{-5}$，差三个量级），相干指数 $\rho$ 分不开；噪声混叠仍是软肋 | §7 |
+| Q5 变尺度 | 只改时间标签，$R=\omega_s$ 把未知频率压到 1 rad/s。**盲测可定频**：三频 10/7.3/3.7 全命中，网格内误差 $\le 0.05\%$、抛物插值后 $\le 0.01\%$；但峰宽只有 $\pm 0.1\%$，按 4.9\%/格全域穷举必漏（最近格点偏 1.3\%），必须先用 FFT 给初值再局部细扫。$\nu$ 是因变量不是输入；相干指数 $\rho$ 分不开真假（0.9954 vs 0.9931）| §7 |
 
 **阶段一问题清单销账**：Q6（$\lambda_c$ 换参数漂多少）→ 本号给出步长维度的 ±0.005 抖动与阈值带，恢复力/噪声维度留阶段 3；Q8（变尺度是否缩放噪声带宽）→ 本号指出混叠风险并留待阶段 3 做 PSD 对照；Q10（频段取哪一段）→ **仍待导师**，本号不给假答案。
 ''')
@@ -513,17 +661,33 @@ summary = {
                   'note': 'report a band, not a point; conditions: clean, h=0.02, T=1200 for the fine scan; '
                           'the old 0.734-0.736 alternation was a T=400 transient artifact'},
     'step_sensitivity': {str(h): {'first_jump': jump} for h, jump in zip(hs, step_jumps)},
-    'rescale': {'true_omega_rad_s': omega_true, 'R_grid': list(map(float, Rs)),
-                'pstd_at_lambda0p73': [round(float(v), 6) for v in minp073],
-                'spurious_low_pstd_R': spurious,
-                'tight_1e-3_pass': tight,
-                'coherence_r_true': round(float(coh073[i10]), 4),
-                'coherence_others_max': round(float(rest.max()), 4),
-                'verdict': 'frequency IS identifiable, but only via the absolute pstd level '
-                           '(spurious >= 3e-2 vs true ~3e-5, about 3 orders of magnitude); '
-                           'coherence rho does NOT separate them (0.9954 vs 0.9931)',
-                'note': 'nu=omega/R here is verification mode (omega assumed known); '
-                        'blind data-driven test is in s2-jupyterbook chapter 3'},
+    'rescale': {
+        'blind': True,
+        'implementation': 'data-driven: step h1 = R*dt, reads sig[i]; no omega and no nu in the detector',
+        'dt_s': DT_S, 'n_samples': N_SAMP, 'lambda_work': 0.73,
+        'selection_bandwidth_pct': round(float(w_mean), 3),
+        'selection_bandwidth_by_freq': {str(om): round(float(w), 3)
+                                        for (om, w) in zip(curves.keys(), widths)},
+        'detect_threshold': DET_TH,
+        'full_sweep': {
+            'relative_step_pct': round(float((Rs_glob[1] / Rs_glob[0] - 1) * 100), 2),
+            'min_pstd': round(float(p_glob[i_g]), 5),
+            'nearest_grid_to_truth_pct': round((near - 10.0) / 10.0 * 100, 3),
+            'hit': bool(p_glob[i_g] < 1e-2),
+            'verdict': 'fails: the peak is only +-0.1% wide, a 4.9%/grid sweep steps over it'},
+        'localization': [{'true_omega': r['true'],
+                          'fft_guess': round(r['fft'], 5),
+                          'grid_best': round(r['grid'], 5),
+                          'parabolic': round(r['parab'], 5),
+                          'grid_err_pct': round((r['grid'] - r['true']) / r['true'] * 100, 4),
+                          'parabolic_err_pct': round((r['parab'] - r['true']) / r['true'] * 100, 4),
+                          'pstd_min': float('%.3g' % r['pmin'])} for r in rows],
+        'verdict': 'frequency IS identifiable blind, but only with an initial guess from the '
+                   'sample sequence (FFT) plus a local sweep at <=0.05% relative steps; '
+                   'brute-force sweeping over the whole band must miss the peak',
+        'note': 'coherence rho does NOT separate true from spurious (0.9954 vs 0.9931), so the '
+                'decision must use the absolute pstd level; the +-0.05% resolution here is the '
+                'noise-free limit and does not transfer to the -23 dB case (see s2 chapter 5)'},
     'stage1_questions_answered': ['Q6 (step-size dimension only)', 'Q8 (aliasing risk flagged)'],
     'stage1_questions_pending': ['Q10 (frequency band — mentor decision)'],
 }

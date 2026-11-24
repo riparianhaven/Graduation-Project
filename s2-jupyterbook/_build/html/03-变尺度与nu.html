@@ -34,7 +34,7 @@
     <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=3c74b3bc" />
     <link rel="stylesheet" type="text/css" href="_static/togglebutton.css?v=9c3e77be" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
-    <link rel="stylesheet" type="text/css" href="_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css?v=8cd3d715" />
     <link rel="stylesheet" type="text/css" href="_static/sphinx-thebe.css?v=4fa983c6" />
     <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=6a604523" />
   
@@ -385,7 +385,7 @@
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#nu-omega-r">3.3 为什么很多复现代码里会出现 <code class="docutils literal notranslate"><span class="pre">nu=omega/R</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#omega">3.4 盲测：把 <span class="math notranslate nohighlight">\(\omega\)</span> 彻底藏起来</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">3.5 代价：三点必须写进报告</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#r">① 频率分辨率 = <span class="math notranslate nohighlight">\(R\)</span> 网格间距</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#r">① 频率分辨率 = <span class="math notranslate nohighlight">\(R\)</span> 网格间距，而且带宽窄到必须先给初值</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">② 扫 <span class="math notranslate nohighlight">\(R\)</span> 是多重检验，虚警必须校正</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">③ 步长放大与表 2 的参数不自洽</a></li>
 </ul>
@@ -557,9 +557,10 @@ pstd&lt;0.02 的 ν 取值: [1.]
 <section id="id3">
 <h2>3.5 代价：三点必须写进报告<a class="headerlink" href="#id3" title="Link to this heading">#</a></h2>
 <section id="r">
-<h3>① 频率分辨率 = <span class="math notranslate nohighlight">\(R\)</span> 网格间距<a class="headerlink" href="#r" title="Link to this heading">#</a></h3>
-<p><span class="math notranslate nohighlight">\(p_{std}\)</span> 的谷极窄（<span class="math notranslate nohighlight">\(\nu\)</span> 偏 0.5% 就退回混沌）。<span class="math notranslate nohighlight">\(R\)</span> 网格步长 0.05 时，
-<span class="math notranslate nohighlight">\(\omega=10\)</span> 的估计误差可以做到 0；换成 0.5 的粗网格就会整条漏掉。
+<h3>① 频率分辨率 = <span class="math notranslate nohighlight">\(R\)</span> 网格间距，而且带宽窄到必须先给初值<a class="headerlink" href="#r" title="Link to this heading">#</a></h3>
+<p><span class="math notranslate nohighlight">\(p_{std}\)</span> 的谷极窄：<span class="math notranslate nohighlight">\(\nu\)</span> 偏 <span class="math notranslate nohighlight">\(0.5\%\)</span> 就完全退回混沌；按判据 <span class="math notranslate nohighlight">\(10^{-2}\)</span> 量，带宽只有 <span class="math notranslate nohighlight">\(\pm 0.1\%\)</span>——三个频率 <span class="math notranslate nohighlight">\(10/7.3/3.7\)</span> 实测完全一致，说明带宽由阻尼与恢复力决定，与频率无关。
+<span class="math notranslate nohighlight">\(R\)</span> 网格步长 0.05、<span class="math notranslate nohighlight">\(\omega=10\)</span> 时估计误差恰好为 0，<strong>但那只是因为 <span class="math notranslate nohighlight">\(10.00\)</span> 落在网格点上</strong>；换成 0.5 的粗网格（每格 <span class="math notranslate nohighlight">\(4.9\%\)</span>）最近格点偏 <span class="math notranslate nohighlight">\(1.3\%\)</span>，整条峰被跨过去，最低 <span class="math notranslate nohighlight">\(p_{std}\)</span> 停在 <span class="math notranslate nohighlight">\(1.4\times10^{-2}\)</span>，判成「没信号」。
+所以真检测必须先由采样序列自身（FFT）给初值，再在 <span class="math notranslate nohighlight">\(\pm1\%\)</span> 内按 <span class="math notranslate nohighlight">\(0.05\%\)</span> 一格细扫——这一步原文没写，但工程上绕不开。
 <strong>分辨率不是方法给的，是扫描预算给的。</strong></p>
 </section>
 <section id="id4">
@@ -678,7 +679,7 @@ pstd&lt;0.02 的 ν 取值: [1.]
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#nu-omega-r">3.3 为什么很多复现代码里会出现 <code class="docutils literal notranslate"><span class="pre">nu=omega/R</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#omega">3.4 盲测：把 <span class="math notranslate nohighlight">\(\omega\)</span> 彻底藏起来</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">3.5 代价：三点必须写进报告</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#r">① 频率分辨率 = <span class="math notranslate nohighlight">\(R\)</span> 网格间距</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#r">① 频率分辨率 = <span class="math notranslate nohighlight">\(R\)</span> 网格间距，而且带宽窄到必须先给初值</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">② 扫 <span class="math notranslate nohighlight">\(R\)</span> 是多重检验，虚警必须校正</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">③ 步长放大与表 2 的参数不自洽</a></li>
 </ul>

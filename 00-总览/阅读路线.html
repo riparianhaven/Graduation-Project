@@ -38,7 +38,7 @@ strong{font-weight:650}
 </head><body>
 <div class="bar"><a href="../index.html">← 返回资料索引</a>
 <a href="阅读路线.md">查看 Markdown 源码</a><span class="fn">00-总览/阅读路线.md</span></div>
-<div class="staticnote">这是 <b>静态排版副本</b>，生成于 2026-11-25 21:41。直接双击 <code>index.html</code> 时看到的就是它；若 Markdown 刚改过，请在工作区运行 <code>py build_static.py</code> 重新生成，或用 <code>start_index.bat</code> 启动本地服务查看实时渲染版。页内公式由 MathJax 渲染，需要联网。</div><main><h1>阅读路线：从文献堆到可运行系统</h1>
+<div class="staticnote">这是 <b>静态排版副本</b>，生成于 2026-11-26 00:37。直接双击 <code>index.html</code> 时看到的就是它；若 Markdown 刚改过，请在工作区运行 <code>py build_static.py</code> 重新生成，或用 <code>start_index.bat</code> 启动本地服务查看实时渲染版。页内公式由 MathJax 渲染，需要联网。</div><main><h1>阅读路线：从文献堆到可运行系统</h1>
 <ul><li>课题：基于混沌振子的极低频磁场微弱信号检测｜学期：第二学期第 1–16 周</li><li>配套文件：<code>参考资料-极低频磁场混沌振子微弱信号检测.md</code>（30 条清单，编号沿用）｜<a href="../文献/00-下载索引.html">00-下载索引.md</a>（全文状态）｜<a href="../文献/参考文献.bib">参考文献.bib</a>（题录）</li><li>整理日期：2026-11-13</li><li>状态图例：✅ 已有本地 PDF｜🌐 开放获取、需浏览器手动补｜🔒 需校园网 / 文献传递｜📚 纸本图书｜❌ 下载链接失效、无法打开</li><li>PDF 链接：文中所有 PDF 标记与精读卡里的文件名都是可点链接，指向本地 <code>文献\</code> 目录，点开直接读全文；在排版版索引或双击打开的静态副本下同样有效。标 🔒 / 📚 / ❌ 的条目没有本地全文，不给链接。</li><li>文档地图（2026-11-23 主题目录重组后）：全局说明在 <code>00-总览/</code>（本文件、结构说明、主清单、技术路线方框图、环境说明）；各阶段成果在 <code>01-阶段一/</code> <code>02-阶段二/</code> <code>03-阶段三/</code> <code>06-阶段四/</code> <code>07-阶段五/</code>；逐篇论文精读在 <code>04-论文精读/</code>；方法提案与评估在 <code>05-方法创新/</code>。可运行实验在 <code>learn/</code>，图纸与 JSON 在 <code>复现输出/</code>。完整目录树见 <a href="项目结构说明.html">项目结构说明</a>。</li></ul>
 <hr>
 <h2>零、三条总原则</h2>
@@ -168,5 +168,7 @@ strong{font-weight:650}
 <p>五个阶段各自回答局部问题，但它们默认"接收端已经有一段准备好的序列"。<strong><a href="../08-端到端链路/端到端-发射接收检测.html">端到端链路：一端发射、一端接收并识别目标</a></strong> 把这段补上：发射端发 $A\cos(\omega t+\varphi)$，经 $1/r^3$ 衰减与噪声污染，接收端只拿采样序列与 $\Delta t$，靠 FFT 粗估 + 变尺度细扫自己找到 $\omega$（误差 −0.010%），三相位阵列判「有/无」，再用 $\lambda^*$ 差分估幅（−7.4 dB 下 0.3%）。</p>
 <p>两个值得记住的数字：<strong>单振子被相位盲区封顶在 $P_d\approx0.46$（与噪声无关）</strong>，三相位阵列才能到 −7.4 dB 的 $P_d\ge0.9$；这也解释了阶段 4 的 −11 dB 为什么必须注明"$\theta=0$ 同相条件"。跑法：<code>.venv\Scripts\python.exe tools\link_sim.py</code>（约 95 s）。</p>
 <h3>要动手联调时看这份</h3>
-<p><strong><a href="../08-端到端链路/端到端-双端UI联调说明.html">端到端双端 UI：发送端与接收端</a></strong> 把上面那条链路做成两个能点的窗口：<code>tools/tx_app.py</code> 发（可调 SNR、时长，信号与噪声各自开关），<code>tools/rx_app.py</code> 收（默认<strong>已知 R</strong>，不扫频，1.4 s 判一帧；也可切到跟随发送端或盲测扫 R），收到就画波形图与阵列图。</p>
-<p>两个必须记住的实测约束：<strong>一帧短于约 48 个载波周期判据就抖</strong>（16 周期时跨种子离散从 1e-3 到 0.4）；<strong>单振子被相位盲区封顶在约 26% 覆盖率</strong>，这是三相位阵列存在的理由。协议是 UDP 分帧（头包 + 1024 样本/包 + 尾包），缺包会补零并告警。</p></main></body></html>
+<p><strong><a href="../08-端到端链路/端到端-双端UI联调说明.html">端到端双端 UI：发送端与接收端</a></strong> 把上面那条链路做成两个能点的窗口：<code>tools/tx_app.py</code> 发（可调 SNR、时长，信号与噪声各自开关），<code>tools/rx_app.py</code> 收（默认<strong>已知 R</strong>，不扫频，0.15 s 判一帧；也可切到跟随发送端或盲测扫 R），收到就画波形图与阵列图。</p>
+<p>两个必须记住的实测约束：<strong>一帧短于约 48 个载波周期判据就抖</strong>（16 周期时跨种子离散从 1e-3 到 0.4）；<strong>单振子被相位盲区封顶在约 26% 覆盖率</strong>，这是三相位阵列存在的理由。协议是 UDP 分帧（头包 + 1024 样本/包 + 尾包），缺包会补零并告警。</p>
+<h3>想知道那 0.15 s 是怎么来的</h3>
+<p><strong><a href="性能优化与基准.html">性能优化与基准</a></strong> 记录了一次"只改怎么算、不改算什么"的重构：内核的瓶颈根本不是浮点，而是<strong>每步 60–80 次 numpy 调用</strong>（3 元数组上一次调用约 0.4 μs，浮动部分只占几纳秒）。优化后默认判一帧 1.5 s → <strong>0.15 s</strong>（10×），盲测扫 R 3.6 s → 0.92 s（3.9×），而 11 个算例的 Poincaré 点 sha256 与优化前<strong>逐位相同</strong>。里面也写了三条"看着能省其实不能省"的路：<code>x*x*x</code> 替 <code>x**3</code>（26% 位模式不同）、多进程跑扫频（spawn 成本比省下的还多）、缩短瞬态（直接改论文口径）。复现：<code>py tools/bench_speed.py</code>。</p></main></body></html>

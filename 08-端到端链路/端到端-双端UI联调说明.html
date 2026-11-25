@@ -38,9 +38,9 @@ strong{font-weight:650}
 </head><body>
 <div class="bar"><a href="../index.html">← 返回资料索引</a>
 <a href="端到端-双端UI联调说明.md">查看 Markdown 源码</a><span class="fn">08-端到端链路/端到端-双端UI联调说明.md</span></div>
-<div class="staticnote">这是 <b>静态排版副本</b>，生成于 2026-11-25 21:41。直接双击 <code>index.html</code> 时看到的就是它；若 Markdown 刚改过，请在工作区运行 <code>py build_static.py</code> 重新生成，或用 <code>start_index.bat</code> 启动本地服务查看实时渲染版。页内公式由 MathJax 渲染，需要联网。</div><main><h1>端到端双端 UI：发送端与接收端</h1>
+<div class="staticnote">这是 <b>静态排版副本</b>，生成于 2026-11-26 00:37。直接双击 <code>index.html</code> 时看到的就是它；若 Markdown 刚改过，请在工作区运行 <code>py build_static.py</code> 重新生成，或用 <code>start_index.bat</code> 启动本地服务查看实时渲染版。页内公式由 MathJax 渲染，需要联网。</div><main><h1>端到端双端 UI：发送端与接收端</h1>
 <p>前面几份文档都是"离线跑一遍出图"，<strong>这一份是实时联调</strong>：一个窗口发、另一个窗口收，点按钮就能看到判决。</p>
-<ul><li>发送端 <code>tools/tx_app.py</code>：模拟目标发出的极低频磁场，可独立开关<strong>信号</strong>与<strong>噪声</strong>，按 SNR 反算幅值。</li><li>接收端 <code>tools/rx_app.py</code>：监听、收帧、判「有/无目标」，显示<strong>波形图</strong>与<strong>阵列图</strong>。</li><li>两者共用 <code>tools/link_proto.py</code>（协议 + 算法），数值内核仍是 <code>kernel_src.simulate_seq</code>，<strong>没有第二套积分器</strong>。</li></ul>
+<ul><li>发送端 <code>tools/tx_app.py</code>：模拟目标发出的极低频磁场，<strong>启动后一直发、不自动停</strong>；发送过程中可随时「附加目标信号」，目标出现多久由参数决定。</li><li>接收端 <code>tools/rx_app.py</code>：持续监听、收帧、<strong>一帧一判</strong>（R 已知，不扫频），显示波形 / 频谱 / 阵列 $p_{std}$ / 相图 / 判决时序。</li><li>两者共用 <code>tools/link_proto.py</code>（协议 + 算法），线上样本为 <strong>int16</strong>（对齐 ESP32 ADC 计数），数值内核仍是 <code>kernel_src.simulate_seq</code>，<strong>没有第二套积分器</strong>。</li><li>判决工作点 $\lambda_0=0.73$（内核默认 0.72，界面按联调要求抬到 0.73，理由见第三节）。</li></ul>
 <p><img src="../复现输出/界面-发送端.png" alt="发送端" style="display:block;max-width:100%;height:auto;margin:10px 0"></p>
 <p><img src="../复现输出/界面-接收端.png" alt="接收端" style="display:block;max-width:100%;height:auto;margin:10px 0"></p>
 <hr>
@@ -70,18 +70,20 @@ strong{font-weight:650}
 <h2>二、发送端参数</h2>
 <table><thead><tr><th>参数</th><th>默认</th><th>作用与约束</th></tr></thead><tbody>
 <tr><td>载波角频率 ω</td><td>10.0 rad/s</td><td>即 $f_0=1.5915$ Hz。接收端的 R 必须与它一致（或由它扫出来）</td></tr>
-<tr><td>信噪比 SNR</td><td>−11.0 dB</td><td>滑块 −30…+5 dB。<strong>幅值由它反算</strong>：$A=\sigma\sqrt{2\cdot10^{\text{SNR}/10}}$</td></tr>
+<tr><td>信噪比 SNR</td><td>−7.4 dB</td><td>滑块 −30…+5 dB。<strong>幅值由它反算</strong>：$A=\sigma\sqrt{2\cdot10^{\text{SNR}/10}}$</td></tr>
 <tr><td>基线噪声 σ</td><td>0.05</td><td>归一化策动力单位。噪声每样本标准差 $=\sigma\sqrt{\omega/f_s}$（力口径）</td></tr>
 <tr><td>采样率 $f_s$</td><td>500 Hz</td><td>与接收端共享；收端默认"跟随发送端 fs"</td></tr>
-<tr><td>发送时长</td><td>94.2 s</td><td>一帧的物理时长＝47100 点 ≈ 150 个载波周期。<strong>低于 48 周期判据会抖</strong>（见第七节）</td></tr>
+<tr><td>帧长</td><td>94.2 s</td><td>一帧的物理时长＝47100 点 ≈ 150 个载波周期。<strong>低于 48 周期判据会抖</strong>（见第七节）</td></tr>
 <tr><td>噪声类型</td><td>白噪</td><td>另可选 $1/f$ 色噪（去 DC 的一阶积分噪声）</td></tr>
-<tr><td>发送信号</td><td>开</td><td><strong>独立开关</strong>。关掉后只发噪声 → 用来做"无目标"对照</td></tr>
+<tr><td>发送信号（常开）</td><td>开</td><td>勾上 = 每一帧都有目标，不自动停。取消勾选后只有「附加」窗口内才有目标</td></tr>
 <tr><td>发送噪声</td><td>开</td><td>独立开关。关掉则是干净信号（$p_{std}$ 会低到 $10^{-3}$，无悬念）</td></tr>
-<tr><td>连发帧数</td><td>1</td><td>一次发 N 帧，接收端逐帧判决并累计 Pd/Pfa</td></tr>
+<tr><td>附加时长</td><td>180 s</td><td>「附加目标」按钮开窗多久（秒）。按 $f_0$ 折算显示成"≈N 帧"</td></tr>
 <tr><td>随机种子</td><td>0</td><td>0 = 每次随机初相；填定值可复现同一帧</td></tr>
-<tr><td>发送节奏</td><td>尽快</td><td>尽快 = 包间 2 ms；实时 = 每包按 $\Delta t$ 停，可填倍率（如 ×10 就是 10 倍速）</td></tr>
+<tr><td>发送节奏</td><td>实时 ×10</td><td>实时 = 按 $\Delta t$ 限速（×10 即 10 倍速，UART 回放口径）；尽快 = 包间 2 ms</td></tr>
 <tr><td>目标地址 / 端口</td><td>127.0.0.1 : 50500</td><td>与接收端一致</td></tr>
 </tbody></table>
+<p><strong>连续发送 + 手动附加目标</strong>是这一版的核心改动。原来是"填帧数、发完就停"，现在启动后一直发，目标什么时候出现由你按按钮决定：</p>
+<ul><li>勾着「发送信号（常开）」→ 每帧都带目标（标定、演示用）。</li><li>取消勾选 → 常态是纯背景噪声；<strong>发送中点「附加目标」</strong>，从<strong>下一帧起点</strong>开始叠 $A\cos(\omega(t-t_{on})+\theta_0)$，持续「附加时长」秒后自动关断，界面状态行显示"目标窗至 t=xxx s"。</li><li>「撤销目标」= 立刻把窗口截到当前时刻，已发出的样本不受影响（改不了历史）。</li><li>相位跨帧连续：窗口模式下 $\varphi=\omega(t_{start}-t_{on})+\theta_0$，同一个目标不会因为跨帧而跳相——真实目标不会在帧边界换相位。</li><li>窗口不对齐帧，所以<strong>末尾那一帧天然是"部分覆盖"</strong>（$0&lt;\text{cov}&lt;1$），统计上单列，不算进 Pd 也不算进 Pfa。</li></ul>
 <p><strong>为什么 SNR 与幅值是绑定的</strong>：接收端判的是"驱动幅值有没有把振子推过阈值"，物理量是幅值 $A$；而工程上人们更习惯说信噪比。所以界面上让你调 SNR，程序内部换成 $A$ 再发给接收端——头包里两个都带，方便对表。</p>
 <p><strong>信号与噪声两个开关要分开</strong>，是因为它们回答不同的问题：</p>
 <ul><li>只开信号（无噪声）→ 检查判据的<strong>物理正确性</strong>（$p_{std}$ 该到 $10^{-3}$）；</li><li>只开噪声（无信号）→ 测<strong>虚警率</strong>（$p_{std}$ 该停在 0.4 以上，判「无」）；</li><li>都开 → 真实工况。</li></ul>
@@ -92,7 +94,7 @@ strong{font-weight:650}
 <tr><td>采样间隔 $\Delta t$</td><td>0.002 s</td><td>勾「跟随发送端的 fs」时自动取头包里的 $1/f_s$（<strong>推荐</strong>）</td></tr>
 <tr><td>R 模式</td><td><strong>已知 R</strong></td><td>三选一，见下</td></tr>
 <tr><td>已知 R</td><td>10.0 rad/s</td><td>已知模式用。必须与发送端 ω 一致，<strong>偏 5% 就判不出来</strong></td></tr>
-<tr><td>工作点 $\lambda_0$</td><td>0.72</td><td>与阶段 2–5 同一个工作点（比 $\lambda_c\approx0.7335$ 低 0.0135）</td></tr>
+<tr><td>工作点 $\lambda_0$</td><td>0.73</td><td>联调要求抬到 0.73（内核默认 0.72，比 $\lambda_c\approx0.7335$ 只低 0.0035）。实测分离度不变：目标帧 $1.4\text{e-}3\sim2.1\text{e-}3$，背景帧最小 $0.23$</td></tr>
 <tr><td>判态门限</td><td>0.08</td><td>$p_{std}$ 低于它算"该路共振"。混沌态约 0.4，周期态约 $10^{-3}$，中间没有含糊地带</td></tr>
 <tr><td>阵列</td><td>三相位 ±120°</td><td>三路或单路。三相位是为了补相位盲区（见第七节）</td></tr>
 <tr><td>估计幅值/相位</td><td>勾</td><td>$\lambda^*$ 差分估计 $\hat\gamma$、$\hat\theta$，每帧多约 2.5 s</td></tr>
@@ -101,52 +103,104 @@ strong{font-weight:650}
 <h3>三种 R 模式</h3>
 <p>用户明确说「可以已知 R，不用扫描 R」，所以默认走<strong>已知 R</strong>，扫 R 保留为论文的盲测流程：</p>
 <table><thead><tr><th>模式</th><th>用时（47100 点）</th><th>适用场景</th></tr></thead><tbody>
-<tr><td><strong>已知 R</strong>（默认）</td><td><strong>约 1.4 s</strong>（含估幅约 4 s）</td><td>联调、演示、已知目标频率的场合</td></tr>
+<tr><td><strong>已知 R</strong>（默认）</td><td><strong>约 0.15 s</strong>（含估幅约 2.8 s）</td><td>联调、演示、已知目标频率的场合</td></tr>
 <tr><td>跟随发送端</td><td>同上</td><td>联调最省事：不用两头各填一次，直接用头包里的 ω</td></tr>
-<tr><td>自动扫 R</td><td>约 3.5 s</td><td>论文流程：只拿序列与 $\Delta t$，FFT 粗估后在 ±1% 内两级细扫</td></tr>
+<tr><td>自动扫 R</td><td>约 0.9 s</td><td>论文流程：只拿序列与 $\Delta t$，FFT 粗估后在 ±1% 内两级细扫</td></tr>
 </tbody></table>
 <p>已知 R 时仍然<strong>不是"作弊"</strong>：检测判决完全由 $p_{std}$ 与门限决定，R 只决定"在哪个时间尺度上看这个振子"。R 偏 5% 时驱动频率失谐到 1.05，共振塌掉、$p_{std}$ 从 $2.3\times10^{-3}$ 回到 $0.43$——这说明判决对 R 是敏感的，而<strong>检测这件事本身仍然是靠动力学，不是靠对表</strong>。</p>
 <hr>
 <h2>四、数据交互</h2>
+<h3>4.0 一帧里装的是什么：信号 + 噪声，<strong>没有策动力</strong></h3>
+<p>这条口径必须说清楚，否则看相图和频谱都会误读。整条链路里只有两种物理量：</p>
+<pre><code>发射序列  tx(t) = A·cos(ω t + φ)·gate(t)                     ← 目标磁场（归一化单位）
+接收序列  rx(t) = tx(t)·10^(−α/20) + σ√h₁·n(t),  n~N(0,1)     ← 仅此两项，h₁=ω/fs</code></pre>
+<p><strong>策动力 $\lambda_0\cos t$ 不在任何一条线上</strong>：它不发射、不传输、也不加进 <code>rx</code>。它是<strong>接收端自己的振子内部驱动力</strong>，只在判决那一刻出现在积分方程里：</p>
+<p>$$\ddot x+\delta\dot x-x+x^3=\lambda_0\cos\tau+\underbrace{s(\tau)}_{\text{来自 }rx}$$</p>
+<p>对应代码里，$\lambda_0$ 只作为 <code>pstd_array(..., lam=lam)</code> / <code>analyze(..., lam=lam)</code> 的参数传给内核（<code>simulate_seq</code> 里的 <code>f = lam*cos(tau+beta) + s</code>），而 <code>make_frame</code> 里的 <code>tx/rx</code> 完全不含它。换句话说：</p>
+<ul><li>发送端<strong>不知道</strong> $\lambda_0$ 是多少，也不需要知道——它只发磁场。</li><li>接收端把 <code>rx</code> 当成"外加激励 $s(\tau)$"塞进振子右边，振子自己再叠 $\lambda_0\cos\tau$。信号的作用是把<strong>合成幅值</strong>从 $\lambda_0$ 抬到 $\sqrt{\lambda_0^2+A^2+2\lambda_0A\cos\theta}$，越过 $\lambda_c$ 就翻到周期态。</li><li>所以"有信号"判据是<strong>振子轨迹变没变</strong>，不是"序列里有没有某个成分"。</li></ul>
+<p>数值核对（$\omega=10$、$f_s=500$、$A=0.02$、$\sigma=0.05$、30 s 帧）：</p>
+<table><thead><tr><th>检查项</th><th>实测</th><th>理论</th></tr></thead><tbody>
+<tr><td>背景帧 <code>tx</code></td><td>恒等于 0</td><td>关信号就该是 0</td></tr>
+<tr><td>背景帧 <code>rx</code> 标准差</td><td>0.00704</td><td>$\sigma\sqrt{h_1}=0.05\times0.1414=0.00707$</td></tr>
+<tr><td>目标帧 <code>tx</code> 标准差</td><td>0.01414</td><td>$A/\sqrt2=0.01414$</td></tr>
+<tr><td>目标帧 <code>rx − tx</code> 标准差</td><td>0.00708</td><td>同上噪声项</td></tr>
+<tr><td><code>tx</code> 对 $\cos\omega t$ 的相干投影</td><td>0.02000</td><td>$A=0.02$</td></tr>
+</tbody></table>
+<p>界面上容易被误读的两处，已在图里写死标注：<strong>(a) 接收波形：信号+噪声</strong>——那里画的就是 <code>rx</code>；<strong>(d) 相图的 x 轴标题</strong>写明"内驱 lam·cos t 不进序列"——闭合轨迹是振子转起来了，不是信号里多了个正弦。</p>
 <h3>4.1 为什么用 UDP 而不是共享文件</h3>
 <p>"一端发、一端收"要能跨进程、跨机器，还要能一帧一帧流式判。UDP 的好处是<strong>不建立连接</strong>：接收端先开就先听着，发送端后开也不会报错；发送端重启也不影响接收端。代价是可能丢包——这一点在 4.3 里专门处理。</p>
 <h3>4.2 包结构</h3>
-<p>统一 4 字节魔数 <code>WBDX</code> + 1 字节类型，三类包：</p>
+<p>统一 4 字节魔数 <code>WBDX</code> + 1 字节类型（协议版本 <code>v=2</code>），三类包：</p>
 <pre><code>H 头包   WBDX H &lt;UTF-8 JSON&gt;
-         字段：v, frame, n, fs, w_hint, amp, sigma, alpha,
-               snr_db, has_sig, has_noise, duration, phase, ts
-D 数据包 WBDX D &lt;4s c I I I f&gt; &lt;float32[1024]&gt;
-         (magic, 'D', frame, seq, nseq, fs) + 1024 个样本 = 4117 字节
+         字段：v, frame, n, fs, w_hint, amp, sigma, alpha, snr_db, has_sig,
+               has_noise, duration, phase, ts, scale,
+               t0, sig_t0, sig_dur, sig_epoch, cov
+D 数据包 WBDX D &lt;4s c I I I f&gt; &lt;int16[1024]&gt;
+         (magic, 'D', frame, seq, nseq, fs) + 1024 个 int16 = 21 + 2048 = 2069 字节
 T 尾包   WBDX T &lt;UTF-8 JSON&gt;   {frame, sent, nseq}</code></pre>
-<p>一帧 = 1 个 H + $\lceil n/1024\rceil$ 个 D + 1 个 T。默认 $n=47100$ → 47 个数据包，整帧约 190 KB。</p>
-<p>数据包选 1024 样本（4117 字节）是为了留足余量：单包不超过 MTU，跨机不会 IP 分片，丢一个包也只丢 1024 点。</p>
+<p><strong>样本是 int16，不是 float32</strong>：满量程对应 $\pm1.0$，<code>scale = 32768</code>，1 LSB $=3.05\times10^{-5}$。换算是 <code>q = clip(round(x·scale), −32768, 32767)</code>（饱和，不环绕），收端 <code>x = q/scale</code>。这么改有两个理由：一是 ESP32 的 ADC 本来就是整数计数，仿真口径对齐固件可以直接搬；二是每包从 4117 字节降到 <strong>2069 字节</strong>，UART 回放的带宽预算减半（换算见 <code>07-阶段五/README-ESP32-固件实现.md</code>）。</p>
+<p>一帧 = 1 个 H + $\lceil n/1024\rceil$ 个 D + 1 个 T。默认 $n=47100$ → <strong>46 个数据包</strong>，整帧约 <strong>95 KB</strong>（float32 时代是 47 包 / 190 KB）。</p>
+<p>数据包选 1024 样本（2069 字节）是为了留足余量：单包不超过 MTU，跨机不会 IP 分片，丢一个包也只丢 1024 点。</p>
+<p><strong>头包里与连续发送相关的四个时间字段</strong>：</p>
+<table><thead><tr><th>字段</th><th>含义</th></tr></thead><tbody>
+<tr><td><code>t0</code></td><td>本帧第一个样本的<strong>会话绝对时间</strong>（s），帧号 0 起从 0 累加</td></tr>
+<tr><td><code>sig_t0</code> / <code>sig_dur</code></td><td>目标窗口的起止（绝对时间）。没有窗口时为 <code>null</code></td></tr>
+<tr><td><code>cov</code></td><td>本帧覆盖率 $[0,1]$，发送端自报；收端<strong>会自己按 <code>t0/sig_t0/sig_dur</code> 重算并核对</strong>，不一致就打 warn</td></tr>
+<tr><td><code>sig_epoch</code></td><td>窗口序号，用来区分"同一个窗"和"撤了又重新附加"</td></tr>
+</tbody></table>
 <h3>4.3 接收端怎么装配</h3>
-<pre><code>收到 H → 新建 FrameBuf(n)，按 seq 把 D 包写进定长数组
+<pre><code>收到 H → 新建 FrameBuf(n)，按 seq 把 D 包写进定长 int16 数组
+        │  换算比例取**本帧头包**里的 scale（不是全局常量，便于换量程）
         ├─ 重复 seq 直接丢弃（回环/重传可能重复）
         ├─ 收够 n 点 或 收到 T → 提交给计算线程
+        ├─ 又来一个新 H → 旧帧没凑齐也顶掉，报「帧号跳变 / 残帧丢弃」
+        ├─ 尾包 frame 与头包不一致 → 报 warn 并丢弃
         └─ 3 s 内没凑齐 → 丢弃残帧并报「缺 x 点」</code></pre>
 <p>缺包时<strong>补零后仍然参与计算</strong>并打警告——因为补零相当于"那段时间信号是 0"，会把 $p_{std}$ 抬高（偏保守，不会误判成"有"）。日志里会写明缺了多少点，便于判断这次判决可不可信。</p>
+<p>连续发送下还有个新问题：<strong>计算跟不上发送</strong>。已知 R 一帧约 0.15 s（含估幅 2.8 s），而实时 ×10 时一帧是 9.4 s——勉强跟得上；但"尽快"模式下一帧 0.1 s，队列会爆。所以接收端用一个<strong>容量 1 的帧队列</strong>：新帧进队时把还没算的旧帧丢掉并计数，界面上显示"丢弃 N 帧"。这不是 bug，是明确取舍——永远判最新那一帧，不排队等历史。</p>
 <h3>4.4 时序</h3>
-<pre><code>发送端                                 接收端
-  │  H(n, fs, ω, A, SNR, 开关)  ────▶   新建帧缓冲
-  │  D(seq=0..46, 1024 点/包)   ────▶   按 seq 填数组
-  │  T(sent=n)                  ────▶   提交 → 计算线程（FFT/扫 R/阵列）
-  │                                      ▼
-  │                                   判决 + 画图（100 ms 内刷新界面）</code></pre>
-<p>发送端"尽快"模式下包间停 2 ms，一帧约 0.1 s 发完，但<strong>接收端的计算要 1.4–4 s</strong>。所以连发多帧时会在接收端排队——这是正常的，队列积压时界面会连续刷新好帧。</p>
+<pre><code>发送端（一直发）                          接收端
+  │  H(frame, n, fs, ω, A, SNR, t0, sig_t0/sig_dur, cov)  ──▶  新建帧缓冲
+  │  D(seq=0..46, 1024 点 int16)                          ──▶  按 seq 填数组
+  │  T(sent=n)                                            ──▶  提交 → 计算线程
+  │  H(frame+1) ────────────────────────────────────────▶  下一帧，t0 自动 +n/fs
+  │                                                          ▼
+  │                                                    判决 + 画图（一次约 0.15 s）</code></pre>
+<p>时间轴完全由 <code>t0</code> 锚定：帧号从 0 单调递增、没有"总帧数"，<code>t0</code> 每帧前进 $n/f_s$。接收端靠 <code>t0</code> 与 <code>sig_t0/sig_dur</code> <strong>独立</strong>算出本帧覆盖率，两个端算的是同一个函数 <code>window_coverage()</code>（有专门测试钉住），所以不会出现"发送端说是目标帧、接收端当成背景帧"的口径错位。</p>
+<p>发送端的界面刷新被<strong>节流到 0.35 s 一次</strong>——不然尽快模式下每秒几百帧全塞进 Tk 事件队列，<code>update()</code> 会被卡到几十秒。收端同理，只画最新一帧。</p>
 <hr>
 <h2>五、联调步骤</h2>
-<ol><li><strong>先开接收端</strong>，点「开始监听」。状态栏显示"监听中…"，日志出现"已绑定 0.0.0.0:50500，等待发送端…"。</li><li><strong>检查两端参数</strong>：接收端 R 与发送端 ω 是否一致（都是 10.0）；接收端勾了"跟随发送端的 fs"就不会错。</li><li><strong>开发送端</strong>，点「预览波形」确认 $f_0$、$A$、周期数都正常（周期数低于 48 会标黄/标红）。</li><li><strong>点「开始发送」</strong>。接收端日志会出现"← 来自 127.0.0.1:xxxxx 帧 0，n=47100，fs=500.0，SNR=-11.0，信号=开 噪声=开"，然后 1–4 s 后出判决。</li><li><strong>做对照</strong>：把发送端的「发送信号」取消勾选，再发一帧 → 接收端应判「未检测到目标」，$p_{std}$ 回到 0.4 以上。</li></ol>
+<ol><li><strong>先开接收端</strong>，点「开始监听」。状态栏显示"监听中…"，日志出现"已绑定 0.0.0.0:50500，等待发送端…"。</li><li><strong>检查两端参数</strong>：接收端 R 与发送端 ω 是否一致（都是 10.0）；接收端勾了"跟随发送端的 fs"就不会错。</li><li><strong>开发送端</strong>，点「预览波形」确认 $f_0$、$A$、周期数都正常（周期数低于 48 会标黄/标红）。</li><li><strong>取消勾选「发送信号（常开）」</strong>（这样常态是纯背景），把「附加时长」设成 180 s，点「开始持续发送」——发送端<strong>不会停</strong>，一帧接一帧地发。</li><li><strong>看接收端 3~5 帧之后</strong>：应该稳定判「无」（背景）。日志里每行都有 <code>cov=0.00</code> 与三路 $p_{std}$。</li><li><strong>点发送端的「附加目标」</strong>。从<strong>下一帧起点</strong>开始叠目标，接收端下一帧就应判「有」，日志里 <code>cov</code> 变成 1.00；末帧会是 <code>cov=0.xx</code>——那就是"部分覆盖"，界面上单独标色、不进 Pd/Pfa。</li><li><strong>做对照</strong>：点「撤销目标」→ 接收端回到「无」。整条时序在接收端的 (e) 时序条上一眼能看出来：绿=判有、红=虚警、灰=正确判无、橙=部分覆盖、黄=漏检。</li></ol>
 <p>判断联调是否正常，看三个数：<strong>有目标时 min pstd 应在 $10^{-3}$ 量级、无目标时在 0.4 以上、门限 0.08 落在两者中间</strong>。如果两端都在 0.4 以上，先查 R 是否填错；如果都在 $10^{-3}$，先查是不是关掉了噪声。</p>
 <hr>
 <h2>六、实测结果</h2>
-<p>条件：$\omega=10$、$f_s=500$、$\Delta t=0.002$、一帧 94.2 s（47100 点，150 周期）、$\lambda_0=0.72$、$\sigma=0.05$、$A=0.02$（−11 dB）。</p>
-<table><thead><tr><th>场景</th><th>三路 $p_{std}$</th><th>判决</th><th>用时</th></tr></thead><tbody>
-<tr><td>有目标，$\theta=0$，已知 R=10</td><td><strong>2.83e−03</strong> / 5.02e−01 / 6.20e−01</td><td>✅ 有</td><td>4.1 s（含估幅）</td></tr>
-<tr><td>同一条帧，R 填成 10.5</td><td>4.26e−01 / 5.11e−01 / 5.88e−01</td><td>❌ 无</td><td>1.4 s</td></tr>
-<tr><td>纯噪声（信号关闭）</td><td>4.45e−01 / 5.47e−01 / 6.64e−01</td><td>❌ 无</td><td>0.5 s</td></tr>
+<p>条件：$\omega=10$、$f_s=500$、$\Delta t=0.002$、一帧 94.2 s（47100 点，150 周期）、<strong>$\lambda_0=0.73$</strong>、$\sigma=0.05$、$A=0.02$（−7.4 dB）、已知 R=10、门限 0.08。</p>
+<table><thead><tr><th>场景</th><th>三路 $p_{std}$（β=0 / −120° / +120°）</th><th>判决</th><th>用时（<code>analyze(known)</code>）</th></tr></thead><tbody>
+<tr><td>背景帧（信号窗外）</td><td>3.78e−01 / 4.84e−01 / 5.44e−01</td><td>❌ 无</td><td>0.15 s</td></tr>
+<tr><td>目标帧，$\theta=0$</td><td><strong>2.32e−03</strong> / 5.19e−01 / 5.44e−01</td><td>✅ 有</td><td>0.15 s</td></tr>
+<tr><td>目标帧，$\theta=+90°$</td><td>4.03e−01 / 5.16e−01 / <strong>2.28e−03</strong></td><td>✅ 有</td><td>0.15 s</td></tr>
+<tr><td>部分覆盖 $\text{cov}=0.58$</td><td>4.30e−01 / 5.08e−01 / <strong>2.20e−03</strong></td><td>✅ 有（单列）</td><td>0.15 s</td></tr>
+<tr><td>同一条帧，R 填成 10.5</td><td>4.26e−01 / 5.11e−01 / 5.88e−01</td><td>❌ 无</td><td>0.15 s</td></tr>
 </tbody></table>
-<ul><li>已知 R 时频率误差 <strong>+0.000%</strong>（R 直接就是真值），幅值 $\hat\gamma=0.0200$、相位 $\hat\theta=+3.6°$。</li><li>三路里只有<strong>正对相位的那一路</strong>跌破门限，其余两路停在 0.5 上下——这正是三相位阵列"谁共振谁报警"的工作方式。</li><li>自动扫 R 时 $\hat R=9.9993$（误差 −0.007%），比已知 R 多花约 2 s。</li></ul>
+<ul><li><strong>用时一列的来源</strong>：统一按 <code>analyze(known)</code> 的 0.149 s 填（<code>00-总览/性能优化与基准.md</code>，同条件 47124 点、三相位），<strong>不是逐帧单独计时</strong>；2026-11-26 内核重构前同条件为 1.5 s。</li></ul>
+<ul><li><strong>相位扫描（$\lambda_0=0.73$ 的收益）</strong>：$\theta=0/+90°/+180°/−90°$ 分别由 β=$0°$/+120°/−120°/−120° 那一路报警，全部判「有」。原因是抬高工作点后合成幅值余量变大：临界角从 $\lambda_0=0.72$ 时的 $48.1°$ 放宽到 $80.7°$，<strong>单路覆盖率 26.7% → 44.8%</strong>，三路 ±120° 恰好把 360° 铺满（80.2% → <strong>100%</strong>）。</li><li>三路里只有<strong>正对相位的那一路</strong>跌破门限，其余两路停在 0.4~0.55——这正是三相位阵列"谁共振谁报警"的工作方式。</li><li>已知 R 时频率误差 <strong>+0.000%</strong>（R 直接就是真值）。</li><li>部分覆盖帧仍能判出，因为信号只要占了半帧的激励量就足以把振子推过临界；但按统计纪律它<strong>不进 Pd</strong>，只计数。</li></ul>
+<hr>
+<h2>六点五、发送端的「框架演示」窗口（Pfa / Pd）</h2>
+<p>发送端底部有个「框架演示 Pfa/Pd」按钮，点开是下面这张图——它复现的是阶段一 notebook 里那张「输入片段 / 框架演示」，但<strong>条件由发送端给</strong>，所以它展示的是这条链路自己的统计分离，而不是抄来的图。</p>
+<p><img src="../复现输出/界面-框架演示.png" alt="框架演示窗口" style="display:block;max-width:100%;height:auto;margin:10px 0"></p>
+<p><strong>面板上只填两个量</strong>：<strong>幅值 $A$</strong> 与 <strong>$SNR_E$</strong>（能量比口径，默认 −15 dB）。$\sigma$ 不填，由这两者反算</p>
+<p>$$\sigma=\sqrt{\frac{A^2/2}{10^{SNR_E/10}}}$$</p>
+<p>并在旁边只读显示。这么做是因为"$\sigma$"和"$SNR$"是同一件事的两种写法，同时可填必然自相矛盾；而 $SNR_E$ 是<strong>能直接和文献对表</strong>的那个定义（$\Sigma s^2/\Sigma n^2$），界面 SNR 滑块用的"力口径"（$A$ 对 $\sigma$）差一个 $10\lg h_1\approx-17$ dB，两者混着看必然错。</p>
+<p>左图是 2 s 的输入片段（$H_0$ 仅噪声 / $H_1$ 信号+噪声），右图是 200 次独立试验的相干投影幅值分布，<strong>黑色虚线是 $H_0$ 的 95% 分位</strong>——阈值只由 $H_0$ 定，这是 ROC 可不可信的分水岭；拿 $H_1$ 去调阈值，$P_d$ 立刻虚高。</p>
+<table><thead><tr><th>口径</th><th>$A$</th><th>$\sigma$（每样本）</th><th>$SNR_E$</th><th>阈值（$H_0$ 95%）</th><th>$P_{fa}$</th><th>$P_d$</th></tr></thead><tbody>
+<tr><td>阶段一算例（nT）</td><td>1 nT</td><td>3.976 nT</td><td>−15 dB</td><td><strong>0.216 nT</strong></td><td>0.050</td><td>1.000</td></tr>
+<tr><td>同口径、$T$ 拉到 20 s 的 −20 dB 版</td><td>1 nT</td><td>7.071 nT</td><td>−20 dB</td><td>0.385 nT</td><td>0.050</td><td>1.000</td></tr>
+<tr><td>当前发送参数（归一化，$T$=20 s）</td><td>0.0302</td><td>0.00707</td><td>+9.6 dB</td><td>2.3e−4</td><td>0.050</td><td>1.000</td></tr>
+</tbody></table>
+<p>两件事值得说清：</p>
+<ul><li><strong><code>P_d=1.000</code> 不代表检测器强</strong>。这里的统计量"知道频率"，而且 $T=20$ s 的积分增益是 $\sqrt{Tf_s/2}\approx45$ 倍，把 −15 dB 抬成了约 4.7 倍的信噪余量。把 $T$ 调小（比如 2 s）就能看到过渡带——$P_d$ 开始随 $P_{fa}$ 变化。界面第二行会直接报"两组相差几倍"，&gt;10 倍就提示"已完全分离"。</li><li><strong>这不是本课题的检测器</strong>。真正的判据是阶段 3 的相变（接收端算的 $p_{std}$）。这个窗口存在的意义只有一条：把"阈值只由 $H_0$ 标定 + 报 $P_{fa}$ 与 $P_d$ 一对数字"这套纪律摆在明面上——文献里大量工作只报 $P_d$ 不报 $P_{fa}$，那正是本课题要填的空位（阶段一 Q1）。</li></ul>
+<p>下拉框第二项「当前发送参数（归一化）」会取发送端的 $\omega$、$f_s$、$A$ 与当前噪声，用来回答"我这条链路现在的分离度是多少"。注意它的 $SNR_E=+9.6$ dB 而滑块写的是 −7.4 dB——<strong>这两个数都对</strong>，只是口径不同（差 $10\lg h_1$）。</p>
+<p>「保存」把当前图写进 <code>复现输出/框架演示-PfaPd-*.png</code>（阶段一算例与发送端参数分开命名）。</p>
 <hr>
 <h2>七、已知边界与坑</h2>
 <p><strong>1. 帧长低于约 48 个载波周期，判据开始抖。</strong> 实测（同相、5 个噪声种子）：</p>
@@ -155,7 +209,13 @@ T 尾包   WBDX T &lt;UTF-8 JSON&gt;   {frame, sent, nseq}</code></pre>
 <tr><td>跨种子离散</td><td>0.026–0.54</td><td>0.14–0.51</td><td>1.7e−3–0.43</td><td>1.5e−3–0.48</td><td>稳定</td><td>稳定</td></tr>
 </tbody></table>
 <p>原因是 <code>burn_frac=0.5</code> 丢掉前一半做瞬态，剩下的 Poincaré 点只有周期数的一半——16 周期只剩 8 个点算标准差，本身就不可靠。发送端界面因此在周期数 &lt;60 时标橙、&lt;30 时标红。</p>
-<p><strong>2. 相位盲区：单振子会被"信号相位"封顶。</strong> 相变由合成幅值 $\sqrt{\lambda_0^2+A^2+2\lambda_0A\cos\theta}$ 决定，$\lambda_0$ 只比 $\lambda_c$ 低 0.0135，所以 $A=0.02$ 时要求 $|\theta|&lt;47.5°$——<strong>单路覆盖率只有 26%，再大的 SNR 也救不回来</strong>。三相位阵列把覆盖率补到约 79%，剩下的 21% 只能靠多发几帧。这也是"连发帧数"这个参数的用处。</p>
+<p><strong>2. 相位盲区：单振子会被"信号相位"封顶。</strong> 相变由合成幅值 $\sqrt{\lambda_0^2+A^2+2\lambda_0A\cos\theta}$ 决定，要求它越过 $\lambda_c$，即 $|\theta|&lt;\arccos\frac{\lambda_c^2-\lambda_0^2-A^2}{2\lambda_0A}$：</p>
+<table><thead><tr><th>工作点</th><th>临界角</th><th>单路覆盖</th><th>三路 ±120° 覆盖</th></tr></thead><tbody>
+<tr><td>$\lambda_0=0.72$</td><td>$48.1°$</td><td>26.7%</td><td>80.2%</td></tr>
+<tr><td>$\lambda_0=0.73$</td><td>$80.7°$</td><td>44.8%</td><td><strong>100%</strong></td></tr>
+</tbody></table>
+<p>所以这一版把工作点从 0.72 抬到 0.73，不只是"跟固件对齐"，顺带把三路覆盖率补满了；单路仍然会被封顶——<strong>单振子的 Pd 再大的 SNR 也上不去</strong>，这是方法本身的性质，不是实现问题。</p>
+<p><strong>2b. 波形上看不出正弦是正常的。</strong> 界面上的 SNR 是<strong>力口径</strong>（与阶段 2–5 一致：$A$ 对 $\sigma$），波形上能不能用眼睛看出正弦要看<strong>每样本口径</strong>，两者差 $10\lg(\omega/f_s)=10\lg(0.02)\approx-17$ dB。所以"−7.4 dB"的帧，每样本 SNR 其实是 <strong>+9.6 dB</strong>，坐标放大后能看出正弦；而更低的 SNR 下波形就该被噪声糊成一团——<strong>图上看不见不等于信号没发出去</strong>，判决看的是振子轨迹，不是眼睛。</p>
 <p><strong>3. R 偏 5% 就判不出来。</strong> 频率选择带宽只有 ±0.1%（阶段 2 实测），5% 远在带外。所以"已知 R"这条路要求 R 确实知道——联调时建议用"跟随发送端"，让包头把 ω 带过来。</p>
 <p><strong>4. 参数改动即时生效，但只对</strong>下一帧<strong>。</strong> 监听中改 R、$\lambda_0$、门限都会在下一帧生效（主线程每 100 ms 刷新一次参数快照），不用停止重开。</p>
 <p><strong>5. 端口占用的处理。</strong> 接收端绑定时设了 <code>SO_REUSEADDR</code> 与 4 MB 接收缓冲；如果 50500 被别的程序占了，日志会明确报"绑定失败"，换端口即可（记得发送端同步改）。</p>
@@ -163,10 +223,10 @@ T 尾包   WBDX T &lt;UTF-8 JSON&gt;   {frame, sent, nseq}</code></pre>
 <hr>
 <h2>八、代码边界</h2>
 <table><thead><tr><th>文件</th><th>职责</th><th>与内核的关系</th></tr></thead><tbody>
-<tr><td><code>tools/link_proto.py</code></td><td>协议打包/解析、帧装配、信号生成、<code>analyze()</code> 全流程</td><td>只调 <code>simulate_seq</code>，无独立积分器</td></tr>
-<tr><td><code>tools/tx_app.py</code></td><td>发送端界面与发送线程</td><td>不碰内核，只用 <code>make_frame</code> + <code>split_frame</code></td></tr>
-<tr><td><code>tools/rx_app.py</code></td><td>接收端界面、接收线程、计算线程、四联图</td><td>不碰内核，只用 <code>analyze</code></td></tr>
-<tr><td><code>tests/test_link_apps.py</code></td><td>14 项：协议往返、切包重组、UDP 环回、三种 R 模式、盲区、缺包统计</td><td>全部不启动 tkinter</td></tr>
+<tr><td><code>tools/link_proto.py</code></td><td>协议打包/解析（int16）、帧装配、连续发送 <code>TxStream</code>、目标窗 <code>SignalSchedule</code>、信号生成、<code>analyze()</code> 全流程、<code>framework_demo()</code>（框架演示统计）</td><td>只调 <code>simulate_seq</code>，无独立积分器</td></tr>
+<tr><td><code>tools/tx_app.py</code></td><td>发送端界面与发送线程（无限循环 + 手动附加目标）、框架演示窗口 <code>DemoWindow</code></td><td>不碰内核，只用 <code>make_frame</code> / <code>split_frame</code> / <code>framework_demo</code></td></tr>
+<tr><td><code>tools/rx_app.py</code></td><td>接收端界面、接收线程、计算线程、四联图 + 判决时序条</td><td>不碰内核，只用 <code>analyze</code></td></tr>
+<tr><td><code>tests/test_link_apps.py</code></td><td>30 项：int16 往返与饱和、切包重组逐点相等、真 UDP 环回、连续发送不停止与时间轴连续、附加/撤销窗口、跨帧相位连续、覆盖度重算与核对、三种 R 模式、相位盲区、缺包统计、判决统计分类、框架演示的「阈值只取 H0」与 Pd 单调性</td><td>全部不启动 tkinter</td></tr>
 </tbody></table>
 <p>跑测试：</p>
 <pre><code>.venv\Scripts\python.exe -m pytest tests\test_link_apps.py -q</code></pre>

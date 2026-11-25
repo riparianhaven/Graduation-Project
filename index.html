@@ -344,10 +344,17 @@ footer{border-top:1px solid var(--line);padding:20px 0 34px;color:var(--faint);f
       <div class="foot"><span>Markdown · 阶段 5 过关产出 · 含内嵌图</span><span class="go">打开 →</span></div>
     </a>
 
-    <a class="card item" data-search="双端 UI 图形界面 发送端 接收端 tkinter UDP 50500 联调 已知R 不扫描 波形图 阵列图 送 SNR 发送时长 信号噪声开关 协议 分帧 丢包 相位盲区 帧长" href="08-端到端链路/端到端-双端UI联调说明.md" target="_blank">
+    <a class="card item" data-search="ESP32 固件 README 嵌入式 规格 AI 执行 引脚 ADC 定点 Q6.12 Q0.30 系数 DDS 相位累加 Poincaré 插值 构建 烧录 idf.py 测试 验收 错误码 扩展限制 机器可解析 YAML 初相盲区 帧长 WBDX 协议 UART 回放 帧边界 断线检测 前置增益 门限 Pfa" href="07-阶段五/README-ESP32-固件实现.md" target="_blank">
+      <div class="kicker">新增 · 面向 AI 执行的工程规格</div>
+      <h3>ESP32 固件实现规格（README）</h3>
+      <p>可直接喂给 AI 继续实现的固件蓝图：固定字段 + YAML 参数表 + 可判定验收。含<b>功能边界</b>（明确不做扫 R / 估幅 / 无线）、<b>引脚表与禁止脚</b>（ADC1 专用、禁用 ADC2）、<b>双格式定点契约</b>（状态 Q6.12 + 系数 Q0.30——`h1/6` 存 Q6.12 会偏 2.5%）、<b>DDS 相位累加 + 精确 Poincaré 插值</b>（按步数取整压掉 4 个量级、插值权重取错余量压掉 3.6 个量级）、构建烧录命令、<b>10 条单测期望值 + 9 项上板指标</b>、错误码表、三条物理硬限制（单相覆盖 26.6% / 三相 79.9%、帧长 ≥48 周期、带宽 ±0.1%）。每个数值带 <code>[S2]/[S5]/[LK]/[SPEC]/[TODO]</code> 来源标记，未实测项不冒充结论。</p>
+      <div class="foot"><span>Markdown · 固件规格 · 代码待创建</span><span class="go">打开 →</span></div>
+    </a>
+
+    <a class="card item" data-search="双端 UI 图形界面 发送端 接收端 tkinter UDP 50500 联调 已知R 不扫描 连续发送 手动附加目标 int16 协议 分帧 丢包 覆盖度 相位盲区 帧长" href="08-端到端链路/端到端-双端UI联调说明.md" target="_blank">
       <div class="kicker">新增 · 图形化联调</div>
       <h3>双端 UI：一个窗口发，一个窗口收</h3>
-      <p>两个独立脚本各自带图形界面：<b>发送端</b>可调 SNR、发送时长、独立开关信号与噪声；<b>接收端</b>默认用<b>已知 R</b>（不扫频，1.4 s 出一帧），收到就判「有/无目标」并画<b>波形图</b>与<b>阵列图</b>（三路 pstd 柱 + 相轨迹）。数据走 UDP 分帧，含头包/数据包/尾包与缺包告警。实测有目标 $p_{std}=2.8	imes10^{-3}$、纯噪声 0.44，门限 0.08 卡在中间。</p>
+      <p>两个独立脚本各自带图形界面：<b>发送端</b>启动后<b>持续发送不自动停</b>，发送中可随时「附加目标信号」（时长可配），另有<b>框架演示窗口</b>（填 A 与 SNR_E，出 H0/H1 与 Pfa/Pd，阈值只取 H0 的 95% 分位）；<b>接收端</b>默认用<b>已知 R</b>（不扫频，0.15 s 出一帧），一帧一判并画接收波形、频谱、三路 pstd 柱、相图与判决时序条。线上样本是 <b>int16</b>（对齐 ESP32 ADC 计数，包长减半），UDP 分帧含头包/数据包/尾包与缺包告警。实测目标帧 $p_{std}=2.3\times10^{-3}$、背景帧 0.38，门限 0.08 卡在中间。</p>
       <div class="foot"><span>Markdown · 含界面截图 · 附协议表</span><span class="go">打开 →</span></div>
     </a>
 
@@ -356,6 +363,13 @@ footer{border-top:1px solid var(--line);padding:20px 0 34px;color:var(--faint);f
       <h3>端到端链路：一端发射、一端接收并识别目标</h3>
       <p>用同一段 RK4 内核跑通<b>发射 → 信道 → 接收 → 判决</b>全链路：接收端只拿采样序列与 dt，靠 FFT 粗估 + 变尺度细扫 R 自己找到 ω（误差 −0.010%），三相位阵列 pstd 判「有/无」，再用 λ* 差分估幅（−7.4 dB 下 0.3%）。<b>最关键的实测结论：单振子被相位盲区封顶在 Pd≈0.46（与噪声无关），必须三相位阵列才能到 −7.4 dB 的 Pd≥0.9</b>。四张实跑图内嵌，代码见 <a href="tools/link_sim.py" target="_blank">tools/link_sim.py</a>。</p>
       <div class="foot"><span>Markdown · 端到端链路 · 含实跑图</span><span class="go">打开 →</span></div>
+    </a>
+
+    <a class="card item" data-search="性能优化 基准 benchmark 速度 加速 内核 simulate_seq 微内核 numpy 调用开销 逐位一致 sha256 黄金样本 缓冲区复用 broadcast numba 多进程 为什么不并行 RK4 Python float" href="00-总览/性能优化与基准.md" target="_blank">
+      <div class="kicker">新增 · 性能优化与基准</div>
+      <h3>只改怎么算：一帧判决 1.5 s → 0.15 s</h3>
+      <p>先定位再动手：瓶颈根本不是浮点，而是<b>每步 60–80 次 numpy 调用</b>——3 元数组上一次调用约 0.4 μs，真正算的那点浮点只占几纳秒。于是把驱动项搬出循环、让 $m\le32$ 的通道改走<b>纯 Python float 微内核</b>、复用缓冲、把估幅的 68 MB 拷贝换成广播。默认判一帧 <b>1.5 s → 0.15 s（10×）</b>，盲测扫 R 3.6 s → 0.92 s，<b>11 个算例的 Poincaré 点 sha256 与优化前逐位相同</b>。也写清三条"看着能省其实不能省"的路（<span class="mono">x*x*x</span> 替 <span class="mono">x**3</span> 会让 26% 的位模式变、多进程跑扫频比串行还慢、缩短瞬态等于改论文口径）。</p>
+      <div class="foot"><span>Markdown · 含基准表与复现命令</span><span class="go">打开 →</span></div>
     </a>
 
     <a class="card item" data-search="创新点 对比 现有方案 之前版本 核心思路 实现方式 功能效果 性能效率 可维护性 使用体验 chaos-CFAR 恒虚警 阈值带 判据 工程改进" href="05-方法创新/方案创新点与版本对比.md" target="_blank">

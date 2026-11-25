@@ -1,0 +1,152 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>00-总览/性能优化与基准.md</title><style>
+:root{--bg:#f6f7f9;--panel:#fff;--line:#e3e7ec;--text:#1b232c;--muted:#63707e;--accent:#2f6fd0;--soft:#eaf1fc}
+@media(prefers-color-scheme:dark){:root{--bg:#14181d;--panel:#1d232a;--line:#303a45;--text:#e7edf3;--muted:#a7b3c0;--accent:#7fb0f5;--soft:#21334d}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.8 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+.bar{position:sticky;top:0;background:var(--panel);border-bottom:1px solid var(--line);padding:9px 24px;font-size:13px;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.bar a{color:var(--accent);text-decoration:none}.bar a:hover{text-decoration:underline}
+.bar .fn{color:var(--muted);margin-left:auto;word-break:break-all}
+main{max-width:980px;margin:0 auto;padding:26px 28px 70px;background:var(--panel);min-height:calc(100vh - 44px);
+  border-left:1px solid var(--line);border-right:1px solid var(--line)}
+h1,h2,h3,h4{line-height:1.4;margin:1.5em 0 .6em;font-weight:650}
+h1{font-size:25px;border-bottom:1px solid var(--line);padding-bottom:10px;margin-top:.4em}
+h2{font-size:20px;border-bottom:1px solid var(--line);padding-bottom:7px}
+h3{font-size:17px}h4{font-size:15px}
+p,li{color:var(--text)}li{margin:.25em 0}
+a{color:var(--accent)}
+code{background:var(--soft);padding:1px 5px;border-radius:4px;font:12.6px ui-monospace,Consolas,monospace}
+pre{background:var(--soft);border:1px solid var(--line);border-radius:8px;padding:14px 16px;overflow:auto}
+pre code{background:none;padding:0}
+blockquote{border-left:3px solid var(--accent);background:var(--soft);margin:12px 0;padding:8px 16px;color:var(--muted)}
+blockquote p{margin:.3em 0}
+.staticnote{max-width:980px;margin:14px auto -8px;padding:9px 14px;border:1px solid var(--line);
+  border-left:3px solid var(--accent);border-radius:0 8px 8px 0;background:var(--soft);
+  font-size:12.6px;color:var(--muted)}
+.staticnote a{color:var(--accent)}
+table{border-collapse:collapse;width:100%;margin:14px 0;font-size:13.4px;display:block;overflow:auto}
+th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top}
+th{background:var(--soft);color:var(--muted);white-space:nowrap}
+tr:nth-child(even) td{background:rgba(127,150,180,.045)}
+hr{border:none;border-top:1px solid var(--line);margin:26px 0}
+strong{font-weight:650}
+</style>
+<script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']]},
+  options:{skipHtmlTags:['script','noscript','style','textarea','pre','code','annotation']}};</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+</head><body>
+<div class="bar"><a href="../index.html">← 返回资料索引</a>
+<a href="性能优化与基准.md">查看 Markdown 源码</a><span class="fn">00-总览/性能优化与基准.md</span></div>
+<div class="staticnote">这是 <b>静态排版副本</b>，生成于 2026-11-26 00:37。直接双击 <code>index.html</code> 时看到的就是它；若 Markdown 刚改过，请在工作区运行 <code>py build_static.py</code> 重新生成，或用 <code>start_index.bat</code> 启动本地服务查看实时渲染版。页内公式由 MathJax 渲染，需要联网。</div><main><h1>性能优化与基准：把一帧判决从 1.5 s 压到 0.15 s</h1>
+<blockquote><p>目标：<strong>不改数值、不改边界行为、不改功能</strong>，只改"怎么算"。</p><p>结论：默认链路（已知 R 判一帧）<strong>10×</strong>、盲测扫 R <strong>3.9×</strong>、两级细扫 <strong>2.7×</strong>；</p><p>11 个算例的 Poincaré 点 sha256 与优化前<strong>逐位相同</strong>。</p><p></p><p>复现：<code>py tools/bench_speed.py</code>（速度）＋ <code>py -m pytest tests/test_kernel_golden.py -q</code>（一致性）。</p></blockquote>
+<h2>一、先定位：慢的不是浮点，是 numpy 的"每次调用"</h2>
+<p>一帧 94.2 s、$f_s=500$ Hz 就是 47100 个样本，内核要积分 47124 步。原来的<br><code>simulate_seq</code> 在<strong>每一步</strong>里做这些事：</p>
+<pre><code>f1 = lam * np.cos(tau + beta) + s0            # 4 次 ufunc
+fh = lam * np.cos(tau + h1/2 + beta) + 0.5*(s0+s1)   # 6 次
+f4 = lam * np.cos(tau + h1 + beta) + s1       # 4 次
+k1y = -K*y + x**3 - x**5 + f1                 # 6 次   × 4 次 RK4 级
+x2, y2 = x + h1/2*k1x, y + h1/2*k1y           # 4 次   × 6 次中间步
+x = x + h1/6*(k1x + 2*k2x + 2*k3x + k4x)      # 7 次   × 2 个分量</code></pre>
+<p>数下来<strong>每步 60–80 次 numpy 调用</strong>。三通道时数组只有 3 个元素，<br>每次调用的固定开销（分派、检查、创建返回数组）约 $0.4\ \mu s$，<br>实测 $1.448\ \text{s}/47124 = 30.7\ \mu s$／步 ÷ 74 ≈ $0.41\ \mu s$／次——<br><strong>浮点运算本身只占其中几纳秒</strong>。换句话说：</p>
+<blockquote><p>慢的根因是"用 numpy 做标量运算"。3 元数组上，numpy 的调用开销是</p><p>它算的那点浮点的上千倍。</p></blockquote>
+<p>三条实测支撑这个判断：</p>
+<table><thead><tr><th>观察</th><th>数据</th><th>含义</th></tr></thead><tbody>
+<tr><td>3 路阵列 vs 3 次单路（老标量快路径）</td><td>1.448 s vs 3×0.134 s = 0.40 s</td><td>通道少时阵列路径反而<strong>慢 3.6 倍</strong></td></tr>
+<tr><td>通道数 16 → 180 的总耗时</td><td>1.52 s → 2.59 s（只涨 1.7 倍）</td><td>每步调用次数不变，摊到 180 路上就便宜了</td></tr>
+<tr><td>微内核单通道单步</td><td>$0.89\ \mu s$／步（约 45 次 Python float 运算）</td><td>纯标量算术比 numpy 小数组快<strong>一个量级</strong></td></tr>
+</tbody></table>
+<h2>二、优化措施</h2>
+<h3>2.1 把驱动项搬出循环（预算表）</h3>
+<p><code>λcos(τ+β)+s(τ)</code> 只依赖步号，与状态 $(x,y)$ 无关，却放在循环里算了 47124 遍。<br>现在按列在循环外一次算成 Python float 列表。</p>
+<p><strong>合法性依据（实测，不是推断）</strong>：<code>np.cos</code> 在 float64 上对同一输入<br><strong>逐位等于</strong> <code>math.cos</code>，且<strong>与数组长度/形状无关</strong>——20000 个点上逐位比对<br>0 处不同，<code>(steps,3)</code> 的二维调用与逐步的 3 元数组调用也完全相同。<br>所以搬出循环改的只是"什么时候算"，不是"算出了什么"。</p>
+<h3>2.2 小通道数走微内核（本次最大收益）</h3>
+<p>$m \le 32$ 时不再用数组，改成<strong>逐通道的纯 Python float</strong> 循环：驱动项从<br>预算表里取，RK4 的四级算术全是 <code>float</code>。同一套公式、同样的运算顺序。</p>
+<table><thead><tr><th>通道数</th><th>阵列路径</th><th>微内核</th><th>比值</th></tr></thead><tbody>
+<tr><td>1</td><td>0.134 s</td><td>0.042 s</td><td><strong>3.2×</strong></td></tr>
+<tr><td>3（三相位阵列，GUI 默认）</td><td>1.448 s</td><td>0.126 s</td><td><strong>11.5×</strong></td></tr>
+<tr><td>16</td><td>1.519 s</td><td>0.711 s</td><td>2.1×</td></tr>
+<tr><td>32</td><td>1.690 s</td><td>1.458 s</td><td>1.16×</td></tr>
+<tr><td>64</td><td>1.863 s</td><td>2.732 s</td><td>0.68×</td></tr>
+<tr><td>180（估幅网格）</td><td>2.591 s</td><td>7.786 s</td><td>0.34×</td></tr>
+</tbody></table>
+<p>交叉点在 40 路附近，阈值取 <strong>32</strong>（偏保守）。超过 32 路时阵列的<br>"一次调用摊 180 路"仍然无可替代，所以两条路径都保留——但<strong>必须逐位一致</strong>，<br><code>tests/test_kernel_golden.py::test_two_paths_agree_at_the_switch_boundary</code><br>在 m=32/33 的边界上钉死这件事。</p>
+<h3>2.3 去掉循环内的重复分配</h3>
+<table><thead><tr><th>原来</th><th>现在</th><th>省掉</th></tr></thead><tbody>
+<tr><td><code>np.maximum(mx, np.abs(x), out=mx)</code> 每步新建 <code>abs</code> 数组</td><td><code>np.abs(x, out=ab)</code> 复用缓冲</td><td>4.7 万次临时数组／帧</td></tr>
+<tr><td><code>np.repeat(x.reshape(-1,1), 180, axis=1)</code></td><td><code>np.broadcast_to(...)</code></td><td>一次 <strong>68 MB</strong> 拷贝</td></tr>
+<tr><td>每步重算 <code>h1/2</code>、<code>h1/6</code>、<code>i*h1</code></td><td>循环外算一次；步进时间轴用 <code>np.arange(steps)*h1</code>（与 <code>i*h1</code> 逐位相同）</td><td>每步 3 次标量运算</td></tr>
+</tbody></table>
+<h3>2.4 一个必须踩到的坑：<code>std</code> 的归约顺序跟内存布局有关</h3>
+<p>微内核按通道收集点，最自然的写法是 <code>np.array([...]).T</code>——那是 <strong>F 序</strong>。<br><code>p.std(axis=0)</code> 在 F 序上会走另一条归约路径，结果差 <strong>1 ulp</strong>（实测<br><code>pstd=2.4e−3</code> 这种量级上末位差 1，肉眼永远看不见，但它足以让哈希比对失败）。数值上无所谓，但"逐位相同"的承诺就没了。<br>统一 <code>np.ascontiguousarray(p)</code> 后与阵列路径完全一致。</p>
+<h3>2.5 明确<strong>没有</strong>做的事</h3>
+<table><thead><tr><th>想做的优化</th><th>为什么不做</th></tr></thead><tbody>
+<tr><td><code>x*x*x</code> 代替 <code>x**3</code>、<code>x*x*x*x*x</code> 代替 <code>x**5</code></td><td>实测 200000 个样本里 <strong>51845 个位模式不同</strong>（最大差 2.8e−14）。混沌态会指数放大，等于换了题</td></tr>
+<tr><td><code>x**3</code> 改 <code>np.multiply</code> 两连乘</td><td>同上：CPython 的 <code>float.__pow__</code> 与 <code>np.power</code> 逐位一致（实测 0/20000 不同），但与连乘不一致</td></tr>
+<tr><td>numba / cython 重写循环</td><td>环境里没有（<code>numa</code>/<code>cython</code> 均未安装），且会给交付物加编译依赖</td></tr>
+<tr><td>多进程并行 <code>scan_R</code> 的 16 个 R</td><td>每个任务 47 ms，Windows spawn 一个进程约 1.5 s（要重新 import numpy）。16 个任务串行 0.75 s，<strong>并行反而更慢</strong></td></tr>
+<tr><td>多线程</td><td>纯 Python float 循环全程持 GIL；numpy 只在大数组上放 GIL，这里数组只有 3 个元素</td></tr>
+<tr><td>减少积分步数 / 缩短瞬态</td><td>直接改数值。<code>steps</code> 由 <code>n_cycles</code> 与 $h_1$ 决定，是论文口径</td></tr>
+</tbody></table>
+<p><strong>并行这件事本项目早就做了</strong>，并行轴是<strong>通道维</strong>而不是时间维：RK4 沿时间是<br>严格串行的，但 $m$ 路振子（三相位阵列、估幅的 4×45 网格、批量试验）互相<br>独立，一次数组调用算完所有路——<code>pstd_batch</code> 按「K 次试验 × 3 相位」拼列，<br>$m=90$ 时 21 ms／路 vs 逐路 140 ms／路，快 7 倍。这次只是把"小 $m$ 时并行<br>不划算"这件事也按实测分了档。</p>
+<h2>三、一致性怎么验证</h2>
+<h3>3.1 黄金样本：优化<strong>前</strong>冻结，优化<strong>后</strong>比对</h3>
+<p><code>tests/golden/kernel_ref.json</code> 是改动之前用当时的内核跑出来的，存了每个算例的<br><code>pstd</code>、<code>mx</code>、Poincaré 点矩阵 <code>p</code> 的 <strong>sha256</strong>、以及 trace 的 <code>X</code> 的 sha256。</p>
+<pre><code>.venv\Scripts\python.exe -m pytest tests/test_kernel_golden.py -q
+# 13 passed</code></pre>
+<p><strong>为什么用哈希而不是容差</strong>：混沌系统里 1 ulp 的差异会被指数放大，用<br><code>np.allclose</code> 只能证明"量级没变"，证明不了"数值没动"。哈希相等才是真的没动。</p>
+<p>覆盖的形状（<code>tools/kernel_cases.py</code>，测试/基准/重冻结共用一份）：</p>
+<table><thead><tr><th>算例</th><th>覆盖的东西</th></tr></thead><tbody>
+<tr><td><code>idle-lam-072-076</code></td><td>全零序列（内驱 0.72 混沌 / 0.76 周期）、m=2</td></tr>
+<tr><td><code>scalar-lock</code></td><td>m=1、20000 点、锁定态</td></tr>
+<tr><td><code>three-phase</code> / <code>-trace</code></td><td>GUI 默认三相位阵列；trace 的 <code>T/X/Y</code> 形状与内容</td></tr>
+<tr><td><code>m32-broadcast</code></td><td>单列广播到 32 路（微内核）</td></tr>
+<tr><td><code>m45-vector</code></td><td>45 路（阵列路径）</td></tr>
+<tr><td><code>short-sig-long-int</code></td><td>序列只有 5000 点、却积分 300 个周期 → <code>i ≥ n</code> 的零阶保持分支</td></tr>
+<tr><td><code>burn-0.3</code></td><td>非默认瞬态比例</td></tr>
+<tr><td><code>R-7.3</code> / <code>R-3.7</code></td><td>变尺度（不同 $h_1$，截面落点不同）</td></tr>
+<tr><td><code>amp-grid</code></td><td>4 相位 × 45 个 λ 的估幅网格（180 列）</td></tr>
+</tbody></table>
+<h3>3.2 两条路径的边界</h3>
+<p><code>test_two_paths_agree_at_the_switch_boundary</code> 把同一列复制到 32 路（微内核）<br>与 33 路（阵列）上，断言前 32 路的 <code>pstd</code>/<code>mx</code>/<code>p</code> <strong>完全相等</strong>。这是"换求值<br>方式不改数值"的核心契约。</p>
+<h3>3.3 上游功能测试照旧</h3>
+<p><code>pytest tests -q</code> → <strong>111 passed</strong>（原有 98 项 + 新增 13 项黄金样本）。<br>其中 <code>test_kernel_contract.py</code> 的 22 项继续保证"一个内核、五个 notebook<br>正文逐字一致"。</p>
+<h2>四、速度提升（本机实测，Python 3.13.9 / numpy 2.4.6）</h2>
+<table><thead><tr><th>场景</th><th>优化前</th><th>现在</th><th>加速</th></tr></thead><tbody>
+<tr><td>内核 m=1（单振子，47124 步）</td><td>0.133 s</td><td><strong>0.041 s</strong></td><td>3.2×</td></tr>
+<tr><td>内核 m=3（三相位阵列）</td><td>1.448 s</td><td><strong>0.126 s</strong></td><td>11.5×</td></tr>
+<tr><td>内核 m=45（阵列路径）</td><td>1.751 s</td><td>1.664 s</td><td>1.1×</td></tr>
+<tr><td>内核 m=180（估幅网格）</td><td>2.591 s</td><td>2.526 s</td><td>1.0×</td></tr>
+<tr><td><strong><code>analyze(known)</code> 一帧判决</strong></td><td>1.513 s</td><td><strong>0.148 s</strong></td><td><strong>10.2×</strong></td></tr>
+<tr><td><code>analyze(auto)</code> 盲测扫 R</td><td>3.631 s</td><td><strong>0.920 s</strong></td><td>3.9×</td></tr>
+<tr><td><code>scan_R</code> 两级细扫（16 次单振子）</td><td>2.047 s</td><td><strong>0.747 s</strong></td><td>2.7×</td></tr>
+<tr><td><code>estimate_amp</code> λ\* 差分</td><td>2.650 s</td><td>2.604 s</td><td>1.0×</td></tr>
+<tr><td><code>framework_demo</code>（200×2 次）</td><td>0.045 s</td><td>0.045 s</td><td>—</td></tr>
+<tr><td><code>make_frame</code> 一帧</td><td>1 ms</td><td>1 ms</td><td>—</td></tr>
+</tbody></table>
+<p><strong>为什么估幅（m=180）没变快</strong>：它本来就走阵列路径，每步 53.6 µs 摊到 180 路<br>只剩 0.30 µs／路／步，numpy 的调用开销早已摊薄；剩下的时间是真的在算<br>$180\times47124$ 条轨迹。要再快只能上 numba 或换硬件，不属于本次范围。</p>
+<p><strong>界面上的变化</strong>：接收端「已知 R」判一帧 1.4 s → <strong>约 0.15 s</strong>（含估幅<br>4 s → 约 2.8 s），波形、频谱、相图、时序条的刷新不再有明显延迟。</p>
+<h2>五、边界行为没动</h2>
+<table><thead><tr><th>行为</th><th>状态</th></tr></thead><tbody>
+<tr><td>发散（`</td><td>x</td><td>=inf/nan<code>）检测：每 256 步查一次，返回 </code>pstd=全 NaN<code>、</code>p` 空</td><td>不变</td></tr>
+<tr><td><code>p</code> 只取截面点的<strong>后一半</strong>（丢瞬态）+ <code>np.std(axis=0)</code></td><td>不变（含归约顺序）</td></tr>
+<tr><td><code>i ≥ n</code> 时样本项取 0（序列短于积分步数）</td><td>不变</td></tr>
+<tr><td>末点 <code>s1 = s0</code>（零阶保持的边界）</td><td>不变</td></tr>
+<tr><td>Poincaré 取精确 $\tau=2\pi k$ 的线性插值（<code>frac</code> 用补角）</td><td>不变</td></tr>
+<tr><td><code>trace=True</code> 时 <code>T/X/Y</code> 的形状（m=1 → <code>(steps,1)</code>，m&gt;1 → <code>(steps,m)</code>）</td><td>不变</td></tr>
+<tr><td>发散返回时的 <code>mx</code></td><td>由"部分累加值"改为"全 NaN"（只在发散这条错误路径上可见，无调用方依赖）</td></tr>
+</tbody></table>
+<h2>六、改了哪些文件</h2>
+<table><thead><tr><th>文件</th><th>改动</th></tr></thead><tbody>
+<tr><td><code>tools/kernel_src.py</code></td><td><code>KERNEL_SRC</code> 重写：微内核 + 预算驱动表 + 缓冲复用。<strong>仍是全项目唯一内核</strong></td></tr>
+<tr><td><code>tools/link_proto.py</code></td><td><code>estimate_amp</code> 的 <code>np.repeat</code> → <code>np.broadcast_to</code>（0 拷贝）</td></tr>
+<tr><td><code>tools/kernel_cases.py</code></td><td>新增：算例矩阵（测试/基准/重冻结共用）</td></tr>
+<tr><td><code>tools/bench_speed.py</code></td><td>新增：一键出"速度 + 逐位校验"</td></tr>
+<tr><td><code>tools/make_kernel_golden.py</code></td><td>新增：重冻结黄金样本（默认只比对，不落盘）</td></tr>
+<tr><td><code>tools/sync_kernel_notebooks.py</code></td><td>新增：把内核正文同步进 6 份 notebook（保留已有输出）</td></tr>
+<tr><td><code>tests/test_kernel_golden.py</code></td><td>新增：13 项逐位一致性测试</td></tr>
+<tr><td><code>tests/golden/kernel_ref.json</code></td><td>新增：优化前冻结的黄金样本</td></tr>
+</tbody></table>
+<p><strong>notebook 的处理</strong>：因为数值逐位相同，本次用 <code>sync_kernel_notebooks.py</code><br>就地替换内核正文、<strong>保留原有输出</strong>（重新生成 + 重跑会重算全部图，而结果一字<br>不差，没必要动）。注意：这条捷径只对"逐位相同"的重构成立；改了数值的升级<br>必须老老实实重新生成并重跑。</p>
+<h2>七、一句话小结</h2>
+<blockquote><p>这个仿真的时间几乎全花在"用 numpy 做标量运算"的调用开销上。</p><p>把驱动项搬出循环、把 $m\le32$ 的通道换成纯 Python float，就拿到了</p><p>一个数量级；真正的浮点运算顺序一个字都没改，所以网格、阈值、pstd</p><p>与优化前逐位相同。</p></blockquote></main></body></html>

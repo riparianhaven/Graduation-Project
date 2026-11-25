@@ -1,0 +1,754 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>07-阶段五/README-ESP32-固件实现.md</title><style>
+:root{--bg:#f6f7f9;--panel:#fff;--line:#e3e7ec;--text:#1b232c;--muted:#63707e;--accent:#2f6fd0;--soft:#eaf1fc}
+@media(prefers-color-scheme:dark){:root{--bg:#14181d;--panel:#1d232a;--line:#303a45;--text:#e7edf3;--muted:#a7b3c0;--accent:#7fb0f5;--soft:#21334d}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.8 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+.bar{position:sticky;top:0;background:var(--panel);border-bottom:1px solid var(--line);padding:9px 24px;font-size:13px;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.bar a{color:var(--accent);text-decoration:none}.bar a:hover{text-decoration:underline}
+.bar .fn{color:var(--muted);margin-left:auto;word-break:break-all}
+main{max-width:980px;margin:0 auto;padding:26px 28px 70px;background:var(--panel);min-height:calc(100vh - 44px);
+  border-left:1px solid var(--line);border-right:1px solid var(--line)}
+h1,h2,h3,h4{line-height:1.4;margin:1.5em 0 .6em;font-weight:650}
+h1{font-size:25px;border-bottom:1px solid var(--line);padding-bottom:10px;margin-top:.4em}
+h2{font-size:20px;border-bottom:1px solid var(--line);padding-bottom:7px}
+h3{font-size:17px}h4{font-size:15px}
+p,li{color:var(--text)}li{margin:.25em 0}
+a{color:var(--accent)}
+code{background:var(--soft);padding:1px 5px;border-radius:4px;font:12.6px ui-monospace,Consolas,monospace}
+pre{background:var(--soft);border:1px solid var(--line);border-radius:8px;padding:14px 16px;overflow:auto}
+pre code{background:none;padding:0}
+blockquote{border-left:3px solid var(--accent);background:var(--soft);margin:12px 0;padding:8px 16px;color:var(--muted)}
+blockquote p{margin:.3em 0}
+.staticnote{max-width:980px;margin:14px auto -8px;padding:9px 14px;border:1px solid var(--line);
+  border-left:3px solid var(--accent);border-radius:0 8px 8px 0;background:var(--soft);
+  font-size:12.6px;color:var(--muted)}
+.staticnote a{color:var(--accent)}
+table{border-collapse:collapse;width:100%;margin:14px 0;font-size:13.4px;display:block;overflow:auto}
+th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top}
+th{background:var(--soft);color:var(--muted);white-space:nowrap}
+tr:nth-child(even) td{background:rgba(127,150,180,.045)}
+hr{border:none;border-top:1px solid var(--line);margin:26px 0}
+strong{font-weight:650}
+</style>
+<script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']]},
+  options:{skipHtmlTags:['script','noscript','style','textarea','pre','code','annotation']}};</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+</head><body>
+<div class="bar"><a href="../index.html">← 返回资料索引</a>
+<a href="README-ESP32-固件实现.md">查看 Markdown 源码</a><span class="fn">07-阶段五/README-ESP32-固件实现.md</span></div>
+<div class="staticnote">这是 <b>静态排版副本</b>，生成于 2026-11-26 00:37。直接双击 <code>index.html</code> 时看到的就是它；若 Markdown 刚改过，请在工作区运行 <code>py build_static.py</code> 重新生成，或用 <code>start_index.bat</code> 启动本地服务查看实时渲染版。页内公式由 MathJax 渲染，需要联网。</div><main><hr>
+<p>schema: duffing-esp32-fw/spec-v1<br>title: ESP32 极低频磁信号混沌检测固件<br>status: spec_only<br>target_mcu: esp32<br>toolchain: esp-idf 5.2.x<br>source_of_truth: tools/kernel_src.py<br>ref_impl: tools/link_proto.py, tools/tx_app.py, tools/rx_app.py<br>last_review: 2026-11-26</p>
+<hr>
+<h1>README · ESP32 极低频磁信号检测固件</h1>
+<blockquote><p>本文件是<strong>规格</strong>，不是使用说明。当前仓库内除本 README 外<strong>没有任何固件代码</strong>，§6 目录树中的文件全部待创建。</p><p>所有数值带来源标记，标记为 <code>[SPEC]</code> / <code>[TODO]</code> 的项<strong>未经硬件验证</strong>，不得当作实测结论引用。</p></blockquote>
+<h2>0. 阅读约定</h2>
+<h3>0.1 来源标记（强制）</h3>
+<table><thead><tr><th>标记</th><th>含义</th><th>可信度</th></tr></thead><tbody>
+<tr><td><code>[S2]</code></td><td>阶段 2/3 Python 实跑（<code>learn/2.ipynb</code> 等）</td><td>已验证，浮点</td></tr>
+<tr><td><code>[S4]</code></td><td>阶段 4 蒙特卡洛实跑</td><td>已验证，浮点</td></tr>
+<tr><td><code>[S5]</code></td><td>阶段 5 定点仿真（<code>learn/5.ipynb</code>，Q2.12）</td><td>已验证，仿真非板级</td></tr>
+<tr><td><code>[LK]</code></td><td>端到端链路实测（<code>tools/link_sim.py</code>）</td><td>已验证，仿真</td></tr>
+<tr><td><code>[APP]</code></td><td>上位机双端脚本实测（<code>tools/link_proto.py</code> / <code>tx_app.py</code> / <code>rx_app.py</code>）与本机复核探针</td><td>已验证，PC 参考实现</td></tr>
+<tr><td><code>[SPEC]</code></td><td>本规格约束，由上述结论推导</td><td>需实现验证</td></tr>
+<tr><td><code>[TODO]</code></td><td>待上板实测</td><td><strong>未知</strong></td></tr>
+</tbody></table>
+<p><code>[APP]</code> 是<strong>行为口径</strong>的来源：包格式、帧重组规则、参数默认值、每帧耗时都取自这三份脚本。固件与它不一致时以它为准——它是浮点实现，可以直接对拍。</p>
+<h3>0.2 术语表（唯一写法，禁止同义替换）</h3>
+<table><thead><tr><th>术语</th><th>符号 / 标识符</th><th>定义</th></tr></thead><tbody>
+<tr><td>数值步长</td><td><code>h1</code></td><td><code>h1 = R * dt</code>，RK4 积分步长（无量纲时间）</td></tr>
+<tr><td>尺度系数</td><td><code>R</code></td><td>变尺度系数；检测时 <code>R = omega</code></td></tr>
+<tr><td>载波角频率</td><td><code>omega</code></td><td>待测信号角频率，rad/s；<code>omega = 2π * f0</code></td></tr>
+<tr><td>工作点</td><td><code>lam0</code></td><td>内驱幅值，系统处于混沌态</td></tr>
+<tr><td>等效阈值</td><td><code>lam_c</code></td><td>混沌→大尺度周期的临界值，参考值 <code>0.7335</code></td></tr>
+<tr><td>判态统计量</td><td><code>pstd</code></td><td>Poincaré 截面点集的标准差</td></tr>
+<tr><td>单振子</td><td><code>osc</code></td><td>一路 Duffing 积分器实例</td></tr>
+<tr><td>相位阵列</td><td><code>bank</code></td><td><code>N_BETA</code> 个 <code>osc</code>，共享同一输入序列，初相不同</td></tr>
+<tr><td>帧</td><td><code>frame</code></td><td>一次判决所需的最短样本块，<code>FRAME_N</code> 个样本</td></tr>
+<tr><td>帧号</td><td><code>frame_id</code></td><td>单调递增整数，用于包重组、日志与上位机对齐</td></tr>
+<tr><td>输入样本</td><td><code>u</code></td><td>待测信号采样值，单位与 <code>lam0</code> 同为归一化策动力；固件中为 Q6.12</td></tr>
+<tr><td>频率提示</td><td><code>w_hint</code></td><td>头包携带的发送端 <code>omega</code>，<strong>仅供联调旁路</strong>，不作判决依据</td></tr>
+<tr><td>判决门限</td><td><code>q_th</code></td><td><code>pstd &lt; q_th</code> 判为「检测到目标」</td></tr>
+<tr><td>输入电平</td><td><code>peak</code></td><td>一帧内 <code>max(u) - min(u)</code>，用于判输入静默/断线，与 <code>pstd</code> 无关</td></tr>
+<tr><td>每样本 SNR</td><td><code>SNR_E</code></td><td><code>10lg((A²/2)/σ²)</code>，每样本能量比。与「力口径 SNR」（按 <code>lam</code> 归一）差 <code>10lg h1</code>，本链路 <strong>−17 dB</strong>；A6 的 −7.4 dB 是力口径。<strong>引用 SNR 必须带口径</strong></td></tr>
+</tbody></table>
+<p><strong><code>u</code> 里没有策动力</strong>：接收序列 = 信号 + 噪声，<code>lam0·cos τ</code> 由 §4.4 的 <code>drv()</code> 在积分内产生，<strong>不进 <code>u</code></strong>。这条对向量导出（§9.1）与下行联调（§8.4）同样成立。</p>
+<p><strong>禁止使用的写法</strong>：<code>ν</code>（旧称，等于 <code>omega/R</code>，代码中不得出现）、<code>simulate</code>（内核函数名已统一为 <code>duffing_step</code>）、<code>阈值 0.73</code>（必须写 <code>0.7335</code> 并注明来源）、<code>alpha</code> 单指相位插值权重（相位相关量一律写 <code>ph</code> / <code>alpha_q30</code>，避免与噪声谱指数 <code>alpha</code> 混用）、把 <code>lam0·cos τ</code> 混进 <code>u</code>（等于把 <code>lam0</code> 算两遍，见 §4.4 禁止 3）。</p>
+<hr>
+<h2>1. 项目目标与功能边界</h2>
+<h3>1.1 目标（全部可判定）</h3>
+<table><thead><tr><th>ID</th><th>目标</th><th>判定标准</th></tr></thead><tbody>
+<tr><td>G1</td><td>在 ESP32 上以 Q6.12 定点实时积分 Duffing 振子</td><td>单步耗时 p95 ≤ 8 μs <code>[SPEC]</code></td></tr>
+<tr><td>G2</td><td>对一帧样本输出「有/无目标」二值判决</td><td>与 Python 参考实现判决一致率 ≥ 99% <code>[SPEC]</code></td></tr>
+<tr><td>G3</td><td>三相位阵列覆盖初相盲区</td><td><code>theta</code> 全周内 Pd ≥ 0.85 @ SNR −7.4 dB <code>[SPEC]</code>，依据 <code>[LK]</code></td></tr>
+<tr><td>G4</td><td>控制虚警</td><td>纯噪声 200 帧 Pfa ≤ 0.05 <code>[SPEC]</code></td></tr>
+<tr><td>G5</td><td>内存不随帧长增长</td><td>heap 峰值 ≤ 64 KB <code>[SPEC]</code></td></tr>
+<tr><td>G6</td><td>连续运行 24 h 不复位、无溢出累计</td><td>溢出计数增量 = 0 <code>[TODO]</code></td></tr>
+</tbody></table>
+<h3>1.2 非目标（明确不做）</h3>
+<table><thead><tr><th>不做</th><th>原因</th></tr></thead><tbody>
+<tr><td>扫 R / 频率盲测</td><td>固件 v1 只用已知 <code>R</code>。<strong>上位机已实现</strong>（<code>analyze(mode="auto")</code>：FFT 初值 + 两级细扫），PC 端 0.92 s/帧（重构前 3.6 s），移植代价见 §11.4</td></tr>
+<tr><td>目标初相 <code>theta</code> 估计</td><td>v1 只判决。<strong>上位机已实现</strong> <code>estimate_amp()</code>（4 相位 × 45 点 <code>lambda*</code> 扫描），仅 <code>detected</code> 时执行，PC 端约 2.6 s</td></tr>
+<tr><td>幅度 <code>gamma</code> 估计</td><td>同上</td></tr>
+<tr><td>无线传输</td><td>检测期间必须关闭 RF，见 §2.4。联调走 UART（§8.4），不走 WiFi</td></tr>
+<tr><td>多目标分辨</td><td>单频单目标假设</td></tr>
+<tr><td>浮点积分路径</td><td>定点为唯一路径，不存在运行时切换</td></tr>
+</tbody></table>
+<h3>1.3 端到端判据链</h3>
+<pre><code>样本 u[n] → duffing_step() → Poincaré 点 x_k → pstd → 与 q_th 比较 → 0/1</code></pre>
+<h3>1.4 上位机参考实现 ↔ 固件模块</h3>
+<p><code>tools/</code> 下的双端脚本是固件的<strong>对照基准</strong> <code>[APP]</code>。同一件事实现在两侧，行为必须一致。</p>
+<table><thead><tr><th>环节</th><th>上位机实现</th><th>固件对应</th><th>一致性要求</th></tr></thead><tbody>
+<tr><td>信号与噪声生成</td><td><code>link_proto.make_frame()</code></td><td>传感器 + <code>SELF_TEST</code> DAC 注入</td><td>仅用于生成向量与自检，固件不生成噪声</td></tr>
+<tr><td>分帧发送</td><td><code>split_frame()</code>，<code>CHUNK=1024</code></td><td><code>link_ingest</code>（下行接收）</td><td>包格式逐字节一致，§8.4</td></tr>
+<tr><td>帧重组</td><td><code>FrameBuf</code></td><td><code>link_ingest</code></td><td>重复包丢弃、缺包补零、超时丢弃，三条必须同</td></tr>
+<tr><td>判决</td><td><code>analyze()</code> → <code>pstd_array()</code></td><td><code>detector</code></td><td>同一 <code>betas</code> 顺序、同一 <code>burn_frac</code>、同一取 <code>min</code></td></tr>
+<tr><td>扫 R（v2）</td><td><code>fft_guess()</code> + <code>scan_R()</code></td><td>未实现</td><td>§11.4</td></tr>
+<tr><td>估幅（v2）</td><td><code>estimate_amp()</code></td><td>未实现</td><td>仅 <code>detected</code> 时执行</td></tr>
+<tr><td>参数热更新</td><td>主线程 100 ms 刷新 <code>self.cur</code>，工作线程每帧读</td><td>NVS / 命令，<strong>帧边界生效</strong></td><td>§5.4</td></tr>
+</tbody></table>
+<p><strong>初始化顺序</strong>（两侧一一对应；不要先建任务后建缓冲）：</p>
+<table><thead><tr><th>步</th><th>上位机（<code>RxApp</code>）</th><th>固件（<code>app_main</code>）</th></tr></thead><tbody>
+<tr><td>1</td><td>建 <code>Tk</code> 与控件，读默认参数</td><td>读 NVS 配置，按 §10.4 校验</td></tr>
+<tr><td>2</td><td><code>_refresh_derived()</code> 刷派生量提示（<code>f0</code>、周期数、R 模式说明）</td><td>由 §3.1 常量算 <code>h1</code>/<code>ph_inc</code>/<code>frame_n</code>，<code>static_assert</code></td></tr>
+<tr><td>3</td><td><code>start()</code>：先建 <code>stop_evt</code> 与参数快照，再起线程</td><td><code>ovf_cnt=0</code>、自检内存、建 ringbuf</td></tr>
+<tr><td>4</td><td>起 <code>_recv</code>（收包装配）与 <code>_worker</code>（判决）两个线程</td><td>起 <code>acq_task</code>（核 0）与 <code>proc_task</code>（核 1）</td></tr>
+<tr><td>5</td><td><code>_drain()</code> 每 100 ms 取结果 → 画图 / 刷状态条</td><td><code>uplink</code> 每帧上报 + <code>TRIG</code></td></tr>
+<tr><td>6</td><td><strong>无此环节</strong>：靠人工先跑纯噪声估门限</td><td><code>CALIB</code> 采 20 帧标定 <code>q_th</code>（§5.3）</td></tr>
+</tbody></table>
+<p>第 6 步是两侧唯一的结构差异：上位机是离线工具，没有现场标定环节；固件必须自带，否则 <code>q_th</code> 只能是仿真值（<code>[TODO]</code>）。</p>
+<hr>
+<h2>2. 硬件与外设接口</h2>
+<h3>2.1 最小系统</h3>
+<table><thead><tr><th>项</th><th>规格</th><th>备注</th></tr></thead><tbody>
+<tr><td>模组</td><td>ESP32-WROOM-32（Xtensa LX6 双核，240 MHz）</td><td>ESP32-S3 亦可，需改引脚宏</td></tr>
+<tr><td>Flash</td><td>≥ 4 MB</td><td>固件 &lt; 300 KB</td></tr>
+<tr><td>晶振</td><td>40 MHz</td><td>采样率精度的基准</td></tr>
+<tr><td>供电</td><td>5 V / 500 mA，LDO 3.3 V</td><td>纹波 &lt; 10 mV，见 §2.4</td></tr>
+<tr><td>传感器</td><td>磁通门 / 感应线圈，输出模拟电压</td><td>需前置放大至 0–3.0 V</td></tr>
+<tr><td>串口</td><td>CP2102 / CH340</td><td>115200 8N1；回放联调用 460800，见 §8.4</td></tr>
+</tbody></table>
+<p><strong>前置增益的标定目标</strong>：本规格全部数值（<code>A = 0.02</code>、门限 <code>q_th</code>、<code>lam_eff</code> 余量 0.0065）都在「归一化策动力」单位下，<code>[APP]</code> 的噪声口径是每样本 <code>sigma·sqrt(h1) = 7.07e-3</code>，折 Q6.12 为 <strong>29 LSB</strong>。因此前置放大应标定到「无目标时背景噪声 RMS ≈ 29 LSB」，<code>A = 0.0199</code> 对应 <strong>82 LSB</strong>。增益偏低会让 <code>A</code> 变小、<code>lam_eff</code> 过不了阈值（表现为「怎么都判不出」）；偏高则噪声吃掉动态范围。<strong>这是 A5/A6 不达标最常见的原因，先查增益再查算法。</strong></p>
+<h3>2.2 引脚分配</h3>
+<table><thead><tr><th>信号</th><th>GPIO</th><th>复用</th><th>方向</th><th>约束</th></tr></thead><tbody>
+<tr><td><code>ADC_IN</code></td><td>34</td><td>ADC1_CH6</td><td>输入</td><td><strong>仅输入脚</strong>，无内部上下拉</td></tr>
+<tr><td><code>ADC_AUX</code></td><td>35</td><td>ADC1_CH7</td><td>输入</td><td>备用/参考通道，v1 未用</td></tr>
+<tr><td><code>SELF_TEST</code></td><td>25</td><td>DAC1</td><td>输出</td><td>注入自检正弦，用于 §9.3 A3</td></tr>
+<tr><td><code>TRIG</code></td><td>4</td><td>GPIO</td><td>输出</td><td>判决为「有」时拉高 100 ms</td></tr>
+<tr><td><code>LED</code></td><td>2</td><td>GPIO</td><td>输出</td><td>板载；心跳 1 Hz / 报警常亮</td></tr>
+<tr><td><code>UART_TX</code></td><td>1</td><td>U0TXD</td><td>输出</td><td>日志与二进制上报</td></tr>
+<tr><td><code>UART_RX</code></td><td>3</td><td>U0RXD</td><td>输入</td><td>命令注入</td></tr>
+<tr><td><code>BOOT</code></td><td>0</td><td>strapping</td><td>输入</td><td>烧录，运行时勿拉低</td></tr>
+</tbody></table>
+<p>外部 ADC 变体（<code>ADC_SOURCE=ADS1256</code>，SPI）：</p>
+<table><thead><tr><th>信号</th><th>GPIO</th><th>约束</th></tr></thead><tbody>
+<tr><td><code>SPI_SCK</code></td><td>18</td><td>—</td></tr>
+<tr><td><code>SPI_MISO</code></td><td>19</td><td>—</td></tr>
+<tr><td><code>SPI_MOSI</code></td><td>23</td><td>—</td></tr>
+<tr><td><code>SPI_CS</code></td><td>5</td><td>strapping 脚，上电需为高</td></tr>
+<tr><td><code>DRDY</code></td><td>27</td><td>下降沿中断</td></tr>
+<tr><td><code>RESET</code></td><td>26</td><td>—</td></tr>
+</tbody></table>
+<p><strong>两套引脚互斥</strong>：<code>ADC_IN</code>(34) 与 SPI 组不可同时启用，由编译期 <code>static_assert</code> 保证。</p>
+<h3>2.3 禁止使用的引脚</h3>
+<table><thead><tr><th>GPIO</th><th>原因</th></tr></thead><tbody>
+<tr><td>6–11</td><td>接内部 SPI Flash，占用即无法启动</td></tr>
+<tr><td>12–15</td><td>strapping，上电电平影响启动模式</td></tr>
+<tr><td>16、17</td><td>部分模组接 PSRAM</td></tr>
+<tr><td>0、2、5</td><td>strapping；仅按上表用途使用</td></tr>
+</tbody></table>
+<h3>2.4 反模式（违反则指标不可复现）</h3>
+<ol><li><strong>禁止使用 ADC2</strong>：ADC2 与 WiFi 共用仲裁器，开 RF 时读数失效。只能用 ADC1。</li><li><strong>检测期间关闭 WiFi/BT</strong>：RF 突发电流在 3.3 V 轨上产生 &gt; 50 mV 波动，直接进入 1.59 Hz 带内。</li><li><strong>ADC 源阻抗 &lt; 10 kΩ</strong>：ESP32 ADC 采样保持电容充电不足会引入非线性。前置放大输出串 1 kΩ + 100 nF 到地。</li><li><strong>硬件高通截止 ≥ 0.1 Hz</strong>：抑制传感器直流偏置与 ADC 1/f 漂移；截止频率必须远低于 <code>f0 = 1.5915 Hz</code>。</li><li><strong>模拟地与数字地单点连接</strong>，模拟部分加屏蔽罩。</li></ol>
+<hr>
+<h2>3. 配置参数</h2>
+<h3>3.1 算法常量（机器可解析）</h3>
+<pre><code># ---- 信号与时间基 ----
+omega:      10.0          # [S2] rad/s, 待测信号角频率
+f0:          1.5915494    # [S2] Hz, = omega / 2π
+fs:        500.0          # [SPEC] Hz, 采样率（实际值须标定, 见 §9.3 A1）
+dt:          0.002        # [SPEC] s, = 1 / fs
+h1:          0.02         # [S2] 数值步长 = R * dt, R = omega
+R:          10.0          # [S2] 尺度系数, 检测时固定 = omega
+
+# ---- 振子参数 ----
+lam0:        0.72         # [S2] 工作点（混沌态）
+lam_c:       0.7335       # [S2] 参考等效阈值（浮点, 0.001 步长精扫）
+damping:     0.5          # [S2] 线性阻尼系数
+n_beta:      3            # [LK] 相位阵列路数
+betas_deg:  [0.0, -120.0, 120.0]   # [APP] 各路初相偏置（度）——顺序即数组下标，禁止重排
+phi0:        0.0          # [SPEC] 第 0 路初相, 运行时置 0 便于复现
+
+# ---- 帧结构 ----
+n_cycles:  150.0          # [S2] 每帧载波周期数
+n_cycles_min: 48.0        # [LK] 硬下限, 低于此判据抖动
+burn_frac:   0.5          # [S2] 前 50% Poincaré 点丢弃
+step_per_cycle: 314.1592653589793   # = 2π / h1, 禁止取整为 314
+frame_n:   47124          # [SPEC] = round(n_cycles * step_per_cycle)；上位机默认 94.2 s 只给 47100 点
+frame_dur:   94.248       # [SPEC] s, = frame_n * dt
+poc_total:  150           # [SPEC] 每帧总 Poincaré 点数 = n_cycles
+poc_pts:     75           # [SPEC] 实际累加点数 = poc_total * (1 - burn_frac)
+poc_skip:    75           # [SPEC] 前 75 点丢弃 = poc_total - poc_pts
+
+# ---- 判决 ----
+q_th:        0.08         # 当前生效门限；CALIB 成功后写 NVS 覆盖
+q_th_default: 0.08        # [APP][S2] 出厂默认（上位机双端与阶段 2/3 同一口径），标定失败回退
+q_th_pfa5:   0.347        # [LK] 等虚警门限 = 200 帧 H0 的 5% 分位；用它报 Pfa，不用它做默认
+q_th_min:    1.0e-7       # [SPEC] pstd 塌缩下限（定点退化到同一格点），不是"断线检测"
+q_peak_min:  5e-3         # [SPEC] 一帧 peak 低于此值判输入静默（≈ 20 LSB），见 §10.1
+silent_n:    5            # [SPEC] 连续多少帧静默才报 ERR_INPUT_SILENT
+
+# ---- 定点算术 ----
+q_pre:       6            # [SPEC] 整数位（含符号）
+q_frac:     12            # [S5] 小数位, F=12 与浮点同阈值
+q_coef_frac: 30           # [SPEC] 系数/三角函数小数位（h1、cos）
+q_one:      4096          # = 1 &lt;&lt; q_frac
+q_lsb:       0.00024414   # = 2^-12
+q_max:    131071          # = 32.0 * 4096 - 1, 超出即溢出
+ph_inc:  13671306         # [SPEC] 相位累加增量 = round(h1 / 2π * 2^32)
+
+# ---- 任务与缓冲 ----
+adc_chunk:  512           # [SPEC] 单次 DMA 读取样本数
+ring_items: 8192          # [SPEC] 环形缓冲项数（uint16 计数）
+task_core_acq:  0         # [SPEC] 采集任务绑定核
+task_core_proc: 1         # [SPEC] 计算任务绑定核
+prio_acq:     8           # [SPEC] FreeRTOS 优先级
+prio_proc:    6           # [SPEC]
+stack_proc: 8192          # [SPEC] byte
+timeout_ms: 3000          # [SPEC] 帧超时, 超时丢弃
+
+# ---- 联调下行（§8.4，v1 可选） ----
+link_chunk: 1024          # [APP] 每包样本数，与上位机 CHUNK 一致
+link_hdr:     21          # [APP] 数据包头长 = 4s + c + I + I + I + f
+uart_baud: 460800         # [SPEC] 回放波特率；115200 只够 ×1 实时
+replay_mult_max: 10       # [SPEC] 回放倍率上限（×10 → 19.5 KB/s，见 §8.4 带宽表）</code></pre>
+<h3>3.2 参数依赖：改一项会连锁触发什么</h3>
+<table><thead><tr><th>改动</th><th>必须同步</th><th>必须重做的事</th></tr></thead><tbody>
+<tr><td><code>fs</code></td><td><code>dt</code>、<code>h1 = R*dt</code>、<code>frame_n</code>、<code>ph_inc</code></td><td><strong>重扫 <code>lam_c</code></strong> <code>[S5]</code>——<code>h1</code> 变了，阈值跟着漂</td></tr>
+<tr><td><code>omega</code></td><td><code>f0</code>、<code>R</code>、<code>h1</code>、<code>ph_inc</code></td><td>同上，且重标前置滤波器</td></tr>
+<tr><td><code>R</code></td><td><code>h1</code>、<code>ph_inc</code></td><td><strong>运行时参数</strong>（"已知 R"由用户给出，非编译期写死），供 §9.3 A4 的失谐测试；单独改 R 不重扫 <code>lam_c</code></td></tr>
+<tr><td><code>lam0</code></td><td>—</td><td>重跑 H0 标定 <code>q_th</code>；<code>lam0 ≥ 0.74</code> 会使 H0 自相变 <code>[S5]</code></td></tr>
+<tr><td><code>q_th</code></td><td>—</td><td>改门限即改 Pfa。必须重跑 A5，并<strong>同时报门限值与噪声条件</strong>，否则数字无意义（§9.3）</td></tr>
+<tr><td><code>q_frac</code></td><td><code>q_one</code>、<code>q_lsb</code>、<code>q_max</code></td><td>重跑 §9.2 全部用例；<code>F ≤ 8</code> 时判据失效 <code>[S5]</code></td></tr>
+<tr><td><code>n_cycles</code></td><td><code>frame_n</code>、<code>poc_pts</code></td><td>不得 &lt; 48；缩短会同时抬高 <code>pstd</code> 与判决抖动 <code>[LK]</code></td></tr>
+<tr><td><code>betas_deg</code></td><td>—</td><td>重算 §11.1 覆盖率表；<strong>数组顺序即下标</strong>，重排会让 <code>p_q16[]</code> 与日志错位</td></tr>
+<tr><td><code>uart_baud</code></td><td><code>replay_mult_max</code></td><td>倍率上限 <code>= baud / (20·fs)</code>（8N1 每字节 10 bit、<strong>int16 每样本 2 B</strong>，协议 v2）；460800 时为 46，工程取 10 留余量</td></tr>
+</tbody></table>
+<p><strong><code>lam_c</code> 的重扫方法</strong>：喂全零序列（仅内驱），在 <code>[0.70, 0.84]</code> 内以 0.001 步长扫 <code>lam</code>，取首个 <code>pstd &lt; 0.1</code> 的点。必须 <code>n_cycles ≥ 190</code>（对应 T=1200 s），短窗会把「未收敛」读成「阈值更高」<code>[S5]</code>。</p>
+<h3>3.3 上位机默认值 ↔ 固件默认值（<code>[APP]</code>）</h3>
+<p>实现时按此表对齐，不要凭 §3.1 的 yaml 反推上位机行为——<code>[APP]</code> 的默认值写在控件初始化里，与 yaml 有 24 个样本的差异。</p>
+<table><thead><tr><th>参数</th><th>上位机默认</th><th>固件默认</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>omega</code> / <code>R</code></td><td>10.0 / 10.0</td><td>10.0</td><td>发送端 <code>omega</code> 与接收端 <code>R</code> 必须相等；<code>known</code> 模式<strong>不做校验</strong>，靠人保证</td></tr>
+<tr><td><code>fs</code></td><td>500</td><td>500</td><td>接收端勾「跟随发送端的 fs」时用头包 <code>fs</code>；固件用 A1 标定值</td></tr>
+<tr><td><code>duration</code></td><td>94.2 s → <strong>47100 点 / 149.92 周期</strong></td><td>94.248 s → <strong>47124 点 / 150 周期</strong></td><td>差 24 点，判据无差别；回放以头包 <code>n</code> 为准，<code>steps = n</code></td></tr>
+<tr><td><code>sigma</code></td><td>0.05</td><td>不适用</td><td>固件面对真实噪声，靠 <code>CALIB</code> 现场标定与前置增益（§2.1）</td></tr>
+<tr><td><code>SNR</code></td><td>−11.0 dB（滑块 −30…+5）</td><td>不适用</td><td>仅用于生成向量；A4/A6 用 −7.4 dB。<strong>力口径</strong>（按 <code>lam</code> 归一，与 <code>sigma</code> 一起决定 <code>A</code>）</td></tr>
+<tr><td><code>SNR_E</code></td><td>−15.0 dB（框架演示默认）</td><td>不适用</td><td>仅「框架演示 Pfa/Pd」窗口用：<code>sigma = sqrt((A²/2)/10^(SNR_E/10))</code>，只填 <code>A</code> 与 <code>SNR_E</code>，<code>sigma</code> 只读反算。与上一行差 <code>10lg h1</code> = <strong>−17 dB</strong>，见 §3.4</td></tr>
+<tr><td><code>alpha</code>（噪声谱）</td><td>0（白噪）/ 1（1/f 色噪）</td><td>不适用</td><td>见 §3.4</td></tr>
+<tr><td><code>lam0</code></td><td>0.72</td><td>0.72</td><td>必须 <code>&lt; lam_c = 0.7335</code></td></tr>
+<tr><td><code>q_th</code></td><td>0.08</td><td>0.08（标定后覆盖）</td><td>见 §3.1 三条门限的分工</td></tr>
+<tr><td><code>betas</code></td><td><code>0, -120, +120</code></td><td>同</td><td>顺序即下标，禁止重排</td></tr>
+<tr><td><code>burn_frac</code></td><td>0.5</td><td>0.5</td><td>前 75 个 Poincaré 点丢弃</td></tr>
+<tr><td>阵列</td><td>三相位（可切单路 β=0）</td><td>三相位</td><td>单路只用于带宽测量与估幅</td></tr>
+<tr><td><code>do_est</code></td><td>开（仅 <code>detected</code> 时执行）</td><td>无</td><td>v2，§11.4</td></tr>
+<tr><td>R 模式</td><td><code>known</code>（默认）/ <code>hint</code> / <code>auto</code></td><td><code>known</code></td><td><code>hint</code> 的使用边界见 §8.4</td></tr>
+</tbody></table>
+<h3>3.4 噪声类型（<code>[APP]</code> 已实现，固件无需实现）</h3>
+<p>上位机可注入两种噪声，用 <code>make_noise(alpha)</code> 生成：</p>
+<table><thead><tr><th><code>alpha</code></th><th>类型</th><th>实现</th><th>谱形</th></tr></thead><tbody>
+<tr><td>0</td><td>白噪</td><td><code>rng.standard_normal</code></td><td>平坦</td></tr>
+<tr><td>1</td><td>1/f 色噪</td><td><code>rfft</code> 后按 <code>f^(-alpha/2)</code> 加权、去 DC、再归一化到单位方差</td><td>低频抬高</td></tr>
+</tbody></table>
+<p><strong>关键</strong>：色噪只改谱形，<strong>不改 σ 口径</strong>——归一化后每样本标准差仍是 <code>sigma·sqrt(h1)</code>。所以 §3.1 的 <code>A</code>、<code>lam_eff</code>、<code>q_th</code> 全部沿用。固件侧不需要生成噪声，但 <code>CALIB</code> 必须在<strong>两种谱形</strong>下都验一遍：真实磁通门的 1/f 拐点若落在 1.6 Hz 附近，白噪下标定的 <code>q_th</code> 会偏乐观（<code>[TODO]</code>）。</p>
+<p><strong>两套 SNR 口径，别混着引用</strong>：力口径按 <code>lam0</code> 归一（<code>SNR = 20lg(A/lam0)</code>，配 <code>sigma</code> 定 <code>A</code>），每样本口径 <code>SNR_E = 20lg(A/(σ√2))</code>。两者差 <code>10lg h1</code>，本链路 <code>h1 = 0.02</code> → <strong>−17 dB</strong>。所以界面读到 −7.4 dB 的那一帧，每样本是 <strong>+9.6 dB</strong>，波形图上本该看得见正弦；反之 −15 dB（<code>SNR_E</code>）的框架演示里看不到波形也是正常的。<strong>不要用「波形看不出来」判信号没发出去</strong>，判据只有 <code>pstd</code> 与相干投影。</p>
+<hr>
+<h2>4. 定点算术契约</h2>
+<h3>4.1 双格式：状态 Q6.12 + 系数 Q0.30</h3>
+<p><strong>状态量</strong>（<code>x</code>, <code>y</code>, 样本 <code>u</code>）与<strong>系数</strong>（<code>h1</code>、<code>h1/2</code>、<code>h1/6</code>、<code>lam0</code>、<code>cos</code>）必须用两种格式，否则 RK4 无法成立。</p>
+<table><thead><tr><th>类别</th><th>格式</th><th>容器</th><th>范围</th><th>分辨率</th></tr></thead><tbody>
+<tr><td>状态 <code>x</code>, <code>y</code>, <code>u</code></td><td>Q6.12</td><td><code>int32_t</code></td><td><code>[-32.0, +31.9998]</code></td><td><code>2.4414e-4</code></td></tr>
+<tr><td>系数 <code>h1</code>, <code>h1/2</code>, <code>h1/6</code>, <code>cos</code></td><td>Q0.30</td><td><code>int32_t</code></td><td><code>[-2.0, +2.0)</code></td><td><code>9.3132e-10</code></td></tr>
+<tr><td><code>lam0</code></td><td><strong>Q6.12</strong></td><td><code>int32_t</code></td><td>同状态</td><td><code>2.4414e-4</code></td></tr>
+</tbody></table>
+<p><code>lam0 = 0.72</code> 若用 Q0.30 是 <code>7.73e8</code>，<strong>溢出 int32</strong>（Q0.30 的值域只有 <code>[-2, 2)</code>）。故 <code>lam0</code> 必须留在 Q6.12（<code>2949</code>，实际 <code>0.719971</code>，偏差 <code>1.2e-4</code>，占阈值余量 <code>0.0065</code> 的 1.8%，不影响判决），与 <code>cos</code> 相乘时走 <code>qmul_coef</code> 的混合路径（§4.2）。重扫 <code>lam_c</code> 时必须用同一个量化后的 <code>lam0</code>。</p>
+<p><strong>为什么必须分开</strong>：<code>h1/6 = 0.0033333</code> 若存成 Q6.12 只有 <code>14</code> 个 LSB（<code>14/4096 = 0.003418</code>，相对误差 <strong>2.5%</strong>），每步末态组合都会系统性偏大，等效于把步长改掉 2.5%——远超 ±0.1% 的频率带宽，判据直接失效。存成 Q0.30 是 <code>3579139</code>，相对误差 <code>3e-10</code>。</p>
+<table><thead><tr><th>常量</th><th>Q0.30 值</th><th>实际值</th><th>相对误差</th></tr></thead><tbody>
+<tr><td><code>h1 = 0.02</code></td><td><code>21474836</code></td><td><code>0.0199999996</code></td><td><code>2e-8</code></td></tr>
+<tr><td><code>h1/2</code></td><td><code>10737418</code></td><td><code>0.0099999995</code></td><td><code>5e-8</code></td></tr>
+<tr><td><code>h1/6</code></td><td><code>3579139</code></td><td><code>0.0033333297</code></td><td><code>8e-6</code></td></tr>
+</tbody></table>
+<p><strong>与阶段 5 的关系</strong>：<code>[S5]</code> 用 Q2.12（W=14 窄字长，模拟 FPGA），且 <strong><code>cos</code> 用双精度、<code>h1</code> 用浮点</strong>——即 <code>[S5]</code> 从未验证「系数也定点化」。本规格的 Q6.12 状态与 <code>[S5]</code> 的小数位相同（舍入噪声同量级），但额外引入了 Q0.30 系数与 LUT <code>cos</code>，<strong>这是 <code>[S5]</code> 未覆盖的新误差源</strong>，必须由 §9.2 T2/T9 与 §11.3 的 <code>cos_lut</code> 项验证。</p>
+<h3>4.2 乘法与舍入</h3>
+<pre><code>// 状态 × 状态 -&gt; 状态 (Q6.12 × Q6.12 -&gt; Q6.12)
+static inline int32_t qmul(int32_t a, int32_t b) {
+    return (int32_t)(((int64_t)a * b + (1 &lt;&lt; 11)) &gt;&gt; 12);
+}
+
+// 状态 × 系数 -&gt; 状态 (Q6.12 × Q0.30 -&gt; Q6.12)
+static inline int32_t qmul_coef(int32_t a_q12, int32_t c_q30) {
+    return (int32_t)(((int64_t)a_q12 * c_q30 + (1LL &lt;&lt; 29)) &gt;&gt; 30);
+}</code></pre>
+<ul><li>两个插件的中间积都必须 <code>int64_t</code>：<code>qmul</code> 的上界 <code>131071² = 1.7e10</code>，<code>qmul_coef</code> 的上界 <code>131071 × 2^31 = 2.8e14</code>，均超 <code>int32</code>。</li><li><code>qmul_coef</code> 的值域要求 <code>|a_q12| ≤ 2^17</code>（即状态 ≤ 32.0），与 Q6.12 范围一致。</li><li>舍入为「加半后算术右移」，允许 ±1 LSB 偏差；不要求 round-half-away-from-zero。</li><li><code>qadd</code> / <code>qsub</code> 为饱和加，见 §4.3。<strong>但 §4.4 的末态组合不得用 <code>qadd</code></strong>，见该节说明。</li></ul>
+<h3>4.3 溢出策略</h3>
+<table><thead><tr><th>情形</th><th>动作</th></tr></thead><tbody>
+<tr><td><code>qadd</code>/<code>qsub</code> 结果超 <code>[-131072, 131071]</code></td><td>钳位到边界，<code>ovf_cnt++</code></td></tr>
+<tr><td>单帧 <code>ovf_cnt &gt; 0</code></td><td>该帧 <code>pstd</code> 置 <code>NAN</code>，判决输出 <code>ERR_OVF</code>，不上报 0/1</td></tr>
+<tr><td>单帧 <code>ovf_cnt &gt; 100</code></td><td>判定参数失配（<code>lam0</code> 或输入幅度错误），停机 LED 快闪</td></tr>
+</tbody></table>
+<h3>4.4 单步积分（固定字段，实现必须逐项对应）</h3>
+<p>方程为一阶化系统 <code>x' = y</code>、<code>y' = -0.5y + x³ - x⁵ + lam0·cos(τ) + u</code>。</p>
+<pre><code>输入:  状态 x, y (Q6.12)   相位 ph (uint32)   样本 u_cur, u_nxt (Q6.12)
+常量:  H1_Q30 = 21474836   HH_Q30 = 10737418   H6_Q30 = 3579139      (Q0.30)
+       LAM_Q12 = 2949     HALF_Q12 = 2048                            (Q6.12)
+
+u_mid = (u_cur + u_nxt) &gt;&gt; 1                                  // 算术右移 1 位, 精确
+drv(ph, u) = qadd(qmul_coef(LAM_Q12, cos_q30(ph)), u)
+
+f(xx, yy, d):
+    x2 = qmul(xx, xx)
+    x3 = qmul(x2, xx)
+    x5 = qmul(x2, x3)                       // 三次乘, 禁止 pow()
+    return qsub(qsub(qadd(x3, d), x5), qmul(HALF_Q12, yy))
+
+k1x = y                        k1y = f(x,            y,            drv(ph,             u_cur))
+k2x = y  + HH·k1y              k2y = f(x + HH·k1x,   y + HH·k1y,   drv(ph + PH_INC/2,  u_mid))
+k3x = y  + HH·k2y              k3y = f(x + HH·k2x,   y + HH·k2y,   drv(ph + PH_INC/2,  u_mid))
+k4x = y  + H1·k3y              k4y = f(x + H1·k3x,   y + H1·k3y,   drv(ph + PH_INC,    u_nxt))
+
+// 末态组合: 以下三行必须逐字照做, 不得改写为 qadd 连加
+int64_t sx = (int64_t)k1x + 2LL*k2x + 2LL*k3x + k4x;
+int64_t sy = (int64_t)k1y + 2LL*k2y + 2LL*k3y + k4y;
+x = qadd(x, (int32_t)((sx * H6_Q30 + (1LL &lt;&lt; 29)) &gt;&gt; 30));
+y = qadd(y, (int32_t)((sy * H6_Q30 + (1LL &lt;&lt; 29)) &gt;&gt; 30));
+
+ph += PH_INC                                                  // uint32 自然溢出 = 跨 2π</code></pre>
+<p>其中 <code>HH·k</code> 表示 <code>qmul_coef(k, HH_Q30)</code>，<code>H1·k</code> 表示 <code>qmul_coef(k, H1_Q30)</code>。</p>
+<p><strong>为什么末态不能复用 <code>qmul_coef</code></strong>：<code>sx</code> 的量级上界为 <code>6 × q_max = 786426</code>，超出 <code>qmul_coef</code> 的入参值域（<code>≤ 2^17</code>），必须先 <code>int64</code> 累加再内联移位。用 <code>qadd</code> 连加则会中途饱和——这正是「每步都少一点、最后判据崩掉」的典型来源。</p>
+<p><strong>三条硬性禁止</strong>（违反即 <code>[S5]</code> 记录的 0.77 假阈值重演）：</p>
+<ol><li><code>k2</code>/<code>k3</code> <strong>必须</strong>用 <code>h1/2</code>。旧实现误用整步 <code>h1</code>，积分精度退化到 RK2，相变点被推到 0.77 <code>[S5]</code>。</li><li><code>x^5</code> 用 <code>x2=x*x; x3=x2*x; x5=x2*x3</code>，三次乘。禁止 <code>pow()</code>，禁止 <code>x*x*x*x*x</code> 串联（尾两个乘法会越界）。</li><li><code>u</code> 只作为 <code>drv</code> 的独立加项，<strong>不得</strong>并入 <code>lam0</code>（<code>lam0 + u</code> 是错误写法，会改变 <code>lam_eff</code> 的物理含义）<code>[S5]</code>。</li></ol>
+<p><strong><code>cos_q30</code> 规格</strong>（这是 <code>[S5]</code> 未覆盖的新误差源）：</p>
+<table><thead><tr><th>项</th><th>值</th></tr></thead><tbody>
+<tr><td>表长</td><td>1024 项，覆盖 <code>[0, π/2)</code>，Q0.30</td></tr>
+<tr><td>索引</td><td><code>idx = ph &gt;&gt; 22</code>；<code>frac = (ph &gt;&gt; 6) &amp; 0xFFFF</code></td></tr>
+<tr><td>插值</td><td><code>lut[idx] + ((lut[idx+1] - lut[idx]) * frac &gt;&gt; 16)</code></td></tr>
+<tr><td>象限折叠</td><td>用 <code>ph</code> 的最高两位选择符号与镜像</td></tr>
+<tr><td>最大绝对误差</td><td><code>5e-6</code>（线性插值 <code>Δ²/8</code>，<code>Δ = 2π/1024</code>）</td></tr>
+<tr><td>折算到激励</td><td><code>5e-6 × 0.72 = 3.6e-6</code>，约为 Q6.12 一个 LSB 的 1.5%，可忽略</td></tr>
+</tbody></table>
+<p>表占 <code>1024 × 4 B = 4 KB</code>，放 <code>const</code> 段（flash），不占 DRAM。若 §9.2 T9 不通过，先试 4096 项表，再试 CORDIC，<strong>不得</strong>改用 <code>cosf()</code>（无硬件双精度，且破坏跨平台一致性）。</p>
+<h3>4.5 相位累加器与 Poincaré 采样</h3>
+<p>用 DDS 式满量程相位：<code>uint32_t ph</code>，<code>2^32 ≡ 2π</code>，每步 <code>ph += PH_INC</code>，溢出即跨过一个载波周期。</p>
+<pre><code>uint32_t prev = ph;
+ph += PH_INC;
+if (ph &lt; prev) {                    // 本轮跨过 2πk
+    uint32_t frac = ph;             // 跨线**后**的余量, 0..PH_INC-1
+    // 权重 = 跨线**前**走过的步内比例 = 1 - frac/PH_INC, 必须取补角
+    uint32_t before = PH_INC - frac;
+    int32_t alpha_q30 = (int32_t)((uint64_t)before * 1073741824ull / (uint64_t)PH_INC);
+    poc_val = qadd(x_prev, qmul_coef(qsub(x, x_prev), alpha_q30));
+    poc_push(poc_val);
+}
+x_prev = x;                          // 每步更新, 供下一次跨周期插值</code></pre>
+<p><code>alpha_q30</code> 的分子 <code>before × 2^30</code> 最大 <code>1.37e7 × 1.07e9 = 1.47e16</code>，<strong>必须用 <code>uint64</code> 中间量</strong>（<code>uint32</code> 会截断）。结果落在 <code>[0, 2^30]</code>，正是 <code>qmul_coef</code> 要求的 Q0.30 值域：<code>before = PH_INC</code>（恰在步末跨线）时 <code>alpha_q30 = 2^30</code>，乘积精确复现 <code>x</code>。若 <code>qmul_coef</code> 的入参上界写死为 <code>2^30-1</code>，需在此钳一位，误差 &lt; 1 LSB。</p>
+<p><strong>补角必须取，这不是可选的写法差异。</strong> <code>frac</code> 是<strong>跨线后</strong>的余量，截点位于 <code>tau + (1 - frac/PH_INC)·h1</code>；直接把 <code>frac/PH_INC</code> 当权重，截点会落到 <code>tau + (frac/PH_INC)·h1</code>，即从跨线处反向偏出 <code>|1 - 2·frac/PH_INC|·h1</code>，最大一个整步，且偏差随 <code>frac</code> 在 <code>[0, h1]</code> 内摆动。同一段浮点 RK4 只换权重实测 <code>[APP]</code>：</p>
+<table><thead><tr><th>状态</th><th><code>frac</code> 口径（kernel 正确）</th><th>余量口径（本节的常见错法）</th><th>按步数取整</th></tr></thead><tbody>
+<tr><td>混沌 <code>lam=0.72</code></td><td><code>4.303e-1</code></td><td><code>4.308e-1</code></td><td><code>4.612e-1</code></td></tr>
+<tr><td>临界 <code>lam=0.7335</code></td><td><code>3.771e-1</code></td><td><code>3.768e-1</code></td><td><code>4.017e-1</code></td></tr>
+<tr><td>周期 <code>lam=0.74</code></td><td><strong><code>3.2e-6</code></strong></td><td><strong><code>1.2e-2</code></strong></td><td><code>3.4e-2</code></td></tr>
+</tbody></table>
+<p>混沌态两种写法看不出差别（差 0.1%），<strong>周期态差 3.6 个量级</strong>——所以这个错在 T5/T7 上不会暴露，只在 T4/T8 上翻车，而且症状与「按步数取整」几乎一样（都是 <code>1e-2</code> 量级），极易误诊为「插值没做对」而反复改 <code>idx</code>。定位时直接对照本表。</p>
+<p><strong>与 <code>tools/kernel_src.py</code> 的对应</strong>：内核写 <code>frac = (2π·idx − τ)/h1</code> 并 clip 到 <code>[0,1]</code>，即「跨线前比例」，与本节 <code>before/PH_INC</code> 逐位等价（<code>idx</code> 就是本节的溢出计数）。改内核口径必须同步改本节，否则 T8 与 <code>[S5]</code> 对不上。</p>
+<p><strong>禁止</strong>按步数取整判周期（如 <code>if (n % 314 == 0)</code>）。按步数取整会把周期态 <code>pstd</code> 从 <code>3.2e-6</code> 抬到 <code>3.4e-2</code>，压掉 4 个量级动态范围 <code>[S2]</code>。</p>
+<p><code>PH_INC = 13671306</code> 的取整误差为 <code>+0.5 LSB</code>（精确值 <code>13671305.512</code>）/步，折算 <code>7.1e-10 rad</code>，150 周期累积 <code>5.4e-6</code> 周期，可忽略。</p>
+<h3>4.6 <code>pstd</code> 计算</h3>
+<pre><code>// poc 点以 Q6.12 存, N = 实际 poc_cnt（正常帧 = poc_pts = 75，只取后 50%）
+int64_t s1 = Σx;                    // Q6.12, |x|≤2, N=75 -&gt; ≤ 6.2e5
+int64_t s2 = Σ(x*x);                // Q8.24, |x|≤2, N=75 -&gt; ≤ 5.1e9 (int64 安全, 不必移位)
+float mean    = (float)s1 / (float)N / 4096.0f;        // 2^12
+float mean_sq = (float)s2 / (float)N / 16777216.0f;    // 2^24
+float var = fmaxf(mean_sq - mean * mean, 0.0f);
+pstd = sqrtf(var);</code></pre>
+<ul><li>统计后处理用 <code>float</code>：仅每帧 1 次，不影响逐样本确定性。</li><li><code>s2</code> 无需右移预处理：<code>N=75</code>、<code>|x|≤2</code> 时上界 5.1e9，远低于 <code>int64</code> 上限。若 <code>N &gt; 2e6</code> 才需要分段累加。</li><li>只有 <code>s1</code>/<code>s2</code> 两个累加器，无点集存储——这是流式架构成立的前提。</li><li><code>pstd</code> 的确定性由 §4.4 的定点积分保证，不由统计后处理保证。</li><li>分母必须用<strong>实际</strong> <code>poc_cnt</code>，不得写死 <code>POC_PTS</code>：帧被截断、<code>ERR_OVF</code> 提前收尾、回放 <code>n &lt; FRAME_N</code> 时点数会少，用常量做分母会系统性压低 <code>pstd</code>（分母偏大 → 方差偏小），表现为「短帧更容易判成有目标」。</li><li><strong>定点地板</strong>：12 位小数位下周期态 <code>pstd</code> 的地板是 <code>2.7e-3</code>（F=12）/ <code>7.6e-3</code>（F=10），来自每步对驱动项与状态的舍入；浮点同一条件是 <code>3.2e-6</code>。门限 <code>0.08</code> 离地板仍有 30 倍余量，判决不受影响，但<strong>浮点值不能当固件指标</strong>（§9.2 T8）。</li></ul>
+<p><strong><code>pstd</code> 不能用来判断线/静默。</strong> <code>u ≡ 0</code> 时系统只剩内驱，而 <code>lam0 = 0.72 &lt; lam_c</code> → 仍处于混沌态，<code>pstd</code> 是 <strong>0.43 量级</strong>（三路实测 <code>[0.431, 0.527, 0.572]</code>，<code>[APP]</code>），不是 0。也就是说：传感器断线、ADC 断流、前置放大掉电，在 <code>pstd</code> 上看起来与「纯背景噪声」几乎一样（噪声帧 0.36–0.48），<strong>只会安静地判「无」</strong>，不会报错。真正的 <code>pstd</code> 塌缩是另一种情形：<code>lam0</code> 越过 <code>lam_c</code>（<code>lam0=0.74</code> 时三路 <code>3.0e-6 / 2.4e-5 / 4.0e-6</code>）或定点字长不足导致轨迹锁死在少数格点（<code>F=4</code> 时全程 <code>pstd ≈ 0</code>）。两种情况必须用不同判据区分：</p>
+<table><thead><tr><th>现象</th><th>物理含义</th><th>判据</th><th>处理</th></tr></thead><tbody>
+<tr><td><code>pstd ≈ 0.43</code>、<code>peak ≈ 0</code></td><td>输入静默（断线/断流）</td><td>输入电平，见 §10.1 <code>ERR_INPUT_SILENT</code></td><td>不输出 0/1</td></tr>
+<tr><td><code>pstd &lt; q_th_min</code></td><td>定点塌缩或 <code>lam0</code> 越界</td><td><code>q_th_min = 1e-7</code></td><td><code>ERR_OVF</code> / <code>ERR_PARAM</code></td></tr>
+<tr><td><code>pstd &lt; q_th</code> 且 <code>peak</code> 正常</td><td>共振 → 检测到目标</td><td><code>pstd</code> 比较</td><td>输出 1</td></tr>
+</tbody></table>
+<hr>
+<h2>5. 数据流与任务模型</h2>
+<h3>5.1 流式架构（不缓存整帧）</h3>
+<p>一帧 <code>47124</code> 样本以 <code>int16</code> 缓存要 <code>92 KB</code>，仍超出本工程给检测链留的 <code>64 KB</code> 峰值预算。因此<strong>必须流式</strong>：</p>
+<pre><code>ADC DMA ──► on_sample(u) ──► duffing_step(3 路) ──► poc_push ──► 滑动 pstd 累加
+                                                                    │
+                                          帧末 ──► pstd ×3 ──► min() ──► 判决</code></pre>
+<p>内存占用与帧长无关：<code>3 × (状态 8 B + 累加器 16 B) + 环形缓冲</code>。<code>[SPEC]</code> 峰值 ≤ 64 KB。</p>
+<p><strong>上位机的「驱动表预算」不可照搬</strong>（2026-11-26 提速改造，见 <code>00-总览/性能优化与基准.md</code>）：PC 侧把 <code>lam·cos(τ+β)+s</code> 在循环外整列预算成 3 条 Python float 列表（单列 <code>3 × 47124</code> 个 float，含对象开销约 <strong>4.5 MB</strong>），换来 11 倍速；固件上这条路<strong>既无必要也不可行</strong>——<code>cos_q30</code> 是 1024 项 LUT（4 KB，flash），驱动项每步实时算两个 <code>qmul</code> 即可。固件若照抄「整帧预存驱动项」，<code>47124 × 3 路 × 4 B ≈ 566 KB</code>，直接顶穿 64 KB 预算，A7 必挂。</p>
+<h3>5.2 双核分工</h3>
+<table><thead><tr><th>核</th><th>任务</th><th>优先级</th><th>职责</th></tr></thead><tbody>
+<tr><td>0</td><td><code>acq_task</code></td><td>8</td><td><code>adc_continuous_read</code> → 写 ringbuf，只做搬运，不做算术</td></tr>
+<tr><td>1</td><td><code>proc_task</code></td><td>6</td><td>从 ringbuf 取样本 → <code>duffing_step</code> ×3 → 帧末判决</td></tr>
+</tbody></table>
+<p>丢样判定：<code>acq_task</code> 写入时若 ringbuf 满，<code>drop_cnt++</code>；一帧内 <code>drop_cnt &gt; 0</code> 则该帧作废（时间轴不连续，Poincaré 点失效）。</p>
+<p><strong>与上位机的对应关系</strong>（<code>[APP]</code>）：<code>_recv</code> 线程只做「收包 → 按 <code>seq</code> 写入定长数组 → 凑齐提交」，与 <code>acq_task</code> 同职责，<strong>不含任何算术</strong>；<code>_worker</code> 线程从队列取整帧、算三路 <code>pstd</code>、出判决，与 <code>proc_task</code> 同职责；<code>_drain</code> 每 100 ms 取结果刷界面，与 <code>uplink</code> 同职责。上位机用两个线程而不是一个，是因为 <code>recvfrom</code> 会阻塞而判决要跑 0.15 s（优化前 1.5 s，见 <code>00-总览/性能优化与基准.md</code>）；固件里对应的是两个任务 + ringbuf，理由相同：<strong>采集绝不能被判决阻塞</strong>。若把判决写进采集回调，94 s 的帧会丢样，<code>drop_cnt</code> 一路涨，帧帧作废。</p>
+<h3>5.3 状态机</h3>
+<pre><code>BOOT ──► CALIB ──► RUN ──► (ERR) ──► RUN
+           │                    └──► HALT
+           └── 详见 transitions</code></pre>
+<table><thead><tr><th>状态</th><th>进入条件</th><th>动作</th><th>退出</th></tr></thead><tbody>
+<tr><td><code>BOOT</code></td><td>上电</td><td>读 NVS 配置、自检内存、<code>ovf_cnt=0</code></td><td>自检通过 → <code>CALIB</code></td></tr>
+<tr><td><code>CALIB</code></td><td>自检通过</td><td>采集 <code>CAL_FRAMES=20</code> 帧纯噪声，标定 <code>q_th</code>（5% 分位）；失败则回退 <code>q_th_default</code></td><td>完成 → <code>RUN</code></td></tr>
+<tr><td><code>RUN</code></td><td>标定完成</td><td>逐帧判决，<code>TRIG</code> 输出；<code>peak &lt; q_peak_min</code> 连续 <code>SILENT_N</code> 帧 → 报 <code>ERR_INPUT_SILENT</code> 但不切状态</td><td>连续 3 帧 <code>ERR_OVF</code> → <code>ERR</code></td></tr>
+<tr><td><code>ERR</code></td><td>溢出/失配</td><td>LED 快闪 2 Hz，<code>TRIG</code> 保持低，日志上报</td><td>收到 <code>RESET</code> 命令或 60 s 超时 → <code>RUN</code></td></tr>
+<tr><td><code>HALT</code></td><td>参数致命错误</td><td>停止采集，等待复位</td><td>仅硬件复位</td></tr>
+</tbody></table>
+<h3>5.4 帧边界与判决</h3>
+<pre><code>帧开始: 清 s1, s2, poc_cnt, ovf_cnt
+每样本: duffing_step ×3 → 每路独立 poc 累加
+        poc_cnt += 1
+        if (poc_cnt &gt; POC_SKIP)  { s1 += x; s2 += x*x; }    // POC_SKIP = 75
+poc_cnt == POC_TOTAL 时: 计算 3 个 pstd（各用 75 个点）
+帧结束: p = min(pstd[0], pstd[1], pstd[2])
+       detected = (p &lt; q_th)</code></pre>
+<p><code>POC_SKIP = 75</code> 即 <code>burn_frac = 0.5</code>：前 75 个 Poincaré 点丢弃，只用后 75 个。<strong>不要</strong>改成「帧末统一丢弃」——那需要缓存全部 150 个点，破坏流式架构。</p>
+<p>三路取 <code>min</code> 是<strong>判决</strong>用法；测量带宽或估幅时必须单路（<code>beta=0</code>），因为三路取 <code>min</code> 会把别的振子在锁频态的伪相变捞进来 <code>[S2]</code>。</p>
+<p><strong>四条帧边界约束</strong>（固件与 <code>[APP]</code> 必须一致，否则「两边都算对了但结论不同」）：</p>
+<ol><li><strong>参数只在帧边界生效</strong>。上位机的做法是主线程每 100 ms 把输入框刷进 <code>self.cur</code> 快照，工作线程<strong>每帧开头</strong>读一次。改到一半的 <code>R</code>/<code>lam0</code> 会让同一帧前后步长不一致，<code>h1</code> 不再恒定，Poincaré 截面失去意义。固件同理：NVS 写入只置「待生效」标志，<code>proc_task</code> 在帧末才切换。</li><li><strong>新帧开始即丢弃残帧</strong>。上位机收到头包直接 <code>self.buf = FrameBuf(obj)</code> 覆盖旧的，不排队、不拼接。固件收到 <code>H</code> 亦须立即复位装配缓冲并 <code>drop_cnt++</code>。</li><li><strong>数据包必须校验 <code>frame</code></strong>。上位机对 <code>frame</code> 与当前头包不符的包直接丢弃（丢了头包的残包）。只按 <code>seq</code> 写而不校验 <code>frame</code>，会把上一帧的尾包写进新帧，制造「看似完整、实则错位」的帧。</li><li><strong>积分步数由样本数决定</strong>。<code>steps = n</code>（因为 <code>h1 = R·dt</code> 固定时 <code>n_cycles = n·h1/2π</code> 反推回来恰好是 <code>n</code>）。本地采集时 <code>n = FRAME_N</code>；回放时以头包 <code>n</code> 为准，<strong>不得写死 47124</strong>——上位机默认 94.2 s 只给 47100 点，写死会多积 24 步（尾部样本早耗尽，驱动归零），<code>pstd</code> 偏低。回放还须满足 §9.1 的 <code>n ≥ 15080</code>。</li></ol>
+<hr>
+<h2>6. 目录结构</h2>
+<h3>6.1 目标树（全部待创建）</h3>
+<pre><code>firmware/
+├── CMakeLists.txt                  # project(duffing_detector)
+├── sdkconfig.defaults              # 固定配置, 见 §8.2
+├── partitions.csv                  # 默认单 app 分区
+├── main/
+│   ├── CMakeLists.txt
+│   ├── main.c                      # app_main: 初始化 → 建任务 → 状态机
+│   └── Kconfig.projbuild           # 暴露 fs / lam0 / q_th 为 menuconfig 项
+├── components/
+│   ├── qmath/
+│   │   ├── CMakeLists.txt
+│   │   ├── include/qmath.h         # qmul/qadd/qsub/qsat/cos_lut
+│   │   └── qmath.c
+│   ├── duffing/
+│   │   ├── CMakeLists.txt
+│   │   ├── include/duffing.h       # osc_t, duffing_init/step/poc
+│   │   └── duffing.c               # §4.4 的唯一实现
+│   ├── adc_acq/
+│   │   ├── CMakeLists.txt
+│   │   ├── include/adc_acq.h       # acq_start/stop/read
+│   │   └── adc_acq.c               # adc_continuous 或 ADS1256
+│   ├── detector/
+│   │   ├── CMakeLists.txt
+│   │   ├── include/detector.h      # detector_reset/push/finalize
+│   │   └── detector.c              # 帧统计 + 判决
+│   ├── link/
+│   │   ├── CMakeLists.txt
+│   │   ├── include/link_ingest.h    # 下行 WBDX 包装配（§8.4，v1 可选）
+│   │   └── link_ingest.c            # 头/数据/尾三类包 + 缺包统计
+│   └── uplink/
+│       ├── CMakeLists.txt
+│       ├── include/uplink.h
+│       └── uplink.c                # 二进制帧上报 + 文本日志
+├── test/
+│   ├── host/                       # 主机侧测试, 不依赖 IDF
+│   │   ├── CMakeLists.txt
+│   │   ├── test_qmath.c
+│   │   ├── test_duffing.c
+│   │   ├── test_detector.c
+│   │   └── vectors/
+│   │       ├── vec_h0.bin           # 纯噪声帧, 期望 pstd
+│   │       ├── vec_h1.bin           # 含信号帧, 期望 pstd
+│   │       └── EXPECTED.json        # 由 scripts/export_vectors.py 生成
+│   └── board/
+│       └── accept.py                # 上板验收脚本, 见 §9.3
+└── scripts/
+    ├── export_vectors.py            # 从 tools/kernel_src.py 导出向量
+    └── calib_threshold.py           # 离线 H0 标定 q_th</code></pre>
+<h3>6.2 模块职责与接口</h3>
+<table><thead><tr><th>模块</th><th>职责</th><th>不允许做的事</th></tr></thead><tbody>
+<tr><td><code>qmath</code></td><td>Q6.12 算术、LUT cos</td><td>不得含业务逻辑</td></tr>
+<tr><td><code>duffing</code></td><td>单步 RK4、Poincaré 抽取</td><td>不得含 IO、不得含帧统计</td></tr>
+<tr><td><code>adc_acq</code></td><td>采样、标定、单位换算</td><td>不得做判决</td></tr>
+<tr><td><code>detector</code></td><td>帧统计、门限比较</td><td>不得直接读 ADC</td></tr>
+<tr><td><code>link_ingest</code></td><td>下行 <code>WBDX</code> 包装配（§8.4）</td><td>不得做算术、不得改判决；<code>known</code> 模式下不得读 <code>w_hint</code></td></tr>
+<tr><td><code>uplink</code></td><td>序列化、上报</td><td>不得修改判决结果</td></tr>
+</tbody></table>
+<p>必需接口（签名固定，实现可填）：</p>
+<pre><code>// duffing.h
+typedef struct { int32_t x, y; uint32_t ph; int64_t s1, s2; uint16_t n; } osc_t;
+void    duffing_init(osc_t *o, float beta_deg, float phi0);
+void    duffing_step(osc_t *o, int32_t u_cur, int32_t u_nxt, int32_t lam0);
+float   duffing_pstd(const osc_t *o);
+
+// detector.h
+typedef struct { osc_t bank[N_BETA]; float q_th; uint32_t frame_id; } det_t;
+void det_reset(det_t *d, float q_th);
+int  det_push(det_t *d, int32_t u_cur, int32_t u_nxt);   // 返回 1 = 帧结束
+int  det_verdict(det_t *d, float *p_out, uint8_t *err);  // 0=无 1=有
+
+// adc_acq.h
+int  acq_start(void);
+int  acq_read(uint16_t *buf, size_t n, uint32_t timeout_ms);
+int32_t acq_to_q(uint16_t raw);                          // 含零点与增益
+
+// link_ingest.h（§8.4，v1 可选：联调回放与 L2 向量注入）
+int  link_start(uint32_t baud);
+int  link_poll(float *buf, size_t cap, size_t *n_out, uint32_t timeout_ms);  // 返回 1 = 整帧就绪
+int32_t u_from_float(float u);                           // float32 归一化样本 -&gt; Q6.12，饱和</code></pre>
+<p><code>acq_to_q</code> 与 <code>u_from_float</code> <strong>不是同一套标度</strong>：前者把 ADC 码值按「零点 + 增益」折成归一化策动力（增益由 §2.1 的噪声 RMS 标定），后者只是 <code>lrintf(u * 4096)</code>。两条路径都必须在 T2 里与浮点基线对拍，不能只验一条。</p>
+<h3>6.3 存在性声明</h3>
+<p><strong>除本节与 §6.1 描述外，上述文件均不存在。</strong> 实现者必须先创建 <code>firmware/</code> 树，逐模块按 §9.2 用例驱动开发，不得一次写完再调。</p>
+<hr>
+<h2>7. 依赖环境</h2>
+<h3>7.1 版本锁定</h3>
+<table><thead><tr><th>依赖</th><th>版本</th><th>说明</th></tr></thead><tbody>
+<tr><td>ESP-IDF</td><td><code>5.2.2</code>（允许 <code>&gt;=5.2 &lt;5.4</code>）</td><td><code>adc_continuous</code> 在 5.0 引入，5.2 起稳定</td></tr>
+<tr><td>Python</td><td><code>&gt;=3.11</code></td><td><code>idf.py</code> 与 <code>scripts/*.py</code> 需要</td></tr>
+<tr><td>CMake</td><td><code>&gt;=3.16</code></td><td>IDF 自带</td></tr>
+<tr><td>Ninja</td><td>任意</td><td>推荐生成器</td></tr>
+<tr><td>工具链</td><td><code>xtensa-esp32-elf-gcc 13.2.0</code></td><td>随 IDF 安装</td></tr>
+<tr><td>串口驱动</td><td>CP210x / CH340 驱动</td><td>Windows 需手动装</td></tr>
+</tbody></table>
+<h3>7.2 环境自检</h3>
+<pre><code>idf.py --version                 # 期望 "ESP-IDF v5.2.2"
+xtensa-esp32-elf-gcc --version   # 期望 13.2.0
+python --version                 # &gt;= 3.11</code></pre>
+<p>任一不满足即停止，不得跳过（版本不符会导致 <code>adc_continuous_config_t</code> 字段错位）。</p>
+<h3>7.3 与上位机的依赖关系</h3>
+<p><code>scripts/export_vectors.py</code> 需要读取本仓库 <code>tools/kernel_src.py</code> 的 <code>simulate_fixed_seq</code> 作为参考实现。<strong>固件不得复制该 Python 代码</strong>，只能通过导出的 <code>.bin</code> 向量对比。</p>
+<p><strong>内核形态（2026-11-26 重构后）</strong>：<code>simulate_seq</code> 内部按振子数分两条路径——<code>m ≤ 32</code> 走微内核（每通道纯标量 RK4），<code>m &gt; 32</code> 走向量路径（沿通道维一次算 <code>m</code> 路）。两条路径对同一问题给出<strong>逐位相同</strong>的 <code>pstd</code>（测试钉在 <code>m = 32/33</code> 边界），签名与 <code>simulate_fixed_seq</code> 都<strong>未变</strong>。所以：导出向量不用关心它走哪条路径；固件实现对应的是 §4.4 的<strong>单步字段</strong>，与路径无关——两条路径执行的是同一套 <code>k1..k4</code> 与同一条末态组合式。</p>
+<p><strong>数值一致性验收</strong>（本仓库做法，固件侧可直接借用）：浮点侧不比 <code>allclose</code>，而是对 <code>pstd</code>/<code>mx</code>/Poincaré 点矩阵取 <code>sha256</code> 逐位比对（<code>tests/golden/kernel_ref.json</code>），因为混沌态下 1 ulp 的差会被指数放大成可见差异——容差在这里既太松又太严。固件侧同理：定点是全整数确定性运算，同输入必须<strong>逐位复现</strong>，见 §9.1 L2。</p>
+<p>浮点 <code>simulate_seq</code> 也可以读，但<strong>只用于「趋势是否一致」的旁证</strong>：指标与容差一律以 <code>simulate_fixed_seq</code>（同一 <code>F</code>）为准。原因是 12 位小数位下周期态 <code>pstd</code> 地板是 <code>2.7e-3</code>，浮点是 <code>3.2e-6</code>，拿浮点当基线会得到「正确实现也不达标」的结论（§9.2 T8/T9）。</p>
+<hr>
+<h2>8. 构建与烧录</h2>
+<h3>8.1 命令序列</h3>
+<pre><code>cd firmware
+idf.py set-target esp32
+idf.py menuconfig                # 按 §8.2 修改
+idf.py build
+idf.py -p COM3 flash
+idf.py -p COM3 monitor           # Ctrl+] 退出</code></pre>
+<h3>8.2 <code>menuconfig</code> 必改项</h3>
+<table><thead><tr><th>路径</th><th>值</th><th>理由</th></tr></thead><tbody>
+<tr><td>Component config → ESP32-specific → CPU frequency</td><td>240 MHz</td><td>时序预算基准</td></tr>
+<tr><td>Component config → FreeRTOS → Run FreeRTOS only on first core</td><td><strong>n</strong></td><td>必须双核，§5.2</td></tr>
+<tr><td>Component config → ADC → Enable ADC continuous mode</td><td>y</td><td>采样主路径</td></tr>
+<tr><td>Component config → Wi-Fi</td><td><strong>n</strong></td><td>§2.4 反模式</td></tr>
+<tr><td>Component config → Bluetooth</td><td><strong>n</strong></td><td>同上</td></tr>
+<tr><td>Serial flasher → Default baud rate</td><td>921600</td><td>烧录速度</td></tr>
+</tbody></table>
+<h3>8.3 串口上报格式（<code>uplink</code>）</h3>
+<p>文本日志（人类可读，1 行/帧）：</p>
+<pre><code>F&lt;frame_id&gt; p=&lt;p0&gt;,&lt;p1&gt;,&lt;p2&gt; min=&lt;pmin&gt; th=&lt;q_th&gt; d=&lt;0|1&gt; ovf=&lt;n&gt; drop=&lt;n&gt; t=&lt;ms&gt;</code></pre>
+<p>二进制上报（<code>TRIG</code> 触发后，<code>0xA5</code> 帧头，小端）：</p>
+<pre><code>typedef struct __attribute__((packed)) {
+    uint8_t  magic;      // 0xA5
+    uint32_t frame_id;
+    int32_t  p_q16[N_BETA];   // pstd × 65536
+    uint32_t ovf_cnt;
+    uint16_t crc16;      // CCITT, 覆盖前 21 字节
+} report_t;</code></pre>
+<p>上报字段与上位机状态条一一对应：<code>p_q16[]</code> ↔ 阵列柱状图、<code>d</code> ↔ 判决、<code>ovf</code>/<code>drop</code> ↔ 日志告警。<code>best_ch</code>（<code>pstd</code> 最小的振子下标，<code>int8_t</code>，可加在 <code>ovf_cnt</code> 之后）只是诊断量，判决仍取 <code>min</code>，不得据 <code>best_ch</code> 反推目标相位——初相盲区下「最小那一路」与真实相位无关。</p>
+<h3>8.4 下行联调格式（<code>link_ingest</code>，v1 可选）</h3>
+<p>与 <code>[APP]</code> 的 UDP 协议<strong>同构</strong>，只把传输层从 UDP 换成 UART（检测期间禁 RF，§2.4）。三类包统一 4 字节魔数 <code>WBDX</code> + 1 字节类型：</p>
+<table><thead><tr><th>包</th><th>类型</th><th>载荷</th><th>长度</th></tr></thead><tbody>
+<tr><td>头</td><td><code>H</code></td><td>UTF-8 JSON：<code>v, frame, n, fs, w_hint, amp, sigma, alpha, snr_db, has_sig, has_noise, duration, phase, ts, scale, t0, sig_t0, sig_dur, sig_epoch, cov</code></td><td>≤ 512 B</td></tr>
+<tr><td>数据</td><td><code>D</code></td><td><code>struct "&lt;4scIIIf&gt;"</code>（魔数 / <code>'D'</code> / <code>frame</code> / <code>seq</code> / <code>nseq</code> / <code>fs</code>）+ <strong><code>int16</code> 小端样本</strong></td><td><strong>21 + 2·1024 = 2069 B</strong></td></tr>
+<tr><td>尾</td><td><code>T</code></td><td>UTF-8 JSON：<code>{frame, sent, nseq}</code></td><td>≤ 64 B</td></tr>
+</tbody></table>
+<p><strong>协议 <code>v = 2</code> 起样本是 <code>int16</code></strong>（<code>v = 1</code> 是 <code>float32</code>，已废弃）：满量程对应 ±1.0，<code>scale = 32768</code> 随头包下发，1 LSB <code>= 3.05e-5</code>。选它是因为 ESP32 的 ADC 本来就是整数计数——<strong>收发两端从此都在整数域里说话</strong>，省掉一次浮点解析，包长也从 4117 B 减到 2069 B。</p>
+<p>一帧 = 1 个 <code>H</code> + <code>ceil(n/1024)</code> 个 <code>D</code> + 1 个 <code>T</code>。<code>n = 47124</code> 时是 <strong>47 个数据包、约 95 KB</strong>（<code>n = 47100</code> 时 46 个包）。</p>
+<p><strong>连续发送与目标窗（v2 新增）</strong>：上位机启动后<strong>一直发、不自动停</strong>，帧号从 0 单调递增、没有"总帧数"；目标可以在发送过程中随时附加，所以头包里必须带四个时间字段——<code>t0</code>（本帧首样本的会话绝对时间）、<code>sig_t0</code>/<code>sig_dur</code>（目标窗起止）、<code>cov</code>（本帧覆盖率）。固件侧<strong>必须用同一套 <code>window_coverage()</code> 口径自己重算 <code>cov</code></strong>，不能直接信 <code>cov</code>：这是唯一能发现"发送端以为在发目标、固件却当背景帧"的办法。窗口不对齐帧，所以每隔一段时间必然出现 <code>0 &lt; cov &lt; 1</code> 的帧——这类帧<strong>既不算 Pd 也不算 Pfa</strong>，只计数。</p>
+<p><strong>装配规则</strong>（与 <code>FrameBuf</code> 逐条对齐，缺一条就会出现「两边都算但结果不同」）：</p>
+<ol><li><strong>头包开新帧</strong>：收到 <code>H</code> 立即丢弃未装配完的旧帧，不排队、不拼接（§5.4 约束 2）。</li><li><strong>按 <code>seq</code> 定位</strong>：写入 <code>buf[seq·1024 : …]</code>；重复 <code>seq</code> 直接丢弃（UDP 回环会重复，UART 重传也会）；<code>frame</code> 与当前头包不符的包丢弃。</li><li><strong>尾包提交</strong>：收到 <code>T</code> 即提交，<strong>不等 <code>n</code> 点齐</strong>——尾包先到说明发送端已发完，缺的就是丢了。</li><li><strong>缺包补零并标记</strong>：<code>got &lt; n</code> 时缺口保持 0，<code>miss</code> 计入日志。上位机补零后照算，<strong>固件必须额外标记该帧不可信</strong>（<code>ERR_FRAME_GAP</code>，§10.1）：补零会压低 <code>pstd</code>，把「丢包」伪装成「检测到」，方向恰好是危险的那一侧。</li><li><strong>超时丢弃</strong>：3 s 内未凑齐 → 丢帧，<code>drop_cnt++</code>。</li></ol>
+<p><strong>样本换算</strong>：线上是 <code>int16</code>（LSB <code>= 1/32768 = 3.05e-5</code>），内部是 Q6.12（LSB <code>= 1/4096 = 2.44e-4</code>），换算就一条算术右移：</p>
+<pre><code>int32_t q_q12 = ((int32_t)q_i16) &gt;&gt; 3;      /* 32768/4096 = 8，算术右移保符号 */</code></pre>
+<p>所以线上分辨率比内部格式细 8 倍，<strong>线上量化不构成瓶颈</strong>，瓶颈仍在 Q6.12。对 <code>A = 0.0199</code>（<code>int16</code> 652 LSB → Q6.12 82 LSB）、每样本噪声 29 LSB 的信号，量化损失 &lt; 1%，可忽略——<strong>但不要把这条链路当成「ADC 量化仿真」</strong>：<code>make_frame(adc_bits=…)</code> 的满量程是按本帧峰值自适应的（<code>fsr = 4·max|rx|</code>），与固定量程 ADC 不是一回事，两者混用会得出「8 bit 也够」的错误结论（§11.2 的位数敏感性结论必须带这个前提引用）。</p>
+<p><strong>带宽预算</strong>（决定 <code>replay_mult_max</code>）：</p>
+<table><thead><tr><th>回放倍率</th><th>数据率</th><th>UART 最低波特率（8N1）</th><th>可行性</th></tr></thead><tbody>
+<tr><td>×1（实时）</td><td>1.0 KB/s</td><td>10 kbaud</td><td>任意波特率</td></tr>
+<tr><td>×10</td><td>9.8 KB/s</td><td>98 kbaud</td><td><code>115200</code> 够用；<code>460800</code> 更宽裕</td></tr>
+<tr><td>×250（上位机「尽快」）</td><td>244 KB/s</td><td>2.4 Mbaud</td><td><strong>不可行</strong>，改用 SD 卡或本地 ADC</td></tr>
+</tbody></table>
+<p>上位机「尽快」模式每包只隔 2 ms，是给回环 UDP 用的；UART 没有这个带宽。<strong>联调时把发送节奏设成「实时×10」</strong>，两侧才跑得动。换成 <code>int16</code> 后 ×10 只要 98 kbaud（<code>float32</code> 时代是 195 kbaud），<code>115200</code> 就从"不够"变成了"够"。</p>
+<p><strong><code>w_hint</code> 的使用边界</strong>：头包里的 <code>w_hint</code> 是发送端的 <code>omega</code>，属<strong>联调旁路</strong>。固件 v1 只接受 <code>known</code> 模式（<code>R</code> 由 NVS 或命令给）；<code>hint</code> 只允许联调脚本用来对表，<strong>不得进入正式判决流程</strong>——那等于把待测量当作已知量，检测本身就没有意义了。上位机界面上把 <code>hint</code> 标为「跟随发送端」并附说明，就是防止误用。</p>
+<hr>
+<h2>9. 测试与验证标准</h2>
+<h3>9.1 三层</h3>
+<table><thead><tr><th>层</th><th>位置</th><th>依赖硬件</th><th>通过条件</th></tr></thead><tbody>
+<tr><td>L1 单元</td><td><code>test/host</code></td><td>否</td><td>全部用例通过</td></tr>
+<tr><td>L2 回放</td><td><code>test/host</code> 读 <code>vectors/</code></td><td>否</td><td><code>pstd</code> 与 <code>EXPECTED.json</code> <strong>逐位相等</strong>（定点为确定性整数运算，不设容差；理由见下）</td></tr>
+<tr><td>L3 上板</td><td><code>test/board</code></td><td>是</td><td>§9.3 全部指标达成</td></tr>
+</tbody></table>
+<p>L1/L2 用主机编译器（<code>gcc -DQ_HOST_TEST</code>），<code>duffing.c</code> 不得包含任何 IDF 头文件。</p>
+<p><strong>向量导出规则</strong>（<code>scripts/export_vectors.py</code> 必须照做，否则 T5 会偶发失败却查不出原因）：</p>
+<table><thead><tr><th>规则</th><th>原因</th></tr></thead><tbody>
+<tr><td>显式传 <code>phase=0</code>（或成组导出 12 个相位）</td><td>上位机的 <code>make_frame</code> 默认<strong>每帧随机初相</strong>，<code>A = 0.02</code> 时单振子只有 26.6% 的相位能越线（§11.1）；随机相位导出的单条 <code>vec_h1.bin</code> 有 73% 概率判「无」</td></tr>
+<tr><td><code>n ≥ 15080</code>（48 周期）</td><td>低于此值判据抖动，<code>pstd</code> 跨门限 <code>[LK]</code></td></tr>
+<tr><td>不用 <code>adc_bits</code> 模拟固件量化</td><td>该参数按本帧峰值自适应满量程，与固定量程 ADC、Q6.12 截断都不是一回事（§8.4）</td></tr>
+<tr><td>同时导出 <code>float32</code> 原序列与期望 <code>pstd</code></td><td>固件侧自己量化，才能在 T9 里分辨「量化误差」与「实现错」</td></tr>
+<tr><td>记录 <code>n</code>、<code>fs</code>、<code>R</code>、<code>lam0</code>、<code>burn_frac</code>、<code>betas</code></td><td>缺任一项，<code>pstd</code> 无法复算——这些都在 <code>EXPECTED.json</code> 里，不在 <code>.bin</code> 里</td></tr>
+<tr><td><code>.bin</code> 只装<strong>接收序列</strong>（信号 + 噪声），不含 <code>lam0·cos τ</code></td><td>策动力由 <code>drv()</code> 在积分内产生（§4.4）；混进样本等于把 <code>lam0</code> 算两遍，<code>lam_eff</code> 直接错</td></tr>
+</tbody></table>
+<p><strong>L2 为什么改为逐位相等</strong>：定点路径每一步都是 <code>int32</code> 整数加乘与移位，同一输入序列、同一 <code>F</code>、同一 <code>burn_frac</code> 下结果<strong>完全确定</strong>，不存在「同对数档」这种模糊判据。改前用容差会漏掉两类真错：① <code>u_mid</code> 用了 <code>(u_cur+u_nxt+1)&gt;&gt;1</code> 的舍入版本（每步差 1 LSB，<code>pstd</code> 差 1e-4 级，容差放过去了）；② Poincaré 插值权重取成余量口径（只有 F=12 的周期态能分辨，见 T8）。浮点侧同理改用哈希而非容差（<code>tests/golden/kernel_ref.json</code>）——<strong>混沌系统里 1 ulp 会被指数放大，容差既太松又太严</strong>。</p>
+<h3>9.2 单元用例（期望值固定）</h3>
+<table><thead><tr><th>ID</th><th>用例</th><th>输入</th><th>通过判据</th></tr></thead><tbody>
+<tr><td>T1</td><td><code>qmul</code> / <code>qadd</code> 边界</td><td><code>qmul(4096,4096)</code>、<code>qmul(-4096,4096)</code>、<code>qadd(131000, 1000)</code></td><td><code>4096</code> / <code>-4096</code> / <code>131071</code>（饱和，<code>ovf_cnt++</code>）</td></tr>
+<tr><td>T2</td><td>Q6.12 ≈ 浮点</td><td>同一零序列，<code>lam</code> 扫 <code>[0.70,0.84]</code></td><td>首个 <code>pstd&lt;0.1</code> 的 <code>lam</code> 与浮点基线差 ≤ 0.002（2 个精扫网格）</td></tr>
+<tr><td>T3</td><td>无信号纯内驱</td><td><code>u ≡ 0</code>，<code>lam0=0.72</code>，150 周期</td><td><code>pstd ∈ [0.33, 0.48]</code>（混沌带）<code>[LK]</code></td></tr>
+<tr><td>T4</td><td>越过阈值</td><td><code>u ≡ 0</code>，<code>lam0=0.74</code></td><td><code>pstd &lt; 0.01</code>（F=12 实测 <code>2.7e-3</code>，F=10 为 <code>7.6e-3</code>）</td></tr>
+<tr><td>T5</td><td>有信号判「有」</td><td><code>vec_h1.bin</code>（<code>A=0.02, sigma=0.05, theta=0</code>）</td><td><code>pstd &lt; q_th</code> 且 <code>detected==1</code></td></tr>
+<tr><td>T6</td><td>错 R 判「无」</td><td>同 <code>vec_h1.bin</code>，<code>R=10.5</code></td><td><code>pstd &gt; q_th</code> 且 <code>detected==0</code></td></tr>
+<tr><td>T7</td><td>纯噪声判「无」</td><td><code>vec_h0.bin</code></td><td><code>detected==0</code></td></tr>
+<tr><td>T8</td><td>Poincaré 精确插值</td><td>周期态 150 周期，<code>lam=0.74</code></td><td><strong><code>pstd &lt; 6e-3</code></strong>。F=12 正确实现 <code>2.7e-3</code>；插值权重取「跨线后余量」<code>1.2e-2</code>（4.4×，失败）；按步数取整 <code>3.4e-2</code>（失败）。<strong>不得用浮点的 <code>1e-4</code> 当门槛</strong>，见下方说明</td></tr>
+<tr><td>T9</td><td>与定点参考一致</td><td><code>vec_h1.bin</code></td><td><code>abs(log10(p_fw) - log10(p_ref)) ≤ 0.2</code>，<code>p_ref</code> 取自 <code>simulate_fixed_seq(F=12)</code>，<strong>不是浮点内核</strong></td></tr>
+<tr><td>T10</td><td>溢出钳位</td><td>注入 <code>x=31.9</code></td><td>状态钳到 <code>131071</code>，<code>ovf_cnt &gt; 0</code>，该帧输出 <code>ERR_OVF</code></td></tr>
+<tr><td>T11</td><td>输入静默可分辨</td><td><code>u ≡ 0</code>，<code>lam0=0.72</code>，150 周期</td><td><code>pstd ∈ [0.40, 0.60]</code>、<code>detected==0</code>，<strong>且 <code>err==ERR_INPUT_SILENT</code></strong>；只靠 <code>pstd</code> 判「无」即失败</td></tr>
+</tbody></table>
+<p><strong>T8/T9 为什么不能用浮点当基线</strong>：12 位小数位对驱动项与状态的逐步舍入本身就是一台噪声源，周期态 <code>pstd</code> 的地板因此被抬到 <code>2.7e-3</code>（F=12），而浮点内核在同一条件下是 <code>3.2e-6</code>——<strong>差 3 个量级</strong>。若照浮点写 <code>pstd &lt; 1e-4</code>，正确实现也会失败；若照浮点写 T9 的 0.2 对数容差，误差会是 2.9，同样必然失败。固件的一切期望值都要从 <code>simulate_fixed_seq</code>（§7.3）取，浮点值只用于判断「趋势是否一致」，不能当指标。另注意 F=10 时正确与写反只差 1.9×（<code>7.6e-3</code> vs <code>1.4e-2</code>），<strong>T8 只在 F=12 上有分辨力</strong>，这也是 §3.1 把 <code>q_frac</code> 钉在 12 的理由之一。</p>
+<p>T3/T4 的 <code>[0.33, 0.48]</code> 与 <code>&lt;0.01</code> 来自 <code>[LK]</code>/<code>[S5]</code> 实测带，按<strong>区间</strong>判，不按点判。T3 的 <code>u ≡ 0</code> 是确定性输入（浮点 <code>pstd = 0.431</code>、三路 <code>0.431/0.527/0.572</code>，F=12 定点 <code>0.426</code>，<code>[APP]</code>）；换成纯噪声后 5 个种子的 min <code>pstd</code> 落在 <code>0.357–0.475</code>，所以带噪声的 H0 帧上界要放宽到 <code>0.52</code>，别拿 <code>0.48</code> 卡 T7。</p>
+<h3>9.3 上板验收（可判定）</h3>
+<table><thead><tr><th>ID</th><th>指标</th><th>方法</th><th>通过条件</th></tr></thead><tbody>
+<tr><td>A1</td><td>实际采样率</td><td>注入 1 Hz 方波，数 100 s 内边沿</td><td><code>fs ∈ [499, 501]</code> Hz；否则用「高速采样 + 抽取」，见 §11.2</td></tr>
+<tr><td>A2</td><td>单步耗时</td><td>GPIO 翻转 + 示波器，或 <code>esp_timer</code> 统计 1e4 步</td><td>p95 ≤ 8 μs，max ≤ 20 μs</td></tr>
+<tr><td>A3</td><td>帧计算耗时（不含采集墙钟）</td><td>一帧起止时间戳</td><td><code>known</code> ≤ 5 s；<code>auto</code>（v2）≤ 15 s。<strong>采集墙钟恒为 94.2 s，不可压缩</strong>——这是信号时标，不是性能问题</td></tr>
+<tr><td>A4</td><td>与仿真一致</td><td><code>SELF_TEST</code> 注入 <code>vec_h1</code> 波形（<code>phase=0</code> 或 12 相位成组）</td><td><code>detected==1</code>；改 <code>R×1.05</code> 后 <code>==0</code></td></tr>
+<tr><td>A5</td><td>虚警</td><td>输入端接地/屏蔽，连跑 200 帧</td><td>Pfa ≤ 0.05，<strong>须注明门限值</strong>：<code>q_th=0.08</code> 时实测应≈0，用 <code>q_th_pfa5=0.347</code> 时名义 5%</td></tr>
+<tr><td>A6</td><td>检测概率</td><td>SNR −7.4 dB 注入，<code>theta</code> 随机 100 帧</td><td>Pd ≥ 0.85</td></tr>
+<tr><td>A7</td><td>内存</td><td><code>heap_caps_get_minimum_free_size</code></td><td>峰值占用 ≤ 64 KB</td></tr>
+<tr><td>A8</td><td>长稳</td><td>连续 24 h</td><td>无复位，<code>ovf_cnt</code> 增量 = 0</td></tr>
+<tr><td>A9</td><td>零漂</td><td>短路输入，1 h</td><td>每帧 <code>pstd</code> 漂移 &lt; 20%</td></tr>
+</tbody></table>
+<p><strong>A3 的量级参考</strong>：<code>[APP]</code> 在 PC 上 47100 点、三相位 <code>known</code> 模式实测 <strong>0.15 s</strong>（<code>analyze(known)</code> 1.513 s → 0.149 s，10×；见 <code>00-总览/性能优化与基准.md</code>），<code>auto</code>（FFT + 16 次单振子 + 三路）3.63 s → <strong>0.92 s</strong>（3.9×）；估幅另加约 2.6 s（180 路一次向量化，<strong>这一项没变快</strong>——它本来就摊满了数组，没有调用开销可摊）。ESP32 按 §9.3 A2 的 8 μs/步上限估，<code>3 × 47124 × 8 μs ≈ 1.13 s</code>，故 5 s 是宽松上限；真正卡时间的是采集墙钟。</p>
+<p><strong>这 10× 不能搬到固件</strong>：PC 的瓶颈是 numpy 每次调用的固定开销（每步 60–80 次调用 × ≈0.41 μs，浮点本身只占几纳秒），所以「少调用」能换 10 倍；C 的标量循环没有这种开销，ESP32 的 8 μs/步是<strong>算术与访存</strong>的真实成本，与 PC 的 0.15 s 没有可比性。固件侧优化只认 A2 的指令数，别拿 PC 的加速比当预期。</p>
+<p><strong>A7 的 64 KB 不受本次重构影响</strong>：上位机的提速靠「整帧驱动表 + 标量微内核」，两者都吃内存（§5.1）；固件是流式 + 4 KB <code>cos_q30</code> 表，峰值只随通道数与帧内 Poincaré 点数变（<code>N_BETA = 3</code>、150 点 → 数 KB 量级）。若 A7 超了，先查是不是照抄了上位机的预算表，而不是去压 <code>FRAME_N</code>——缩帧会直接破坏判据（&lt; 48 周期即抖动）。</p>
+<p><strong>A4 的相位条件</strong>（最容易漏）：<code>SELF_TEST</code> 单次注入时若用随机初相，<code>A = 0.02</code> 的单振子只有 <strong>26.6%</strong> 的相位能越过阈值（§11.1），单帧测试有 73% 概率假失败。必须 <code>phase=0</code>（同相，<code>lam_eff = 0.740</code> 恰好越线），或按 <code>theta = 0°, 30°, …, 330°</code> 注入 12 帧、要求命中 ≥ 10 帧——后者同时在测三相位阵列的覆盖率，更接近真实使用。</p>
+<p><strong>A4 的 <code>R×1.05</code></strong>：<code>R</code> 偏离 5% 时 <code>h1</code> 变为 0.021，频率失谐远超 ±0.1% 带宽，必须判「无」<code>[S2]</code>。这只是粗测门槛，工程验收按 <strong>≤0.1%</strong> 要求：<code>[APP]</code> 的频率选择带宽实测为 ±0.1%（判据 1e-2），接收端界面提示的「偏 5% 就判不出来」只是演示级说法，不可当作容差。</p>
+<p><strong>A6 的 0.85</strong>：<code>[LK]</code> 在 94.25 s 帧、三相位、<code>A=0.0302</code> 时给 Pd=1.00，理论覆盖率 100%（§11.1）。留 15% 余量给 ADC 与时钟抖动，属 <code>[SPEC]</code> 折减。若换到 <code>A=0.02</code>（−11 dB 同相），单振子 Pd 只有 0.46、三相位 0.80，<code>A6</code> 必然不达标——<strong>两档 SNR 不能混着引用</strong>。</p>
+<h3>9.4 不通过时的定位顺序</h3>
+<pre><code>A4 失败 ──► 先查 T8（Poincaré 插值，含补角）→ 再查 T2（定点等价性）→ 最后查驱动
+A6 偏低 ──► 先查 A1（采样率）→ 再查前置滤波器截止 → 最后查 betas 配置
+A5 偏高 ──► 先查 §2.4 反模式（RF/电源）→ 再查 q_th 标定帧数
+一律判「无」且 peak ≈ 0 ──► 不是算法问题，查 T11 与前置增益（§2.1），别改门限</code></pre>
+<p>按顺序查，不要跳步。历史教训：<code>[S5]</code> 的 0.77 假阈值是方法错误，不是硬件问题。</p>
+<hr>
+<h2>10. 错误处理</h2>
+<h3>10.1 错误码</h3>
+<table><thead><tr><th>码</th><th>标识</th><th>触发</th><th>动作</th><th>恢复</th></tr></thead><tbody>
+<tr><td>0</td><td><code>OK</code></td><td>—</td><td>正常</td><td>—</td></tr>
+<tr><td>1</td><td><code>ERR_ADC_TIMEOUT</code></td><td><code>acq_read</code> 超时 3 s</td><td>丢弃当前帧，<code>drop_cnt++</code></td><td>自动重试 3 次后进 <code>ERR</code></td></tr>
+<tr><td>2</td><td><code>ERR_RING_FULL</code></td><td>环形缓冲满</td><td>丢样，标记该帧作废</td><td>自动</td></tr>
+<tr><td>3</td><td><code>ERR_OVF</code></td><td><code>ovf_cnt &gt; 0</code></td><td>该帧不输出 0/1</td><td>下一帧自动清</td></tr>
+<tr><td>4</td><td><code>ERR_PARAM</code></td><td>参数越界（编译期 + 运行期双检）</td><td><code>HALT</code></td><td>仅复位</td></tr>
+<tr><td>5</td><td><code>ERR_CALIB</code></td><td><code>CALIB</code> 帧数不足或方差异常</td><td>回退 <code>q_th_default</code> 继续</td><td>自动</td></tr>
+<tr><td>6</td><td><code>ERR_RATE_MISMATCH</code></td><td>实测 <code>fs</code> 偏离 &gt; 1%</td><td>重算 <code>h1</code>/<code>ph_inc</code> 并重标 <code>q_th</code></td><td>自动；失败进 <code>HALT</code></td></tr>
+<tr><td>7</td><td><code>ERR_ADC_SAT</code></td><td>连续 16 样本达满量程</td><td>日志告警，判决继续但标记不可信</td><td>增益调整后清</td></tr>
+<tr><td>8</td><td><code>ERR_INPUT_SILENT</code></td><td>连续 <code>silent_n=5</code> 帧 <code>peak &lt; q_peak_min</code></td><td><strong>不输出 0/1</strong>，日志报「输入静默/断线」</td><td>电平恢复即自动</td></tr>
+<tr><td>9</td><td><code>ERR_FRAME_GAP</code></td><td>一帧 <code>miss &gt; 0</code> 或 <code>drop_cnt &gt; 0</code>（§8.4 规则 4）</td><td><code>pstd</code> 照算但判决标记不可信，不进 ROC 统计</td><td>下一帧自动</td></tr>
+</tbody></table>
+<p><strong>为什么 8 和 9 必须存在</strong>：<code>pstd</code> 对这两类故障是<strong>盲的</strong>。断线时 <code>u ≡ 0</code>，系统仍在内驱作用下混沌振荡，<code>pstd ≈ 0.43</code>，与正常噪声帧（0.36–0.48）难分，判决只会安静地输出「无」；丢包补零时 <code>pstd</code> 反而被压低，容易假报「有」。两个方向都错，且都不报错——所以必须由输入电平与包完整性各自独立判定，不能指望统计量兜住。</p>
+<h3>10.2 日志约定</h3>
+<pre><code>[E][&lt;code&gt;] &lt;module&gt; | frame=&lt;id&gt; | &lt;detail&gt;
+[W] ...
+[I] ...</code></pre>
+<ul><li><code>E</code> 级必带错误码与 <code>frame_id</code>，便于与上位机 CSV 对齐。</li><li>禁止在中断上下文打印（<code>ESP_LOGE</code> 在 ISR 中会阻塞）。</li></ul>
+<h3>10.3 参数校验（编译期）</h3>
+<pre><code>_Static_assert(q_pre + q_frac &lt;= 31, "Q format exceeds int32");
+_Static_assert(N_BETA == 3, "v1 只支持三相位");
+_Static_assert(FRAME_N &gt;= 15080, "帧长必须 ≥ 48 周期");
+_Static_assert(q_frac &gt;= 12, "F&lt;12 判据失效");
+_Static_assert(!(ADC_SOURCE == ADC_INTERNAL &amp;&amp; USE_SPI_ADC), "内置 ADC 与 SPI 外部 ADC 互斥");
+_Static_assert(PIN_ADC_IN == 34, "必须用 ADC1 通道, ADC2 与 WiFi 冲突");</code></pre>
+<h3>10.4 运行期参数校验（对齐 <code>[APP]</code>）</h3>
+<p>上位机在点「开始发送 / 开始监听」时逐项校验，非法值弹窗拒绝启动；固件没有弹窗，必须走同一套规则并返回 <code>ERR_PARAM</code>。<strong>这张表不是可选的</strong>：少验一项，错误配置就会一路跑到帧末才以「判据异常」的形式暴露，定位成本高一个数量级。</p>
+<table><thead><tr><th>参数</th><th>规则</th><th>违反时</th></tr></thead><tbody>
+<tr><td><code>omega</code></td><td><code>&gt; 0</code></td><td><code>ERR_PARAM</code> → <code>HALT</code></td></tr>
+<tr><td><code>fs</code></td><td><code>&gt; 0</code>；与 <code>1/dt</code> 一致</td><td>同上</td></tr>
+<tr><td><code>dt</code></td><td><code>&gt; 0</code></td><td>同上</td></tr>
+<tr><td><code>R</code>（<code>known</code> 模式）</td><td><code>&gt; 0</code></td><td>同上</td></tr>
+<tr><td><code>R</code>（<code>hint</code> 模式）</td><td>头包 <code>w_hint &gt; 0</code>，缺失即拒绝</td><td>拒帧，日志「没有收到发送端的频率提示」</td></tr>
+<tr><td><code>lam0</code></td><td><code>0 &lt; lam0 &lt; lam_c</code>（0.7335）</td><td><code>ERR_PARAM</code> → <code>HALT</code></td></tr>
+<tr><td><code>q_th</code></td><td><code>&gt; 0</code></td><td>同上</td></tr>
+<tr><td>帧样本数 <code>n</code></td><td><code>≥ 15080</code>（48 周期）</td><td>拒帧，记 <code>ERR_FRAME_GAP</code></td></tr>
+<tr><td><code>sigma</code></td><td><code>≥ 0</code></td><td>仅上位机侧存在</td></tr>
+<tr><td>回放倍率</td><td><code>&gt; 0</code> 且 <code>≤ baud/(40·fs)</code></td><td>超限则降到上限并告警</td></tr>
+</tbody></table>
+<p>上位机的校验集中在 <code>TxApp.params()</code> / <code>RxApp.params()</code>，非法时抛 <code>ValueError</code> 并弹窗；固件实现 <code>det_params_check()</code> 时逐条对应，报告首次失败的字段名与实测值，不要只回一个笼统的错误码。</p>
+<hr>
+<h2>11. 扩展限制</h2>
+<h3>11.1 物理硬限制（不可通过软件绕过）</h3>
+<p><strong>初相盲区</strong>。单振子的有效激励为</p>
+<p>$$\lambda_{\text{eff}} = \sqrt{\lambda_0^2 + A^2 + 2\lambda_0 A\cos\theta} &gt; \lambda_c$$</p>
+<p><code>theta</code> 落在阈值外则无论幅值多大都判「无」。覆盖率随 <code>A</code> 变化：</p>
+<table><thead><tr><th>SNR（<code>sigma=0.05</code>）</th><th><code>A</code></th><th>单振子 <code>theta</code> 上限</th><th>单相覆盖</th><th>三相位覆盖</th><th>来源</th></tr></thead><tbody>
+<tr><td>−11.0 dB</td><td>0.0199</td><td>47.9°</td><td>26.6%</td><td><strong>79.9%</strong>（漏 20%）</td><td><code>[APP]</code> 计算</td></tr>
+<tr><td>−7.4 dB</td><td>0.0302</td><td>64.5°</td><td>35.8%</td><td><strong>100%</strong></td><td><code>[APP]</code> 计算</td></tr>
+<tr><td>−3.0 dB</td><td>0.0501</td><td>76.3°</td><td>42.4%</td><td>100%</td><td><code>[APP]</code> 计算</td></tr>
+</tbody></table>
+<p>三相位全覆盖的临界点是 <code>2θ ≥ 120°</code>，解出 <strong><code>A ≥ 0.0263</code>（<code>SNR ≥ −8.6 dB</code>）</strong>。注意 <code>−9 dB</code> 只有 <strong>97.1%</strong>，不是 100%——差这一档时，<code>theta</code> 恰好落在盲区的帧会被稳定漏掉。</p>
+<p><strong>推论</strong>：<code>A ≈ 0.02</code> 是「刚好越线」（<code>lambda_eff = 0.740</code>，余量仅 0.0065），相位随机时单振子 Pd 被封在 0.46 一线、三相位 0.80。<strong>不要宣称 −11 dB 下三相位满覆盖</strong>；要满覆盖就必须 <code>A ≥ 0.0263</code>。</p>
+<p><strong>其他硬限制</strong>：</p>
+<table><thead><tr><th>限制</th><th>数值</th><th>后果</th></tr></thead><tbody>
+<tr><td>帧长下限</td><td>48 周期 = 30.2 s</td><td>更短则 <code>pstd</code> 抖动跨门限 <code>[LK]</code></td></tr>
+<tr><td>频率选择带宽</td><td>±0.1%</td><td><code>R</code> 偏差超 0.1% 即失谐 <code>[S2]</code></td></tr>
+<tr><td>观测窗</td><td>94.2 s / 帧</td><td>不可压缩，是信号时标</td></tr>
+<tr><td>判决延迟</td><td>≥ 1 帧 = 94.2 s</td><td>无实时性可言，见 §11.2</td></tr>
+</tbody></table>
+<h3>11.2 平台限制</h3>
+<table><thead><tr><th>限制</th><th>影响</th><th>缓解</th></tr></thead><tbody>
+<tr><td>ESP32 内置 ADC 标称 12 bit，实测 ENOB ≈ 9.5 bit</td><td>达不到论文的 12 bit 条件</td><td>ADC 位数对判决不敏感（8 bit <code>pstd=2.26e-3</code> vs 12 bit <code>2.22e-3</code>，差 2%）<code>[LK]</code>，故可用；论文级复现换 ADS1256。<strong>引用该结论必须带前提</strong>：实验用的是按帧峰值自适应的满量程，与固定量程 ADC 不等价（§8.4）</td></tr>
+<tr><td><code>adc_continuous</code> 低采样率可能不支持 500 Hz</td><td>实际 <code>fs</code> 偏离设定</td><td>退化为 8 kHz 过采样 + 16 点均值抽取到 500 Hz；必须用 A1 标定</td></tr>
+<tr><td>UART 回放带宽有限</td><td>460800 下 ×10 实时已是上限（19.5 KB/s），上位机「尽快」模式要 488 KB/s</td><td>联调固定「实时×10」；大批量回放走 SD 卡或本地 ADC，不要试图压 UART</td></tr>
+<tr><td>无双精度 FPU</td><td><code>double</code> 走软件模拟，慢 ~100×</td><td>全链路定点；仅 <code>pstd</code> 后处理用 <code>float</code></td></tr>
+<tr><td>单块 DRAM 上限 ~160 KB</td><td>无法缓存整帧 188 KB</td><td>流式架构，§5.1</td></tr>
+<tr><td>WiFi/BT 与 ADC2 冲突、电源污染</td><td>检测失效</td><td>编译期关闭 RF</td></tr>
+<tr><td>时钟精度 40 MHz 晶振 ±10 ppm</td><td>150 周期累积相位误差 1.5e-3 周期</td><td>可忽略；但 <code>fs</code> 实际值仍须标定</td></tr>
+</tbody></table>
+<h3>11.3 待实测项（<code>[TODO]</code> 清单）</h3>
+<table><thead><tr><th>项</th><th>为什么必须实测</th></tr></thead><tbody>
+<tr><td><code>q_th</code> 现场值</td><td><code>q_th_default=0.08</code> 与 <code>q_th_pfa5=0.347</code> 都来自仿真 H0；真实传感器噪声谱不同，白噪与 1/f 下标定结果也会不同（§3.4）</td></tr>
+<tr><td>前置增益的实际值</td><td>§2.1 给出的「背景噪声 ≈ 29 LSB」是设计目标；实际传感器灵敏度与放大器增益决定它，偏差直接改变 <code>A</code> 与虚警</td></tr>
+<tr><td><code>lam_c</code> 在本平台的等效值</td><td><code>h1</code> 与 cos 实现都可能改变它</td></tr>
+<tr><td><code>fs</code> 实际值</td><td>驱动分频精度未知</td></tr>
+<tr><td>内置 ADC 的 1/f 拐点</td><td>若拐点 &gt; 0.1 Hz，需加高通</td></tr>
+<tr><td><code>cos_lut</code> 精度对 <code>pstd</code> 的影响</td><td><code>[S5]</code> 的定点化未覆盖 cos（用双精度），本规格改用 1024 项 LUT + 线性插值，<strong>新增误差源，必须验证</strong></td></tr>
+</tbody></table>
+<h3>11.4 v2 扩展（明确不在本规格内）</h3>
+<table><thead><tr><th>扩展</th><th>前置条件</th></tr></thead><tbody>
+<tr><td>扫 <code>R</code> 自动对频</td><td>上位机已实现 <code>[APP]</code>：<code>fft_guess()</code>（Hann + 8× 补零 + 对数抛物线，频段 0.3–5.0 Hz，初值误差 ~0.002%）+ <code>scan_R()</code>（±1% 内 0.5%/格粗扫 5 点 → 最优点 ±0.25% 内 0.05%/格细扫 11 点 → 三点抛物线，共 16 次单振子）。PC 端整帧 3.63 s → <strong>0.92 s</strong>（其中 <code>scan_R</code> 2.05 s → 0.75 s，2026-11-26 重构；见 <code>00-总览/性能优化与基准.md</code>），<code>R̂</code> 端到端误差 −0.025%。移植到 ESP32 需 16×47124 ≈ 7.5e5 步，按 8 μs/步 ≈ 6 s，<strong>算力可行但不能与采集并行</strong>，须等整帧收完再扫。频段内无可辨谱峰时上位机返回「无法判定」而非猜一个 <code>R</code>——固件移植必须保留这个分支，不得退化成默认 <code>f0</code></td></tr>
+<tr><td><code>gamma</code>/<code>theta</code> 估计</td><td>上位机已实现 <code>[APP]</code>：<code>estimate_amp()</code> 用 4 个参考相位 × 45 点 λ 网格（0.680–0.790，步长 0.0025），按 <code>gamma·cos(theta) = (λ*₁₈₀ − λ*₀)/2</code>、<code>gamma·sin(theta) = (λ*₂₇₀ − λ*₉₀)/2</code> 做差消去 <code>lam_c</code>；180 路向量化后约 2.6 s。<strong>只在 <code>detected</code> 时执行</strong>——无信号时 <code>λ*</code> 全落在网格端点，<code>atan2(0,0)</code> 会给出恒定的假相位</td></tr>
+<tr><td>多帧累积判决</td><td>需先确定帧间独立性（当前初相随机，独立性成立）</td></tr>
+<tr><td>电池供电</td><td>需评估 94 s 窗内的功耗预算</td></tr>
+</tbody></table>
+<hr>
+<h2>12. AI 执行入口</h2>
+<h3>12.1 十步清单（每步有完成标志，不得跳步）</h3>
+<table><thead><tr><th>步</th><th>动作</th><th>完成标志</th><th>不通过先查</th></tr></thead><tbody>
+<tr><td>1</td><td>读 §0 术语表与 §1.2 非目标</td><td>能复述「不做扫 R / 估幅 / 无线」</td><td>—</td></tr>
+<tr><td>2</td><td>跑 §7.2 环境自检</td><td>三条命令版本匹配</td><td>装对应 IDF 版本</td></tr>
+<tr><td>3</td><td>建 <code>firmware/</code> 树（§6.1）</td><td>目录与文件占位齐备</td><td>—</td></tr>
+<tr><td>4</td><td>实现 <code>qmath</code> + <code>test_qmath</code></td><td>T1 通过</td><td><code>int64</code> 中间积</td></tr>
+<tr><td>5</td><td>实现 <code>duffing</code> + <code>test_duffing</code></td><td>T3 / T4 / T8 通过</td><td><strong>先查 T8 的 Poincaré 插值</strong></td></tr>
+<tr><td>6</td><td>实现 <code>detector</code> + <code>test_detector</code></td><td>T5 / T6 / T7 通过</td><td>门限口径（§9.2 下方注）</td></tr>
+<tr><td>7</td><td>回放 <code>vectors/</code></td><td>T2 / T9 通过</td><td><code>cos_lut</code> 表长</td></tr>
+<tr><td>8</td><td>实现 <code>adc_acq</code> 并上板</td><td>A1 / A2 通过</td><td><code>adc_continuous</code> 最低采样率</td></tr>
+<tr><td>9</td><td>集成 + 自检注入 + UART 回放（§8.4）</td><td>A3 / A4 通过；回放帧 <code>pstd</code> 与上位机同对数档</td><td>采样率、<code>betas_deg</code>、插值补角</td></tr>
+<tr><td>10</td><td>跑指标</td><td>A5 / A6 / A7 / A8 / A9 通过</td><td>§11.2 平台限制</td></tr>
+</tbody></table>
+<h3>12.2 四条最易犯的禁令（再列一次）</h3>
+<ol><li><strong>不得引入 <code>ν</code></strong>。旧称已废弃，正确的量是 <code>R</code>；代码里出现 <code>nu</code> 即为错误。</li><li><strong>末态组合不得用 <code>qadd</code> 连加</strong>。必须 <code>int64</code> 累加后一次移位（§4.4）。</li><li><strong>不得按步数取整取 Poincaré 点</strong>。必须 DDS 相位溢出 + 线性插值（§4.5），否则压掉 4 个量级。</li><li><strong>插值权重不得取「跨线后余量」</strong>。<code>frac</code> 是溢出后的余量，权重是它的补角 <code>(PH_INC - frac)/PH_INC</code>；写反后周期态 <code>pstd</code> 从 <code>3.2e-6</code> 变成 <code>1.2e-2</code>（§4.5 对照表），症状与第 3 条几乎相同，极易误诊。</li></ol>
+<h3>12.3 必须停下来问人的三种情况</h3>
+<table><thead><tr><th>情况</th><th>为什么不能自行决定</th></tr></thead><tbody>
+<tr><td>需要真实硬件（示波器、磁通门、ADS1256）</td><td>规格无法替代实测，编造数字会污染全部下游结论</td></tr>
+<tr><td>需要改 §3.1 的 <code>fs</code> / <code>omega</code> / <code>lam0</code> / <code>q_frac</code></td><td>触发 §3.2 的连锁重标定，属于课题级决策</td></tr>
+<tr><td>§11.3 的 <code>[TODO]</code> 项无法实测</td><td>只能标 <code>[TODO]</code>，<strong>禁止</strong>填推测值并去掉标记</td></tr>
+</tbody></table>
+<p><strong>所有 <code>[TODO]</code> 项在实测前，文档中必须保留原标记。</strong> 把 <code>[TODO]</code> 改成 <code>[SPEC]</code> 或删除标记，等同于伪造数据。</p>
+<hr>
+<h2>13. 变更记录</h2>
+<table><thead><tr><th>日期</th><th>变更</th><th>依据</th></tr></thead><tbody>
+<tr><td>2026-11-25</td><td>初版。状态格式 Q2.12 → Q6.12（int32 容器，±32 防末态饱和）、新增 Q0.30 系数格式与 <code>qmul_coef</code>、DDS 相位累加器、§11.1 覆盖率表、§12 执行入口</td><td><code>[S5]</code> <code>[LK]</code></td></tr>
+<tr><td>2026-11-25</td><td>按 <code>tools/tx_app.py</code> / <code>rx_app.py</code> 对稿修订：① <strong>§4.5 插值权重改为补角</strong> <code>(PH_INC-frac)/PH_INC</code>（旧写法把周期态 <code>pstd</code> 从 <code>3.2e-6</code> 抬到 <code>1.2e-2</code>）；② <strong>§3.1 <code>q_th</code> 默认改 0.08</strong>，0.347 改名 <code>q_th_pfa5</code> 并明确只用于报 Pfa；③ <strong><code>q_th_min</code> 语义改正</strong>：全零输入是 <code>pstd≈0.43</code>（混沌态）而非塌缩，断线检测改由 <code>peak</code> 判（新增 <code>ERR_INPUT_SILENT</code>）；④ <code>betas_deg</code> 顺序改为 <code>0/-120/+120</code>；⑤ 新增 §1.4 双端映射与初始化顺序、§3.3 默认值对照、§3.4 噪声类型、§5.4 四条帧边界约束、§8.4 下行联调格式（含 UART 带宽预算）、§10.4 运行期校验、T11；⑥ 修 §11.1 <code>−3 dB</code> 行（74.6°→76.3°、41.4%→42.4%）、三相位全覆盖阈值改 <code>A ≥ 0.0263</code>（SNR ≥ −8.6 dB）；⑦ §11.4 扫 R/估幅补齐实测代价与误差；⑧ <strong>T8/T9 改用定点基线</strong>（12 位小数位下周期态地板 <code>2.7e-3</code>，浮点 <code>1e-4</code> 不可达；F=10 时正确/写反只差 1.9×，T8 仅在 F=12 有分辨力）</td><td><code>[APP]</code> 对稿 + 本机探针</td></tr>
+<tr><td>2026-11-26</td><td>与内核重构（<code>00-总览/性能优化与基准.md</code>）及口径修订同步：① <strong>§4.4 单步字段不变</strong>——<code>simulate_seq</code> 改为「<code>m ≤ 32</code> 微内核 / <code>m &gt; 32</code> 阵列」两路径，逐位相同、签名未变，固件仍照 §4.4 逐项实现（§7.3 已写明）；② 新增 <strong>§5.1 驱动表不可照搬</strong>（PC 单列约 4.5 MB，固件若存整帧驱动项 <code>47124×3×4 B ≈ 566 KB</code> 直接顶穿 64 KB）；③ <strong>§9.1 L2 由「同对数档」改为逐位相等</strong>，并列出两类会被容差漏掉的错（<code>u_mid</code> 舍入、插值权重取余量）；④ 向量导出新增「<code>.bin</code> 只装信号+噪声，不含 <code>lam0·cos τ</code>」；⑤ <strong>§3.3/§3.4 补 <code>SNR_E</code> 口径</strong>（与力口径差 <code>10lg h1</code> = −17 dB，框架演示默认 −15 dB）；⑥ 耗时统一：<code>known</code> 1.5 s → <strong>0.15 s</strong>、<code>auto</code> 3.63 s → <strong>0.92 s</strong>、<code>scan_R</code> 2.05 s → <strong>0.75 s</strong>，并写明 <strong>PC 的 10× 不可移植</strong>（瓶颈是 numpy 调用开销，非浮点）</td><td><code>00-总览/性能优化与基准.md</code>、<code>tests/golden/</code>、§4.4</td></tr>
+</tbody></table></main></body></html>

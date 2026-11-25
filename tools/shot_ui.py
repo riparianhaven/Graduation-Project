@@ -2,9 +2,13 @@
 # -*- coding: utf-8 -*-
 """给双端界面各截一张图（写文档用，不进测试集）。
 
-    .venv\\Scripts\\python.exe .workbuddy/tmp/shot_ui.py
+    .venv\\Scripts\\python.exe tools\\shot_ui.py
 
 输出：复现输出/界面-发送端.png、复现输出/界面-接收端.png
+
+接收端那张用**真的连续发送流**（`TxStream`，常开目标）打一帧过去，
+而不是手搓包头——否则头包里缺 `scale/t0/cov`，截出来的界面跟实际
+联调时的状态条不是一回事。
 """
 from __future__ import annotations
 
@@ -51,15 +55,31 @@ def window_rect(root: tk.Tk) -> tuple[int, int, int, int]:
 
 
 def grab(root: tk.Tk, name: str) -> None:
-    root.attributes("-topmost", True)      # 否则会被其他窗口盖住，截出半张
+    """截窗口。**先抢到前台再截**——`ImageGrab` 截的是屏幕，不是控件：
+
+    只要右侧有一条属于别的窗口的窄条压在画布上（WorkBuddy 自己的侧栏就会
+    这么干），截出来就会在右边镶一条竖排文字，看着像界面被裁了。
+    光设 `-topmost` 不够，还得 `SetForegroundWindow` 把它顶到最前。
+    """
+    hwnd = int(root.wm_frame(), 16)
+    root.attributes("-topmost", True)
     root.lift()
     root.focus_force()
+    try:
+        ctypes.windll.user32.SetForegroundWindow(hwnd)
+        ctypes.windll.user32.BringWindowToTop(hwnd)
+    except Exception:
+        pass
     root.update_idletasks()
     root.update()
-    time.sleep(0.6)
+    time.sleep(1.0)                       # 太短的话别的窗口还没退到后面
     root.update()
     x0, y0, x1, y1 = window_rect(root)
-    img = ImageGrab.grab(bbox=(x0, y0, x1, y1), all_screens=True)
+    # 只截**客户区 + 标题栏**，不要窗口边框：边框在 Win11 是带透明阴影的，
+    # ImageGrab 会把底下的桌面/别的窗口一起截进来，看着像界面右边镶了一条乱码。
+    cx, cy = root.winfo_rootx(), root.winfo_rooty()
+    cw, ch = root.winfo_width(), root.winfo_height()
+    img = ImageGrab.grab(bbox=(cx, y0 + 2, cx + cw, cy + ch), all_screens=True)
     p = OUT / name
     img.save(p)
     print(f"  已存 {p}  {img.size}")
@@ -92,19 +112,27 @@ def shot_rx(port: int = 50790) -> None:
         root.update()
         time.sleep(0.05)
 
-    fr = LP.make_frame(w=10.0, fs=500.0, duration=94.2, amp=0.02, sigma=0.05,
-                       phase=0.0, rng=np.random.default_rng(4))
+    # 用真的连续发送流出一帧：头包里的 scale / t0 / cov 才齐全，
+    # 接收端的状态条与覆盖率核对走的都是联调时的同一条路径
+    st = LP.TxStream(w=10.0, fs=500.0, duration=94.2, amp=0.02, sigma=0.05,
+                     always_sig=False, seed=4)
+    st.attach(200.0, 0.0)        # 固定 θ0 = 0：随机初相会撞盲区，截图不能靠运气
+    fr = st.frame()
+    meta = dict(frame=fr["frame"], n=fr["n"], fs=500.0, w_hint=10.0, amp=0.02,
+                sigma=0.05, alpha=0, has_sig=True, has_noise=True,
+                snr_db=round(fr["snr_db"], 2) if fr["snr_db"] is not None else None,
+                duration=94.2, phase=fr["phase"], scale=LP.ADC_SCALE,
+                t0=fr["t0"], sig_t0=fr["sig_t0"], sig_dur=fr["sig_dur"],
+                sig_epoch=fr["sig_epoch"], cov=fr["cov"])
 
     def send() -> None:
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.sendto(LP.pack_head(dict(frame=0, n=fr["n"], fs=500.0, w_hint=10.0,
-                                   amp=0.02, sigma=0.05, alpha=0, has_sig=True,
-                                   has_noise=True, snr_db=round(fr["snr_db"], 2))),
-                 ("127.0.0.1", port))
-        for p in LP.split_frame(0, fr["rx"], 500.0):
+        s.sendto(LP.pack_head(meta), ("127.0.0.1", port))
+        for p in LP.split_frame(fr["frame"], fr["rx"], 500.0):
             s.sendto(p, ("127.0.0.1", port))
             time.sleep(0.002)
-        s.sendto(LP.pack_tail(dict(frame=0, sent=fr["n"])), ("127.0.0.1", port))
+        s.sendto(LP.pack_tail(dict(frame=fr["frame"], sent=fr["n"])),
+                 ("127.0.0.1", port))
         s.close()
 
     threading.Thread(target=send, daemon=True).start()

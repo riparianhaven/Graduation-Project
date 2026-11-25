@@ -1,16 +1,19 @@
 # -*- coding: utf-8 -*-
-"""内核一致性契约测试（全项目单一内核 simulate_seq）。
+"""内核一致性契约测试（一个内核，两个实现）。
 
-守的是四条纪律，任何一条被破坏都说明"又长出了第二套积分器"：
+守的是五条纪律，任何一条被破坏都说明"又长出了第二套积分器"：
 
 1. 没有解析内核：`def simulate(` 在项目自有代码与 notebook 里一处都不许有
-   （包括 `s2-jupyterbook/_src`）。`simulate_fixed` 是定点复刻，不在此列，
-   因为它的存在意义就是和浮点内核对比量化代价。
+   （包括 `s2-jupyterbook/_src`）。定点的 `simulate_fixed_seq` 不在此列：
+   它与浮点同签名、同返回，只换算术域（见纪律 5）。
 2. 每份含内核的 notebook 恰好一个 `def simulate_seq`。
 3. notebook 里的内核正文与 `tools/kernel_src.KERNEL_SRC` 逐字相同
    （生成器改了却没重新生成、或手改 notebook 漏同步，都会被这条抓住）。
 4. 数值契约：全零序列等价于"只有内驱"，λ=0.72 混沌 / 0.76 周期；
    标量快路径与向量路径在同一问题上给出相同 pstd。
+5. 定点复刻同源：`learn/5.ipynb` 里的 `simulate_fixed_seq` 正文逐字等于
+   `FIXED_KERNEL_SRC`；同一序列下 F=12 的 pstd 与浮点同量级；
+   F=4 塌缩但不得返回 nan/inf（塌缩 ≠ 发散）。
 """
 from __future__ import annotations
 
@@ -26,10 +29,10 @@ TOOLS = ROOT / "tools"
 import sys
 
 sys.path.insert(0, str(TOOLS))
-from kernel_src import KERNEL_SRC, load_kernel  # noqa: E402
+from kernel_src import FIXED_KERNEL_SRC, KERNEL_SRC, load_fixed_kernel, load_kernel  # noqa: E402
 
-# 含内核的 notebook（learn/0,1,5 与 s2 书里的 notebook 不含内核，只有 JSON 读取）
-NB_WITH_KERNEL = ["learn/2.ipynb", "learn/3.ipynb", "learn/4.ipynb",
+# 含内核的 notebook（learn/0,1 与 s2 书里的 notebook 不含内核，只有 JSON 读取）
+NB_WITH_KERNEL = ["learn/2.ipynb", "learn/3.ipynb", "learn/4.ipynb", "learn/5.ipynb",
                   "learn/all.ipynb", "复现-2-混沌振子建模与临界阈值.ipynb"]
 
 RETURN_LINE = "    return dict(pstd=pstd, mx=np.atleast_1d(mx)"
@@ -138,3 +141,40 @@ def test_sig_column_mismatch_raises(kernel):
     sig = np.zeros((100, 3))
     with pytest.raises(ValueError):
         fn(sig, 1.0, 0.02, lam=[0.72, 0.76], n_cycles=5.0)
+
+
+# ---------------------------------------------------------------- 纪律 5：定点复刻
+def test_lear5_fixed_kernel_is_shared_source():
+    """learn/5 的定点复刻必须逐字来自 FIXED_KERNEL_SRC（含 _qacc 辅助函数）。"""
+    joined = "\n".join(_nb_sources(ROOT / "learn/5.ipynb"))
+    assert FIXED_KERNEL_SRC.strip("\n") in joined, (
+        "learn/5.ipynb 的定点内核与 tools/kernel_src.py 的 FIXED_KERNEL_SRC 不一致")
+    assert "def simulate_fixed_seq(" in joined
+    assert not re.search(r"(?<![_a-zA-Z])simulate_fixed\(", joined), (
+        "learn/5 里还有旧签名 simulate_fixed( 的调用")
+
+
+def test_lear5_holds_both_implementations():
+    """阶段 5 要并排放两个实现：各恰好一个。"""
+    srcs = _nb_sources(ROOT / "learn/5.ipynb")
+    assert sum("def simulate_seq(" in s for s in srcs) == 1
+    assert sum("def simulate_fixed_seq(" in s for s in srcs) == 1
+
+
+def test_fixed_F12_tracks_float():
+    """同一序列：F=12 的 pstd 与浮点同量级（实测相对差约 25%，门槛放到 35%）。"""
+    fn, ns = load_kernel()
+    fx, _ = load_fixed_kernel()
+    sig = 0.02 * np.cos(np.arange(6000) * 0.02 + 0.3)
+    a = fn(sig, 1.0, 0.02, lam=0.70, n_cycles=60.0)["pstd"][0]
+    b = fx(sig, 1.0, 0.02, lam=0.70, n_cycles=60.0, F=12)["pstd"][0]
+    assert np.isfinite(b) and b > 0.1
+    assert b == pytest.approx(a, rel=0.35)
+
+
+def test_fixed_F4_collapses_without_nan():
+    """F=4 动力学塌缩（pstd≈0）但不得发散：定点版是舍入模型，不是溢出模型。"""
+    fx, ns = load_fixed_kernel()
+    r = fx(ns["SIG0"], 1.0, 0.02, lam=[0.72], n_cycles=50.0, F=4)
+    assert np.all(np.isfinite(r["pstd"]))
+    assert r["pstd"][0] < 0.05

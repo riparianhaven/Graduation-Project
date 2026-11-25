@@ -38,8 +38,8 @@ strong{font-weight:650}
 </head><body>
 <div class="bar"><a href="../index.html">← 返回资料索引</a>
 <a href="阶段5-过关产出结果.md">查看 Markdown 源码</a><span class="fn">07-阶段五/阶段5-过关产出结果.md</span></div>
-<div class="staticnote">这是 <b>静态排版副本</b>，生成于 2026-11-24 22:21。直接双击 <code>index.html</code> 时看到的就是它；若 Markdown 刚改过，请在工作区运行 <code>py build_static.py</code> 重新生成，或用 <code>start_index.bat</code> 启动本地服务查看实时渲染版。页内公式由 MathJax 渲染，需要联网。</div><main><h1>阶段 5 过关产出结果：嵌入式实现（定点化 / 资源时序 / 时序仿真）</h1>
-<blockquote><p><strong>验收口径</strong>：<a href="../00-总览/阅读路线.html">阅读路线阶段 5</a> 原文——「定点化位宽分析、资源 / 时序估算、板级或时序仿真结果，与阶段 4 的浮点仿真指标对照。」</p><p><strong>核实时点</strong>：2026-11-23｜<strong>全部数字取自实跑</strong>，程序：<a href="../learn/5.ipynb">learn/5.ipynb</a>（25 单元 / 18 段代码 / 4 张内嵌图 / 0 报错 / 347 s）。机器可读汇总：<a href="../复现输出/阶段5-定点化与资源时序汇总.json">阶段5-定点化与资源时序汇总.json</a>。</p><p><strong>诚实边界</strong>：无 FPGA 板、无综合报告；本页是定点数值仿真 + 基于 F2 实测工艺的换算 + 时序仿真。凡「资源/时钟/实时性」均标注推算依据，不冒充实测。</p></blockquote>
+<div class="staticnote">这是 <b>静态排版副本</b>，生成于 2026-11-25 20:19。直接双击 <code>index.html</code> 时看到的就是它；若 Markdown 刚改过，请在工作区运行 <code>py build_static.py</code> 重新生成，或用 <code>start_index.bat</code> 启动本地服务查看实时渲染版。页内公式由 MathJax 渲染，需要联网。</div><main><h1>阶段 5 过关产出结果：嵌入式实现（定点化 / 资源时序 / 时序仿真）</h1>
+<blockquote><p><strong>验收口径</strong>：<a href="../00-总览/阅读路线.html">阅读路线阶段 5</a> 原文——「定点化位宽分析、资源 / 时序估算、板级或时序仿真结果，与阶段 4 的浮点仿真指标对照。」</p><p><strong>核实时点</strong>：2026-11-23｜<strong>全部数字取自实跑</strong>，程序：<a href="../learn/5.ipynb">learn/5.ipynb</a>（27 单元 / 20 段代码 / 4 张内嵌图 / 0 报错 / 约 240 s）。机器可读汇总：<a href="../复现输出/阶段5-定点化与资源时序汇总.json">阶段5-定点化与资源时序汇总.json</a>。</p><p><strong>诚实边界</strong>：无 FPGA 板、无综合报告；本页是定点数值仿真 + 基于 F2 实测工艺的换算 + 时序仿真。凡「资源/时钟/实时性」均标注推算依据，不冒充实测。</p></blockquote>
 <hr>
 <h2>一、过关要求逐条对照</h2>
 <table><thead><tr><th>#</th><th>路线过关要求</th><th>交付实物</th><th>结果</th></tr></thead><tbody>
@@ -47,34 +47,35 @@ strong{font-weight:650}
 <tr><td>2</td><td>资源/时序估算</td><td>§四：op 数 → 1008 ns/步 → 252 时钟；并行 vs TDM 资源对照表</td><td>✅</td></tr>
 <tr><td>3</td><td>板级或时序仿真结果</td><td>§五：帧级数据流 + 单步 5 拍流水排程时序仿真图（<strong>时序仿真，非板级实测</strong>）</td><td>✅</td></tr>
 <tr><td>4</td><td>与阶段 4 浮点指标对照</td><td>§六：工作点/阈值/Pd/SNR/计算时间五项对照表</td><td>✅</td></tr>
-<tr><td>5</td><td>（附加）工作点重标定发现</td><td>§三：浮点 λ0=0.72 烧录后 Pd=0.05，重标定 λ0=0.76 恢复 Pd=0.93</td><td>✅</td></tr>
+<tr><td>5</td><td>（附加）位宽决定工作点能否沿用</td><td>§三：F=12 下 λ0=0.72 直接可用（Pd=0.82）；F=8 同点只 0.42 且加位宽才能救</td><td>✅</td></tr>
 </tbody></table>
 <p><strong>验收结论：阶段 5 以「时序仿真 + 工艺换算」口径过关。</strong> 板级实测不是本阶段能兑现的——课题无硬件平台，这一边界写进 §七，不掩饰。</p>
 <hr>
-<h2>二、定点化位宽分析：三种失效模式 + 甜点区</h2>
-<p>固定 Q2.F 格式（2 位整数含符号 + F 位小数），无噪扫 λ∈[0.70,0.84]，取首个 pstd&lt;0.1 为定点等效阈值：</p>
+<h2>二、定点化位宽分析：量化几乎不动阈值，位宽不足才致命</h2>
+<p>固定 Q2.F 格式（2 位整数含符号 + F 位小数），无噪（全零序列 = 只有内驱）扫 λ∈[0.70,0.84]，取首个 pstd&lt;0.1 为等效阈值；同一网格、同一序列再跑一遍浮点内核作基线：</p>
 <p><img src="../复现输出/阶段5-位宽扫描与阈值漂移.png" alt="位宽扫描与阈值漂移" style="display:block;max-width:100%;height:auto;margin:10px 0"></p>
-<table><thead><tr><th>字长 F</th><th>W</th><th>等效 λc</th><th>状态</th></tr></thead><tbody>
-<tr><td>4</td><td>6</td><td>伪 0.70</td><td>❌ 动力学塌缩（全程 pstd≈0，假周期）</td></tr>
-<tr><td>6</td><td>8</td><td>—</td><td>❌ 相变消失（全程混沌）</td></tr>
-<tr><td>8</td><td>10</td><td>0.76</td><td>⚠️ λ=0.80 伪周期回弹</td></tr>
-<tr><td>10</td><td>12</td><td>0.77</td><td>✅ 甜点区起点</td></tr>
-<tr><td>12</td><td>14</td><td>0.77</td><td>✅ <strong>推荐</strong>（检测实验所用）</td></tr>
-<tr><td>14–18</td><td>16–20</td><td>0.77</td><td>✅ 稳定但浪费资源</td></tr>
+<table><thead><tr><th>字长 F</th><th>W</th><th>λc（0.01 粗网格 / T=300 s）</th><th>精扫（0.001 / T=1200 s）</th><th>状态</th></tr></thead><tbody>
+<tr><td>4</td><td>6</td><td>无（假阈值 0.70）</td><td>—</td><td>❌ 动力学塌缩（全程 pstd≈0，假周期）</td></tr>
+<tr><td>6</td><td>8</td><td>—</td><td>—</td><td>❌ 相变消失（全程混沌）</td></tr>
+<tr><td>8</td><td>10</td><td>0.76</td><td>—</td><td>⚠️ 阈值漂移 + λ≈0.79 伪回弹</td></tr>
+<tr><td>10</td><td>12</td><td>0.74</td><td>0.735</td><td>✅ 可用，比浮点晚一格</td></tr>
+<tr><td>12</td><td>14</td><td>0.74</td><td><strong>0.734</strong></td><td>✅ <strong>推荐</strong>（检测实验所用，与浮点同格）</td></tr>
+<tr><td>14–18</td><td>16–20</td><td>0.75–0.76</td><td>—</td><td>粗网格抬升是<strong>短窗伪影</strong></td></tr>
 </tbody></table>
-<p><strong>核心结论</strong>：定点化改变的是<strong>等效阈值本身</strong>（浮点 0.734–0.736 → 定点 0.77，漂移 +0.035），不只是"精度略降"。F=4/6/8 三种失效模式（塌缩 / 无相变 / 伪回弹）都不是靠"多加几位"能线性修好的——必须扫 λc 逐个验。</p>
+<p><strong>核心结论（2026-11-25 修正）</strong>：</p>
+<ol><li><strong>量化本身几乎不动阈值</strong>：0.001 步长、T=1200 s 下，浮点与 F=12 都在 0.734 处跃变，F=10 只晚一格（+0.001）。Q2.12 的 LSB≈2.4e-4，远小于 λc 附近的判据分辨率。</li><li><strong>位宽不足才是分水岭</strong>，而且是判据整体失效、不是"阈值抬一点"：F=4 全程 pstd≈0（100% 虚警）、F=6 永不判周期（100% 漏检）、F=8 阈值漂到 0.76 还带回弹。</li><li><strong>旧结论 0.77 是方法错误</strong>：旧实现把 RK4 的 k2/k3 取了整步 $h$（标准应为 $h/2$），积分精度退到 RK2 量级，相变点被推到 0.77。改回 $h/2$ 后立刻回到 0.7335。这条比结论本身更值得写进论文——<strong>先查方法，再谈量化代价</strong>。</li><li><strong>粗网格会骗人</strong>：F=14/16 在 T=300 s 上给出 0.75/0.76，精扫却是 0.734。字长越宽越接近浮点，λc 附近瞬态越长，短窗把"还没收敛"读成了"阈值更高"。</li></ol>
 <hr>
-<h2>三、最关键发现：浮点工作点不能直接烧录</h2>
-<p><img src="../复现输出/阶段5-定点检测与重标定.png" alt="定点检测与重标定" style="display:block;max-width:100%;height:auto;margin:10px 0"></p>
-<p>条件：F=12、σ=0.05、γ=0.02、h=0.02 s、T=300 s、NMC=40、H0 反解门限。</p>
-<table><thead><tr><th>λ0</th><th>H0 pstd 中位</th><th>H1 pstd 中位</th><th>Pd@Pfa≤0.05</th></tr></thead><tbody>
-<tr><td><strong>0.72（浮点工作点）</strong></td><td>0.503</td><td>0.524</td><td><strong>0.05（失效）</strong></td></tr>
-<tr><td>0.74</td><td>0.524</td><td>0.495</td><td>0.17</td></tr>
-<tr><td>0.75</td><td>0.481</td><td>0.011</td><td>0.78</td></tr>
-<tr><td><strong>0.76（重标定）</strong></td><td>0.495</td><td>0.011</td><td><strong>0.93</strong></td></tr>
-<tr><td>0.77</td><td>0.011</td><td>0.011</td><td>0.03（H0 自己已相变）</td></tr>
+<h2>三、最关键发现（结论已反转）：位宽够时浮点工作点可直接沿用</h2>
+<p><img src="../复现输出/阶段5-位宽与检测工作点.png" alt="位宽与检测工作点" style="display:block;max-width:100%;height:auto;margin:10px 0"></p>
+<p>条件：σ=0.05、γ=0.02、h=0.02 s、T=300 s、NMC=40、H0/H1 共用同一批噪声（公共随机数法）、H0 反解门限。两档位宽并排：</p>
+<table><thead><tr><th>λ0</th><th>F=12：H0 中位</th><th>F=12：H1 中位</th><th>F=12 Pd</th><th>F=8 Pd</th></tr></thead><tbody>
+<tr><td>0.70</td><td>0.450</td><td>0.405</td><td>0.05</td><td>0.33</td></tr>
+<tr><td><strong>0.72（浮点工作点）</strong></td><td>0.410</td><td><strong>0.004</strong></td><td><strong>0.82</strong></td><td>0.42</td></tr>
+<tr><td>0.74</td><td>0.003</td><td>0.002</td><td>0.68（门限已失效，数不可信）</td><td>0.40</td></tr>
+<tr><td>0.76</td><td>0.002</td><td>0.002</td><td>0.03</td><td>0.00</td></tr>
+<tr><td>0.78</td><td>0.002</td><td>0.002</td><td>0.10</td><td>0.00</td></tr>
 </tbody></table>
-<ul><li>根因：阶段 2–4 的工作点 λ0=0.72 是相对<strong>浮点阈值 0.735</strong> 留的裕度；定点阈值抬到 0.77 后，λ0+γ=0.74 够不到，H0/H1 都混沌、无法区分；</li><li>重标定到 λ0=0.76 后，H1（=0.78）越过 0.77 触发相变，Pd 恢复到 0.93；</li><li>λ0 不能太高：≥0.77 时 H0 自己就相变了（pstd 塌到 0.011），门限塌缩，Pd 再次失效。</li><li>这是本阶段<strong>最实用的工程结论</strong>：换平台/字长/采样率都要重扫 λc 并重定 λ0。</li></ul>
+<ul><li><strong>F=12</strong>：λ0=0.72 处 H0（0.410）与 H1（0.004）分离极干净，Pd=0.82 —— 浮点工作点<strong>不需要重标定</strong>，直接烧；</li><li><strong>F=8</strong>：同一工作点 Pd 只有 0.42，H0/H1 中位（0.396 / 0.335）几乎叠在一起，门限勉强分得开一点；抬到 0.76 后 H0 自己相变（0.010），Pd 归零——<strong>不是重标定就能救，得先加位宽</strong>；</li><li><strong>λ0 不能往高调</strong>：≥0.74 时 H0 自己越过阈值，H0 反解的门限塌到 0.01 以下，Pd 退化成掷硬币；</li><li>F=12 的 Pd=0.82 低于阶段 4 的 0.92，主因是<strong>窗长 300 s vs 400 s</strong>（阶段 3 已记录短窗保守），不是定点的锅。</li><li><strong>修正后的工程结论</strong>：F≥12 直接沿用浮点阈值与工作点；只有被资源逼到 F≤8 才需要重标定，而那时往往已经无解。</li></ul>
 <hr>
 <h2>四、资源与时序估算（基于 F2 工艺换算）</h2>
 <p><img src="../复现输出/阶段5-资源时序估算.png" alt="资源时序估算" style="display:block;max-width:100%;height:auto;margin:10px 0"></p>
@@ -94,13 +95,13 @@ strong{font-weight:650}
 <hr>
 <h2>六、与阶段 4 浮点指标对照</h2>
 <table><thead><tr><th>项目</th><th>阶段 4 浮点</th><th>阶段 5 定点</th></tr></thead><tbody>
-<tr><td>工作点 λ0</td><td>0.72（浮点阈值带 0.734–0.736）</td><td>0.72 失效 → 重标定 0.76</td></tr>
-<tr><td>等效阈值 λc</td><td>0.734–0.736（精扫）</td><td>F=12 ≈0.77（漂移 +0.035）</td></tr>
-<tr><td>Pd（自身条件）</td><td>0.93（σ=0.05, γ=0.02, T=400 s）</td><td>烧录浮点值 0.05 → 重标定 0.93（T=300 s）</td></tr>
+<tr><td>工作点 λ0</td><td>0.72（浮点阈值带 0.7334–0.7336）</td><td>F=12 <strong>直接沿用</strong>（同一 λ0 下 Pd=0.82）；F=8 同点仅 0.42</td></tr>
+<tr><td>等效阈值 λc</td><td>0.7335（0.001 步长精扫）</td><td>F=12 <strong>0.734（同格）</strong>；F=8 ≈0.76 且 λ≈0.79 伪回弹</td></tr>
+<tr><td>Pd（自身条件）</td><td>0.92（σ=0.05, γ=0.02, T=400 s）</td><td>F=12 0.82 / F=8 0.42（T=300 s, NMC=40）</td></tr>
 <tr><td>最低可检测 SNR</td><td>−11.0 dB（白噪/1/f, T=400 s）</td><td>未重扫（需换平台后重标）</td></tr>
 <tr><td>单步计算时间</td><td>未估算（离线 Python）</td><td>1008 ns ≈ 252 时钟 @250 MHz（工艺换算）</td></tr>
 </tbody></table>
-<p><strong>说明</strong>：两阶段的 Pd 都是 0.93 纯属巧合（各自在自身工作点达标），条件不同（T=400 vs 300 s、浮点 vs 定点），不构成"定点无损失"的结论——真正的结论是<strong>定点需要重标定才能达到同等 Pd</strong>。</p>
+<p><strong>说明</strong>：F=12 的 Pd=0.82 低于阶段 4 的 0.92，主因是<strong>窗长（300 vs 400 s）与蒙特卡洛次数（40 vs 更多）</strong>，不是量化——精扫显示两者等效阈值同格（0.734）。<strong>真正的结论已反转：F≥12 时定点不改变工作点，可以直接烧；F≤8 时再怎么重标定也救不回来，必须先加位宽。</strong></p>
 <hr>
 <h2>七、边界与下一步</h2>
 <ol><li><strong>无板级实测</strong>：没有综合报告、没有板卡；所有时钟/资源数字是 F2 工艺换算。若答辩被问"实测多少"，答案是"本课题止于定点仿真与时序估算，实测需后续平台"。</li><li><strong>换平台必须重标</strong>：λc 与 λ0 都对字长/采样率/平台敏感，重标流程见 <a href="阶段5-嵌入式实现-问题回答.html">问题回答 Q1/Q3</a>。</li><li><strong>观测窗不可压缩</strong>：400 s 是信号时标，FPGA 只压缩"算一帧"的时间（20–60 ms），不压缩物理窗。</li><li><strong>初相盲区仍在</strong>：定点化不解决阶段 3 的 60.69° 盲区，阵列全相位覆盖照旧需要（在 TDM 单核上按相位轮询实现）。</li><li><strong>SNR 不可横向比较</strong>：F2 的 −18 dB 与本课题 −11 dB 的信号/噪声/带宽/判据全不同，不并列。</li></ol>

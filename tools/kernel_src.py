@@ -1,16 +1,24 @@
 # -*- coding: utf-8 -*-
 """★ 全项目唯一的 Duffing 数值内核（single source of truth）。
 
-项目里所有跑仿真的地方——`learn/2,3,4`、根目录 `复现-2`、`s2-jupyterbook` 的
-八章实验——都从这里的 `KERNEL_SRC` 取同一段源码，不允许再各写一份：
+**一个内核，两个实现**，签名与返回值完全相同，只有算术域不同：
 
-1. `tools/build_stage2_notebook.py` / `build_stage3_notebook.py` /
-   `build_stage4_notebook.py` 把 `KERNEL_SRC` 原样拼进 notebook（notebook 保持
-   自包含，不 import 本模块）；
+- `KERNEL_SRC`        → `simulate_seq()`        浮点（双精度），主力实现；
+- `FIXED_KERNEL_SRC`  → `simulate_fixed_seq()`  Q2.F 定点复刻，用于阶段 5
+  的嵌入式验证。它不是"另一套模型"：同一方程、同一 RK4、同一份采样序列，
+  唯一差别是每步算术都落在整型上（乘法后舍入）。所以可以**把同一个序列
+  喂给两个函数直接比 pstd**，量化代价就是这么量出来的。
+
+项目里所有跑仿真的地方——`learn/2,3,4,5`、根目录 `复现-2`、`s2-jupyterbook`
+的八章实验——都从这里的源码取，不允许再各写一份：
+
+1. `tools/build_stage2/3/4/5_notebook.py` 把源码原样拼进 notebook（notebook
+   保持自包含，不 import 本模块）；
 2. `s2-jupyterbook/_src/s2sim.py` 用 `load_kernel()` 把同一段源码 exec 进模块
    命名空间，于是 `s2sim.simulate_seq` 与 notebook 里的实现逐字相同。
 
-宿主必须事先定义四个全局名（内核体里引用它们）：
+宿主必须事先定义四个全局名（内核体里引用它们，定点版还需要 `qmul/to_q/from_q`
+与小数位宽 `F`）：
     TWOPI = 2*pi          # 内驱周期（数值时间轴上恒为 2π）
     K     = 0.5           # 阻尼（有些 notebook 里叫 DAMP，自行别名）
     R0    = 1.0           # 无待测信号时的尺度系数，使 h1 = dt
@@ -18,7 +26,7 @@
     LAM0  = 0.72          # 内驱幅值默认值（内核签名里的默认参数）
     H     = 0.02          # 采样间隔默认值
 
-`tests/test_kernel_contract.py` 会校验各 notebook 里的实现与 `KERNEL_SRC` 一致。
+`tests/test_kernel_contract.py` 会校验各 notebook 里的实现与源码逐字一致。
 """
 from __future__ import annotations
 
@@ -26,7 +34,9 @@ import math
 
 import numpy as np
 
-__all__ = ["KERNEL_SRC", "load_kernel", "DEFAULTS"]
+__all__ = ["KERNEL_SRC", "FIXED_KERNEL_SRC", "QTOOLS_SRC",
+           "load_kernel", "load_fixed_kernel", "DEFAULTS",
+           "qmul", "to_q", "from_q"]
 
 DEFAULTS = dict(TWOPI=2.0 * math.pi, K=0.5, R0=1.0, LAM0=0.72, H=0.02)
 
@@ -170,3 +180,150 @@ def simulate_seq(sig, R=R0, dt=H, lam=LAM0, beta=0.0,
 
 # 去掉定界用的首尾空行：拼接进 notebook 时不能多出换行（否则与既有单元差一个空行）
 KERNEL_SRC = KERNEL_SRC.strip("\n") + "\n"
+
+
+# ---------------------------------------------------------------- Q 格式工具
+# 定点内核与 notebook 的 0.4 单元共用这一份实现：抄两份必然对不上。
+QTOOLS_SRC = r'''
+def qmul(a, b, S):
+    """定点乘：a,b 为 Q2.F 整型，S=2^F；结果舍入回整型。"""
+    return np.rint(a.astype(np.float64) * b.astype(np.float64) / S).astype(np.int64)
+
+
+def to_q(v, S):
+    """浮点 → Q2.F 整型。"""
+    return np.rint(np.asarray(v) * S).astype(np.int64)
+
+
+def from_q(q, S):
+    """Q2.F 整型 → 浮点。"""
+    return np.asarray(q, dtype=np.float64) / S
+'''
+
+_qns = {"np": np}
+exec(compile(QTOOLS_SRC, "<qtools_src>", "exec"), _qns)
+qmul, to_q, from_q = _qns["qmul"], _qns["to_q"], _qns["from_q"]
+
+
+# ---------------------------------------------------------------- 定点复刻
+FIXED_KERNEL_SRC = r'''
+def _qacc(xq, yq, fq, S):
+    """定点加速度 -K·y + x³ - x⁵ + f（全程 Q2.F 整型）。
+
+    K·y 用 round 而非右移：右移对负数是向下取整，会引入负向偏置，
+    在混沌边缘把轨迹系统性地推向一侧。
+    """
+    x2 = qmul(xq, xq, S)
+    x3 = qmul(x2, xq, S)
+    x5 = qmul(x3, x2, S)
+    return -np.rint(K * yq).astype(np.int64) + x3 - x5 + fq
+
+
+def simulate_fixed_seq(sig, R=R0, dt=H, lam=LAM0, beta=0.0,
+                       n_cycles=150.0, burn_frac=0.5, F=12, trace=False):
+    """定点复刻 simulate_seq：同方程、同签名、同返回，算术落在 Q2.F 整型上。
+
+    参数与 simulate_seq 逐项相同，只多一个 F（小数位宽，总位宽 W=2+F）。
+    本实现只走向量路径（m=1 也当 1 元素数组）——硬件里单振子与阵列走的是
+    同一条数据通路，没有"快路径"这回事。
+
+    模拟的是**舍入误差**，不模拟位宽溢出与饱和（用 int64 承载），所以 F 在这里
+    是"精度"刻度而非"范围"约束：F 越小，等效阈值漂得越多，直至动力学塌缩。
+    """
+    lam, beta = [a.ravel().astype(float) for a in np.broadcast_arrays(
+        np.asarray(lam, float), np.asarray(beta, float))]
+    m = lam.size
+
+    sig = np.asarray(sig, float)
+    if sig.ndim == 1:
+        sig = sig.reshape(-1, 1)
+    if sig.shape[1] == 1 and m > 1:
+        sig = np.broadcast_to(sig, (sig.shape[0], m))
+    elif sig.shape[1] != m:
+        raise ValueError(f'sig 有 {sig.shape[1]} 列，与振子数 {m} 不符')
+    n = sig.shape[0]
+
+    h1 = R * dt
+    steps = int(round(n_cycles * TWOPI / h1))
+    bsteps = int(round(steps * burn_frac))
+    S = 1 << F
+    zero = np.zeros(m)
+
+    x = np.zeros(m, dtype=np.int64)
+    y = np.zeros(m, dtype=np.int64)
+    mx = np.zeros(m)
+    idx_prev = 0
+    pts, tr_t, tr_x, tr_y = [], [], [], []
+
+    for i in range(steps):
+        tau = i * h1
+        # ---- 驱动项：内驱 + 第 i 个样本，整段量化（与浮点版同一位置取样本）
+        if i < n:
+            s0 = sig[i]
+            s1 = sig[i + 1] if i + 1 < n else s0
+        else:
+            s0 = s1 = zero
+        f1 = to_q(lam * np.cos(tau + beta) + s0, S)
+        fh = to_q(lam * np.cos(tau + h1 / 2 + beta) + 0.5 * (s0 + s1), S)
+        f4 = to_q(lam * np.cos(tau + h1 + beta) + s1, S)
+
+        # ---- RK4：k2/k3 取 h/2 处、k4 取 h 处（与浮点内核逐行同构）
+        k1x = y
+        k1y = _qacc(x, y, f1, S)
+        xa = x + to_q(h1 / 2 * k1x, 1)
+        ya = y + to_q(h1 / 2 * k1y, 1)
+        k2x = ya
+        k2y = _qacc(xa, ya, fh, S)
+        xb = x + to_q(h1 / 2 * k2x, 1)
+        yb = y + to_q(h1 / 2 * k2y, 1)
+        k3x = yb
+        k3y = _qacc(xb, yb, fh, S)
+        xc = x + to_q(h1 * k3x, 1)
+        yc = y + to_q(h1 * k3y, 1)
+        k4x = yc
+        k4y = _qacc(xc, yc, f4, S)
+        x_prev = from_q(x, S)                       # 更新前存档，供 2π 时刻插值
+        x = x + to_q(h1 / 6 * (k1x + 2 * k2x + 2 * k3x + k4x), 1)
+        y = y + to_q(h1 / 6 * (k1y + 2 * k2y + 2 * k3y + k4y), 1)
+
+        if i >= bsteps:
+            np.maximum(mx, np.abs(from_q(x, S)), out=mx)
+            idx = int(math.floor((tau + h1) / TWOPI + 1e-12))
+            if idx != idx_prev and idx > 0:
+                frac = min(max((TWOPI * idx - tau) / h1, 0.0), 1.0)
+                pts.append(x_prev + frac * (from_q(x, S) - x_prev))
+                idx_prev = idx
+            if trace:
+                tr_t.append(tau)
+                tr_x.append(from_q(x, S).copy())
+                tr_y.append(from_q(y, S).copy())
+
+    p_all = np.asarray(pts)
+    if p_all.size:
+        p = p_all[len(p_all) // 2:]
+        if p.ndim == 1:
+            p = p.reshape(-1, 1)
+        pstd = p.std(axis=0)
+    else:
+        p = np.empty((0, m))
+        pstd = np.full(m, np.nan)
+    if trace:
+        T_, X_, Y_ = np.asarray(tr_t), np.asarray(tr_x), np.asarray(tr_y)
+    else:
+        T_ = X_ = Y_ = None
+    return dict(pstd=pstd, mx=np.atleast_1d(mx), p=p, t=T_, X=X_, Y=Y_)
+'''
+
+
+def load_fixed_kernel(**over):
+    """把 FIXED_KERNEL_SRC exec 进新命名空间，返回 (simulate_fixed_seq, ns)。
+
+    over 可覆盖 DEFAULTS 里的常量；Q 格式工具与浮点版共用同一份源码。
+    """
+    consts = dict(DEFAULTS)
+    consts.update(over)
+    ns = dict(math=math, np=np, SIG0=np.zeros(1),
+              qmul=qmul, to_q=to_q, from_q=from_q)
+    ns.update(consts)
+    exec(compile(FIXED_KERNEL_SRC, "<fixed_kernel_src>", "exec"), ns)
+    return ns["simulate_fixed_seq"], ns

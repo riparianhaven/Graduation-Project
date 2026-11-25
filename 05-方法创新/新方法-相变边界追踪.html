@@ -38,7 +38,7 @@ strong{font-weight:650}
 </head><body>
 <div class="bar"><a href="../index.html">← 返回资料索引</a>
 <a href="新方法-相变边界追踪.md">查看 Markdown 源码</a><span class="fn">05-方法创新/新方法-相变边界追踪.md</span></div>
-<div class="staticnote">这是 <b>静态排版副本</b>，生成于 2026-11-24 22:21。直接双击 <code>index.html</code> 时看到的就是它；若 Markdown 刚改过，请在工作区运行 <code>py build_static.py</code> 重新生成，或用 <code>start_index.bat</code> 启动本地服务查看实时渲染版。页内公式由 MathJax 渲染，需要联网。</div><main><h1>新方法提案：λ 域相变边界追踪法（Phase-Boundary Tracking, PBT）</h1>
+<div class="staticnote">这是 <b>静态排版副本</b>，生成于 2026-11-25 20:19。直接双击 <code>index.html</code> 时看到的就是它；若 Markdown 刚改过，请在工作区运行 <code>py build_static.py</code> 重新生成，或用 <code>start_index.bat</code> 启动本地服务查看实时渲染版。页内公式由 MathJax 渲染，需要联网。</div><main><h1>新方法提案：λ 域相变边界追踪法（Phase-Boundary Tracking, PBT）</h1>
 <blockquote><p><strong>一句话</strong>：不再在固定的工作点问「有没有越过阈值」，而是<strong>测出相变边界被信号推到了哪里</strong>——把混沌振子从「二值检测器」改造成「边界位移传感器」。</p><p><strong>成文日期</strong>：2026-11-19</p><p><strong>来源约束</strong>：全部设计依据取自本项目已入库文献与已完成复现，不引入未读文献的方法细节。</p><p><strong>证据分级</strong>：✅ 解析可复算 ｜ ○ 有文献/复现支撑 ｜ △ 推断，待实验</p></blockquote>
 <hr>
 <h2>零、这个方法要解决的是哪几个具体痛点</h2>

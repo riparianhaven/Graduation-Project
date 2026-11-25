@@ -1,0 +1,152 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>08-端到端链路/端到端-发射接收检测.md</title><style>
+:root{--bg:#f6f7f9;--panel:#fff;--line:#e3e7ec;--text:#1b232c;--muted:#63707e;--accent:#2f6fd0;--soft:#eaf1fc}
+@media(prefers-color-scheme:dark){:root{--bg:#14181d;--panel:#1d232a;--line:#303a45;--text:#e7edf3;--muted:#a7b3c0;--accent:#7fb0f5;--soft:#21334d}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.8 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+.bar{position:sticky;top:0;background:var(--panel);border-bottom:1px solid var(--line);padding:9px 24px;font-size:13px;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.bar a{color:var(--accent);text-decoration:none}.bar a:hover{text-decoration:underline}
+.bar .fn{color:var(--muted);margin-left:auto;word-break:break-all}
+main{max-width:980px;margin:0 auto;padding:26px 28px 70px;background:var(--panel);min-height:calc(100vh - 44px);
+  border-left:1px solid var(--line);border-right:1px solid var(--line)}
+h1,h2,h3,h4{line-height:1.4;margin:1.5em 0 .6em;font-weight:650}
+h1{font-size:25px;border-bottom:1px solid var(--line);padding-bottom:10px;margin-top:.4em}
+h2{font-size:20px;border-bottom:1px solid var(--line);padding-bottom:7px}
+h3{font-size:17px}h4{font-size:15px}
+p,li{color:var(--text)}li{margin:.25em 0}
+a{color:var(--accent)}
+code{background:var(--soft);padding:1px 5px;border-radius:4px;font:12.6px ui-monospace,Consolas,monospace}
+pre{background:var(--soft);border:1px solid var(--line);border-radius:8px;padding:14px 16px;overflow:auto}
+pre code{background:none;padding:0}
+blockquote{border-left:3px solid var(--accent);background:var(--soft);margin:12px 0;padding:8px 16px;color:var(--muted)}
+blockquote p{margin:.3em 0}
+.staticnote{max-width:980px;margin:14px auto -8px;padding:9px 14px;border:1px solid var(--line);
+  border-left:3px solid var(--accent);border-radius:0 8px 8px 0;background:var(--soft);
+  font-size:12.6px;color:var(--muted)}
+.staticnote a{color:var(--accent)}
+table{border-collapse:collapse;width:100%;margin:14px 0;font-size:13.4px;display:block;overflow:auto}
+th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top}
+th{background:var(--soft);color:var(--muted);white-space:nowrap}
+tr:nth-child(even) td{background:rgba(127,150,180,.045)}
+hr{border:none;border-top:1px solid var(--line);margin:26px 0}
+strong{font-weight:650}
+</style>
+<script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']]},
+  options:{skipHtmlTags:['script','noscript','style','textarea','pre','code','annotation']}};</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+</head><body>
+<div class="bar"><a href="../index.html">← 返回资料索引</a>
+<a href="端到端-发射接收检测.md">查看 Markdown 源码</a><span class="fn">08-端到端链路/端到端-发射接收检测.md</span></div>
+<div class="staticnote">这是 <b>静态排版副本</b>，生成于 2026-11-25 21:02。直接双击 <code>index.html</code> 时看到的就是它；若 Markdown 刚改过，请在工作区运行 <code>py build_static.py</code> 重新生成，或用 <code>start_index.bat</code> 启动本地服务查看实时渲染版。页内公式由 MathJax 渲染，需要联网。</div><main><h1>端到端链路仿真：一端发射、一端接收并识别目标</h1>
+<blockquote><p><strong>一句话结论</strong>：用同一段 RK4 内核跑通「发射 → 信道 → 接收 → 判决」全链路。有目标时接收端把采样序列扫到 $R=\omega$ 共振，$p_{std}$ 从 0.44 塌到 $2.3\times10^{-3}$，判「有」；无目标时三路 $p_{std}$ 都在 0.44–0.56，判「无」。<strong>频率估计误差 −0.010%</strong>，<strong>幅值误差 0.3%</strong>（−7.4 dB）。三相位阵列在 <strong>−7.4 dB</strong> 达到 $P_d\ge0.9$，而单振子即便信号强到 −3 dB 也只有 <strong>0.46</strong>——限制它的是<strong>相位盲区</strong>，不是噪声。</p></blockquote>
+<blockquote><p>代码：<a href="../tools/link_sim.py"><code>tools/link_sim.py</code></a>（约 500 行，命令行直接跑）；数字：<a href="../复现输出/端到端链路-发射接收检测汇总.json"><code>复现输出/端到端链路-发射接收检测汇总.json</code></a>。</p></blockquote>
+<hr>
+<h2>一、为什么要做这条链路</h2>
+<p>阶段 2–5 各自回答了局部问题：振子怎么建模、阈值在哪里、含噪能不能检测、定点化掉不掉精度。但它们都默认"<strong>接收端手里已经有一段准备好的序列</strong>"。真实系统里这段序列要由发射端发出、经信道衰减和噪声污染、被接收端采样得到，中间任何一环参数错，后面全错。</p>
+<p>这条链路补的就是这一段，并且把三件事一次性串起来验证：</p>
+<table><thead><tr><th>环节</th><th>验证什么</th><th>对应阶段</th></tr></thead><tbody>
+<tr><td>发射端 → 信道 → 接收端</td><td>频率未知时能否自己找到 $\omega$</td><td>阶段 2（变尺度）</td></tr>
+<tr><td>接收端判决</td><td>有噪、初相随机时能否判「有/无」</td><td>阶段 3、4（判据与 Pd）</td></tr>
+<tr><td>幅值/相位估计</td><td>判「有」之后能否给出数值</td><td>阶段 4（$\lambda^*$ 差分器）</td></tr>
+</tbody></table>
+<p><img src="../assets/端到端链路.svg" alt="端到端链路框图" style="display:block;max-width:100%;height:auto;margin:10px 0"></p>
+<hr>
+<h2>二、链路模型与参数</h2>
+<h3>2.1 三段各做什么</h3>
+<p><strong>发射端</strong>：目标特征磁场，单频连续波。</p>
+<p>$$s_{tx}(t)=A\cos(\omega t+\varphi)$$</p>
+<p>$A$、$\varphi$、$\omega$ 对接收端<strong>全部未知</strong>——这是与阶段 4 最大的区别（那里 $\theta$ 固定为 0）。</p>
+<p><strong>信道</strong>：衰减 + 加性噪声 + 量化。</p>
+<p>$$s_{rx}[i]=\underbrace{A\cdot10^{-\alpha_{dB}/20}\cos(\omega i\Delta t+\varphi)}_{\text{信号}}+\underbrace{\sigma\sqrt{h_1}\,n[i]}_{\text{环境磁噪声}}+\underbrace{q(\cdot)}_{\text{ADC}}$$</p>
+<p>噪声口径沿用阶段 1/4：<strong>每步标准差 $\sigma\sqrt{h_1}$</strong>，$\sigma$ 是力强度，不是样本标准差。$h_1=R\Delta t$ 是数值步长，不是采样间隔。</p>
+<p><strong>接收端</strong>：三步盲处理。</p>
+<ol><li><strong>FFT 粗估</strong>：Hann 窗 + 8 倍补零 + 对数幅度抛物线插值，只在"目标特征频段"（$0.5f_0\sim1.5f_0$）内找峰。</li><li><strong>变尺度细扫</strong>：在 $\hat\omega_0$ 的 ±1% 内以 0.05%/格 扫 $R$，取 $p_{std}$ 最小点。<strong>只用单路（β=0）</strong>——三路取 min 会把别的振子的伪相变捞进来，把带宽边界弄糊。</li><li><strong>判态与估计</strong>：三相位阵列 $p_{std}$ 取 min，低于门限即判「有」；再用 $\lambda^*$ 差分器估 $\gamma$、$\theta$。</li></ol>
+<h3>2.2 参数表</h3>
+<table><thead><tr><th>量</th><th>值</th><th>说明</th></tr></thead><tbody>
+<tr><td>载波 $f_0$</td><td>1.5915 Hz</td><td>$\omega=10$ rad/s，落在极低频段</td></tr>
+<tr><td>采样率</td><td>500 Hz</td><td>$\Delta t=0.002$ s</td></tr>
+<tr><td>数值步长 $h_1=R\Delta t$</td><td>0.02</td><td>与阶段 2–4 的 $h=0.02$ 完全一致，阈值可直接对照</td></tr>
+<tr><td>观测窗</td><td>150 个载波周期 = 94.2 s</td><td>47124 点</td></tr>
+<tr><td>工作点 $\lambda_0$</td><td>0.72</td><td>$\lambda_c\approx0.7335$，留 0.0135 裕度</td></tr>
+<tr><td>噪声 $\sigma$</td><td>0.05</td><td>全扫描固定，只扫信号幅值（阶段 4 的正确做法）</td></tr>
+<tr><td>SNR 口径</td><td>$10\lg[(A^2/2)/\sigma^2]$</td><td>整段能量比，与阶段 1/4 同口径</td></tr>
+</tbody></table>
+<p><strong>链路预算</strong>（近场磁偶极 $B=\frac{\mu_0}{4\pi}\frac{m}{r^3}$，每 ×10 距离 −60 dB）：$r=1$ m 记 0 dB 时，10 m 为 −60 dB、100 m 为 −120 dB。示例 $m=100$ A·m²（2000 匝、1 A、0.05 m²）对应 $r=10$ m 约 0.1 nT、$r=100$ m 约 0.1 pT。</p>
+<blockquote><p><strong>边界</strong>：归一化幅值 $A$ 与绝对磁感应强度之间的换算系数 $B_{ref}$ 需实测标定，本仿真只做<strong>幅值比</strong>，不作绝对灵敏度断言。</p></blockquote>
+<hr>
+<h2>三、接收端为什么必须"盲"</h2>
+<p>核心只有一句：<strong>接收端不知道 $\omega$，也不许预设 $\nu$</strong>。</p>
+<p>变尺度系数 $R$ 的作用是把物理采样间隔 $\Delta t$ 映射成数值步长 $h_1=R\Delta t$。序列里角频率为 $\omega$ 的分量，在新时间轴 $\tau=i h_1$ 上变成 $\cos(\omega\tau/R)$——<strong>只要 $R=\omega$，它就等于内驱的 $\cos\tau$</strong>，两者共振，振子从混沌跃迁到大尺度周期，$p_{std}$ 塌下去。</p>
+<p>于是"测频"变成了"扫 $R$ 找相变点"，而那一点的 $R$ 就是 $\omega$：</p>
+<pre><code>w0 = fft_guess(cfg, rx)                       # 只用序列和 dt
+grid = w0 * (1 + np.arange(-20, 21) * 0.0005) # ±1%，0.05%/格
+vals = [pstd_batch(cfg, rx[:, :1], R)[0] for R in grid]
+R_hat = grid[np.argmin(vals)]                  # 相变点 = 待测频率</code></pre>
+<p><strong>为什么不能全域穷举</strong>：频率选择带宽只有 ±0.1%（阶段 2 实测，三频一致）。若在全域按 4.9%/格 粗扫，离真值最近的格点已偏 0.88%，$p_{std}$ 停在 $1.4\times10^{-2}$——那是伪相变，不是共振。必须先让序列自己给出初值（FFT 误差 ~0.002%），再在小窗内细扫。</p>
+<p><img src="../复现输出/端到端-发射与接收.png" alt="发射与接收" style="display:block;max-width:100%;height:auto;margin:10px 0"></p>
+<p>上图中 (b) 是接收端真正拿到的波形：SNR = −7.4 dB，肉眼几乎看不出正弦，但 (c) 的频谱峰依然清晰落在 1.5915 Hz。</p>
+<hr>
+<h2>四、单次判决：有目标 vs 无目标</h2>
+<p>同一台接收机，同一组参数，只改"发射端开不开"：</p>
+<table><thead><tr><th></th><th>三路 $p_{std}$（β=0° / −120° / +120°）</th><th>min $p_{std}$</th><th>判决</th></tr></thead><tbody>
+<tr><td><strong>有目标</strong>（SNR=−7.4 dB，φ=−52.2°）</td><td>0.00233 / 0.479 / 0.609</td><td>$2.3\times10^{-3}$</td><td>✅ 有</td></tr>
+<tr><td><strong>无目标</strong>（只有噪声）</td><td>0.439 / 0.492 / 0.564</td><td>0.439</td><td>✅ 无</td></tr>
+</tbody></table>
+<p>判态门限由 H0 标定：200 次纯噪声的 5% 分位数为 <strong>0.347</strong>，落在混沌态的 $p_{std}$ 带（0.33–0.48）下沿，与周期态的 $10^{-3}$ 量级差 <strong>两个多数量级</strong>，判决没有含糊地带。</p>
+<p><img src="../复现输出/端到端-相图与频率扫描.png" alt="相图与频率扫描" style="display:block;max-width:100%;height:auto;margin:10px 0"></p>
+<ul><li>(a) 有目标：大尺度周期轨道，$p_{std}=2.3\times10^{-3}$；</li><li>(b) 细扫 $R$：共振点唯一且尖锐。<strong>注意两侧 ±0.75% 处的伪共振</strong>（$p_{std}$ 掉到 ~0.1 又弹回），它们仍在门限之上；这正是"带宽只有 ±0.1%"的直观证据；</li><li>(c) 无目标：混沌轨迹填满相空间，$p_{std}=0.44$。</li></ul>
+<p>频率估计误差 <strong>−0.010%</strong>（真值 10 rad/s，估计 9.9990），远小于 ±0.1% 的带宽，够用。</p>
+<hr>
+<h2>五、检测性能：真正的限制是相位，不是噪声</h2>
+<p>固定 $\sigma=0.05$、扫信号幅值，每个 SNR 做 100 次（每次重抽噪声与初相），门限一次性由 200 次 H0 标定、再用<strong>另一批</strong> 200 次 H0 验证：</p>
+<table><thead><tr><th>SNR (dB)</th><th>−23</th><th>−18.9</th><th>−17</th><th>−15.4</th><th>−13.5</th><th>−11</th><th><strong>−7.4</strong></th><th>−3</th></tr></thead><tbody>
+<tr><td>单振子 $P_d$</td><td>0.04</td><td>0.04</td><td>0.04</td><td>0.03</td><td>0.19</td><td>0.36</td><td>0.43</td><td>0.46</td></tr>
+<tr><td>三相位阵列 $P_d$</td><td>0.04</td><td>0.04</td><td>0.04</td><td>0.03</td><td>0.47</td><td>0.82</td><td><strong>1.00</strong></td><td>1.00</td></tr>
+</tbody></table>
+<p>$P_{fa}$（独立验证集 200 次）：单振子 <strong>0.025</strong>、阵列 <strong>0.025</strong>（标称 0.05，偏保守来自 5% 分位数的抽样误差）。</p>
+<p><img src="../复现输出/端到端-Pd与Pfa.png" alt="Pd与Pfa" style="display:block;max-width:100%;height:auto;margin:10px 0"></p>
+<h3>5.1 单振子为什么"再强的信号也只有一半"</h3>
+<p>相变由<strong>合成幅值</strong>决定。共振时信号与内驱同频，合成幅值</p>
+<p>$$\lambda_{eff}=\sqrt{\lambda_0^2+A^2+2\lambda_0A\cos\theta}$$</p>
+<p>必须越过 $\lambda_c\approx0.7335$。$\lambda_0=0.72$ 只差 0.0135，于是要求</p>
+<p>$$\cos\theta&gt;\frac{\lambda_c^2-\lambda_0^2-A^2}{2\lambda_0A}$$</p>
+<p>$A=0.02$ 时阈值是 $\cos\theta&gt;0.675$，即 $|\theta|&lt;47.5^\circ$——<strong>相位覆盖只有 26%</strong>。$A=0.05$ 时也只到 42%。</p>
+<p>这就是图中灰线（解析覆盖估计）的含义：<strong>$P_d$ 的上限由初相覆盖率决定，与噪声无关</strong>。实测点略高于灰线（−11 dB 时 0.36 vs 0.27），因为噪声会"帮"系统越过阈值——这也解释了为什么这条曲线不随 SNR 平滑上升，而是被压在半高。</p>
+<h3>5.2 三相位阵列把盲区补上</h3>
+<p>$\beta=0,\ \pm120^\circ$ 三个振子各自覆盖一段 $\pm\theta_h$，取 min $p_{std}$（OR 融合）。$A=0.02$ 时每段 $\pm47.5^\circ$、三段合计 285°，覆盖 79%；$A\ge0.03$ 时三段拼满一圈，覆盖率 100%。</p>
+<p>实测与解析吻合到 0.02–0.04：−11 dB 阵列 0.82（解析 0.80），−7.4 dB 起 1.00。</p>
+<p><strong>结论</strong>：三相位阵列的最低可检测 SNR（$P_d\ge0.9$）= <strong>−7.4 dB</strong>；单振子在整条扫描上都没到 0.9。</p>
+<h3>5.3 与阶段 4 的 −11 dB 怎么对上</h3>
+<p>阶段 4 报"单振子 −11 dB，$P_d=0.96$"，条件里 <strong>$\theta$ 固定为 0</strong>——那是同相的理想条件，等价于覆盖 100%。链路里发射端相位不可控（−52.2°、57° 都可能），单振子立刻被压到 0.36，必须靠阵列补回来。</p>
+<p><strong>两个数字都对，但口径不同</strong>：一个是"相位已知"的上界，一个是"相位随机"的实际。论文里引用时必须带条件，不能只写"−11 dB"。</p>
+<hr>
+<h2>六、判「有」之后：幅值与初相</h2>
+<p>$\lambda^<em>$ 差分估计器：四个参考相位各扫到相变点 $\lambda^</em>(\beta)$，再作差消掉 $\lambda_c$：</p>
+<p>$$\hat\gamma\cos\hat\theta=\frac{\lambda^<em>(180^\circ)-\lambda^</em>(0^\circ)}{2},\qquad \hat\gamma\sin\hat\theta=\frac{\lambda^<em>(270^\circ)-\lambda^</em>(90^\circ)}{2}$$</p>
+<p>每个 SNR 重复 5 次（每次随机初相）：</p>
+<table><thead><tr><th>SNR (dB)</th><th>真值 $A$</th><th>$\hat\gamma$ 均值</th><th>幅值相对误差</th><th>相位误差</th></tr></thead><tbody>
+<tr><td>−11.0</td><td>0.0199</td><td>0.0200</td><td><strong>3.1%</strong></td><td>2.9°</td></tr>
+<tr><td>−7.4</td><td>0.0302</td><td>0.0307</td><td><strong>1.8%</strong></td><td>1.3°</td></tr>
+<tr><td>−3.0</td><td>0.0501</td><td>0.0496</td><td><strong>1.7%</strong></td><td>0.4°</td></tr>
+</tbody></table>
+<p><img src="../复现输出/端到端-幅值估计.png" alt="幅值估计" style="display:block;max-width:100%;height:auto;margin:10px 0"></p>
+<p>与阶段 4 的 3.8–5.8% 同量级、略好，因为观测窗更长（150 个载波周期，阶段 4 是 64 周期）——$\lambda^*$ 的相变点因为瞬态被丢得更干净而更陡。</p>
+<hr>
+<h2>七、四个必须写进论文的边界</h2>
+<ol><li><strong>无板级实测</strong>。全部是数值仿真。发射/接收是"同一台计算机的两端"，没有真实线圈、磁强计、放大器。</li><li><strong>绝对灵敏度未标定</strong>。$A$ 是归一化策动力，与 pT/nT 的换算需要 $B_{ref}$ 实测。链路预算只给 $1/r^3$ 的<strong>相对</strong>衰减。</li><li><strong>噪声是加性的、平稳的</strong>。真实环境有工频干扰、脉冲噪声、传感器漂移；本仿真只覆盖白噪与 1/f 色噪。</li><li><strong>单目标、单频、连续波</strong>。没有多目标、跳频、调制；目标特征频率被假定在已知的窄带内（$0.5f_0\sim1.5f_0$）。</li></ol>
+<p>另外两条方法学提醒：</p>
+<ul><li><strong>$P_{fa}$ 用独立验证集</strong>。门限由 200 次 H0 标定，另取 200 次 H0 验 Pfa，避免"同一批既标定又验证"的乐观估计（阶段 4 的隐患）。</li><li><strong>位宽不是瓶颈</strong>。同一段数据量化到 8/12/16 bit，$p_{std}$ 分别为 $2.26\times10^{-3}$ / $2.22\times10^{-3}$ / $2.22\times10^{-3}$——与阶段 5 的结论一致：$\ge$12 bit 后判决不受影响，掉精度的是 F≤8。</li></ul>
+<hr>
+<h2>八、怎么跑</h2>
+<pre><code>.venv\Scripts\python.exe tools\link_sim.py            :: 全量，约 95 s
+.venv\Scripts\python.exe tools\link_sim.py --quick    :: 冒烟，约 35 s</code></pre>
+<p>输出：</p>
+<table><thead><tr><th>文件</th><th>内容</th></tr></thead><tbody>
+<tr><td><code>复现输出/端到端-发射与接收.png</code></td><td>发射波形、含噪接收波形、接收频谱</td></tr>
+<tr><td><code>复现输出/端到端-相图与频率扫描.png</code></td><td>阵列最佳路的相图、细扫 $R$ 曲线、无目标相图</td></tr>
+<tr><td><code>复现输出/端到端-Pd与Pfa.png</code></td><td>$P_d$–SNR（实测 + 解析覆盖）+ $P_{fa}$</td></tr>
+<tr><td><code>复现输出/端到端-幅值估计.png</code></td><td>幅值相对误差–SNR</td></tr>
+<tr><td><code>复现输出/端到端链路-发射接收检测汇总.json</code></td><td>全部条件与数字（含 SNR 口径、门限、试验次数）</td></tr>
+</tbody></table>
+<p>脚本不 import 阶段 2–5 的 notebook，只从 <code>tools/kernel_src.py</code> 取 <code>simulate_seq</code> 的源码——<strong>与那几份 notebook 是逐字相同的内核</strong>，所以这里的阈值、判据、动态范围都能和阶段 2–4 直接对照。</p></main></body></html>

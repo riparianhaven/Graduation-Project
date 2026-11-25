@@ -38,7 +38,7 @@ strong{font-weight:650}
 </head><body>
 <div class="bar"><a href="../index.html">← 返回资料索引</a>
 <a href="阶段5-嵌入式实现-问题回答.md">查看 Markdown 源码</a><span class="fn">07-阶段五/阶段5-嵌入式实现-问题回答.md</span></div>
-<div class="staticnote">这是 <b>静态排版副本</b>，生成于 2026-11-25 20:19。直接双击 <code>index.html</code> 时看到的就是它；若 Markdown 刚改过，请在工作区运行 <code>py build_static.py</code> 重新生成，或用 <code>start_index.bat</code> 启动本地服务查看实时渲染版。页内公式由 MathJax 渲染，需要联网。</div><main><h1>阶段 5 问题回答：嵌入式实现能不能落地</h1>
+<div class="staticnote">这是 <b>静态排版副本</b>，生成于 2026-11-25 21:02。直接双击 <code>index.html</code> 时看到的就是它；若 Markdown 刚改过，请在工作区运行 <code>py build_static.py</code> 重新生成，或用 <code>start_index.bat</code> 启动本地服务查看实时渲染版。页内公式由 MathJax 渲染，需要联网。</div><main><h1>阶段 5 问题回答：嵌入式实现能不能落地</h1>
 <blockquote><p>对应 <a href="../00-总览/阅读路线.html">阅读路线阶段 5</a>「带着问题读」的四问；全部数字取自实跑，程序 <a href="../learn/5.ipynb">learn/5.ipynb</a>（27 单元 / 20 段代码 / 4 图 / 0 报错 / 约 240 s），机器可读汇总 <a href="../复现输出/阶段5-定点化与资源时序汇总.json">阶段5-定点化与资源时序汇总.json</a>。</p><p></p><p><strong>诚实边界</strong>：本课题无 FPGA 板、无综合报告。本阶段是<strong>定点数值仿真 + 基于 F2 实测工艺的换算 + 时序仿真图</strong>，不是板级实测。凡「时钟/资源/实时性」均标注推算依据。</p></blockquote>
 <hr>
 <h2>Q1：浮点 RK4 改成定点要留多少位宽才不丢相变？</h2>

@@ -344,6 +344,13 @@ footer{border-top:1px solid var(--line);padding:20px 0 34px;color:var(--faint);f
       <div class="foot"><span>Markdown · 阶段 5 过关产出 · 含内嵌图</span><span class="go">打开 →</span></div>
     </a>
 
+    <a class="card item" data-search="端到端 链路仿真 发射端 信道 接收端 检测 目标 有无 simulate_seq 盲测 扫R FFT 三相位阵列 相位盲区 Pd Pfa 幅值估计 λ* 差分 Python" href="08-端到端链路/端到端-发射接收检测.md" target="_blank">
+      <div class="kicker">新增 · 端到端链路仿真</div>
+      <h3>端到端链路：一端发射、一端接收并识别目标</h3>
+      <p>用同一段 RK4 内核跑通<b>发射 → 信道 → 接收 → 判决</b>全链路：接收端只拿采样序列与 dt，靠 FFT 粗估 + 变尺度细扫 R 自己找到 ω（误差 −0.010%），三相位阵列 pstd 判「有/无」，再用 λ* 差分估幅（−7.4 dB 下 0.3%）。<b>最关键的实测结论：单振子被相位盲区封顶在 Pd≈0.46（与噪声无关），必须三相位阵列才能到 −7.4 dB 的 Pd≥0.9</b>。四张实跑图内嵌，代码见 <a href="tools/link_sim.py" target="_blank">tools/link_sim.py</a>。</p>
+      <div class="foot"><span>Markdown · 端到端链路 · 含实跑图</span><span class="go">打开 →</span></div>
+    </a>
+
     <a class="card item" data-search="创新点 对比 现有方案 之前版本 核心思路 实现方式 功能效果 性能效率 可维护性 使用体验 chaos-CFAR 恒虚警 阈值带 判据 工程改进" href="05-方法创新/方案创新点与版本对比.md" target="_blank">
       <div class="kicker">新增 · 创新点与版本对比</div>
       <h3>方案创新点与版本对比</h3>

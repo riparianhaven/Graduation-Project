@@ -38,15 +38,15 @@ strong{font-weight:650}
 </head><body>
 <div class="bar"><a href="../index.html">← 返回资料索引</a>
 <a href="项目结构说明.md">查看 Markdown 源码</a><span class="fn">00-总览/项目结构说明.md</span></div>
-<div class="staticnote">这是 <b>静态排版副本</b>，生成于 2026-11-25 20:19。直接双击 <code>index.html</code> 时看到的就是它；若 Markdown 刚改过，请在工作区运行 <code>py build_static.py</code> 重新生成，或用 <code>start_index.bat</code> 启动本地服务查看实时渲染版。页内公式由 MathJax 渲染，需要联网。</div><main><h1>项目结构说明</h1>
+<div class="staticnote">这是 <b>静态排版副本</b>，生成于 2026-11-25 21:02。直接双击 <code>index.html</code> 时看到的就是它；若 Markdown 刚改过，请在工作区运行 <code>py build_static.py</code> 重新生成，或用 <code>start_index.bat</code> 启动本地服务查看实时渲染版。页内公式由 MathJax 渲染，需要联网。</div><main><h1>项目结构说明</h1>
 <blockquote><p><strong>一句话</strong>：这是一个「<strong>本地站点 + 可复现实验 + 文献库</strong>」的混合体。分类主轴是<strong>主题与用途</strong>：文档按主题归入 6 个子目录，代码/数据按职责分层。</p><p></p><p>初版整理：2026-11-15｜2026-11-23 上午做引用与信息整理｜<strong>2026-11-23 晚做主题目录重组（本版）</strong>｜范围：整个工作区（不含 <code>.venv</code> 与 <code>.workbuddy</code>）</p></blockquote>
 <hr>
 <h2>一、当前结构速览</h2>
 <table><thead><tr><th>项目</th><th>状态（截至 2026-11-23 晚）</th></tr></thead><tbody>
 <tr><td>文档分层</td><td><strong>29 份 <code>.md</code> + 29 份同名 <code>.html</code> 副本，归入 8 个主题子目录</strong>；另 <code>文献/</code> 下 1 份</td></tr>
 <tr><td>根目录顶层文件</td><td><strong>7 个非隐藏文件</strong> —— 只留站点入口、主交付 notebook 对、一键脚本与配置</td></tr>
-<tr><td>主题目录</td><td><code>00-总览</code>(5 文档) / <code>01-阶段一</code>(7) / <code>02-阶段二</code>(3) / <code>03-阶段三</code>(2) / <code>04-论文精读</code>(4) / <code>05-方法创新</code>(4) / <code>06-阶段四</code>(2) / <code>07-阶段五</code>(2)</td></tr>
-<tr><td>脚本位置</td><td><code>tools/</code> 9 个（运行链 3 + notebook 生成器 5 + 唯一内核 <code>kernel_src.py</code>）；<strong>无 <code>legacy/</code></strong></td></tr>
+<tr><td>主题目录</td><td><code>00-总览</code>(5 文档) / <code>01-阶段一</code>(7) / <code>02-阶段二</code>(3) / <code>03-阶段三</code>(2) / <code>04-论文精读</code>(4) / <code>05-方法创新</code>(4) / <code>06-阶段四</code>(2) / <code>07-阶段五</code>(2) / <code>08-端到端链路</code>(1)</td></tr>
+<tr><td>脚本位置</td><td><code>tools/</code> 10 个（运行链 4 + notebook 生成器 5 + 唯一内核 <code>kernel_src.py</code>）；<strong>无 <code>legacy/</code></strong></td></tr>
 <tr><td>测试</td><td><code>tests/</code> 2 个；<strong>42 passed，0 failed</strong></td></tr>
 <tr><td>资源</td><td><code>assets/</code> 2 个 SVG；图纸在 <code>复现输出/</code>（10 fig + 阶段 2 五图 + 阶段 3 五图 + 阶段 4 四图 + 阶段 5 四图 + 6 JSON + repro-out）</td></tr>
 <tr><td>教学 notebook</td><td><code>learn/</code> 6 个：<code>0</code>–<code>5.ipynb</code>（15/16/17/26/22/27 单元），均已实跑、内嵌输出</td></tr>
@@ -96,6 +96,9 @@ strong{font-weight:650}
 │   ├─ 阶段5-嵌入式实现-问题回答.md  四问逐答 + 位宽决定阈值的发现
 │   └─ 阶段5-过关产出结果.md         验收页：五项打勾 + 四张内嵌图（时序仿真口径）
 │
+├─ 08-端到端链路/                【链路仿真】1 份
+│   └─ 端到端-发射接收检测.md       发射→信道→接收判决全链路 + 四张实跑图
+│
 ├─ 04-论文精读/                  【文献精读】4 份
 │   ├─ 论文精读-阵列Duffing_Sensors2023.md
 │   ├─ 论文精读-D1_磁异常检测综述_MST2021.md
@@ -125,7 +128,8 @@ strong{font-weight:650}
 │   ├─ build_stage2_notebook.py  生成 learn/2.ipynb（savefig 须在 show 前）
 │   ├─ build_stage3_notebook.py  生成 learn/3.ipynb（判据 + 盲区，约 260 s）
 │   ├─ build_stage4_notebook.py  生成 learn/4.ipynb（检测性能 + 估计，约 240 s）
-│   └─ build_stage5_notebook.py  生成 learn/5.ipynb（定点化 + 资源时序，约 240 s）
+│   ├─ build_stage5_notebook.py  生成 learn/5.ipynb（定点化 + 资源时序，约 240 s）
+│   └─ link_sim.py               端到端链路仿真（发射→信道→接收判决，约 95 s，出 4 图 + JSON）
 │
 ├─ tests/                        【测试】test_learn0_notebook / test_learn0_input_signal / test_kernel_contract
 ├─ assets/                       【资源】2 个 SVG（技术路线方框图 / 相变边界追踪流程对比）
@@ -178,6 +182,7 @@ index.html ─→ 6 个主题目录下的 .md/.html + 文献/*.pdf + assets/*.sv
 <tr><td><code>tools/run_ipynb.py</code></td><td>运行链</td><td>venv kernel 跑 notebook 并写回</td><td>nbclient</td></tr>
 <tr><td><code>tools/build_stage1/2/3/4_notebook.py</code></td><td>生成器</td><td>生成阶段 1/2/3/4 教学 notebook</td><td>nbformat、matplotlib</td></tr>
 <tr><td><code>tools/kernel_src.py</code></td><td>内核源码</td><td>唯一内核的两个实现：浮点 <code>simulate_seq</code> 与 Q2.F 定点复刻 <code>simulate_fixed_seq</code>（同签名同返回）；生成器拼接、s2 书 <code>load_kernel()</code> 加载</td><td>无（exec 共享）</td></tr>
+<tr><td><code>tools/link_sim.py</code></td><td>链路仿真</td><td>发射端/信道/接收端三段，复用 <code>simulate_seq</code>（不重写内核）；输出 4 图 + 汇总 JSON</td><td>numpy、matplotlib、<code>kernel_src</code></td></tr>
 <tr><td><code>tests/test_learn0_*.py</code></td><td>测试</td><td>校验 learn/0 参数与信号公式</td><td>pytest、numpy</td></tr>
 <tr><td><code>learn/0-5.ipynb</code></td><td>教学中</td><td>六阶段可运行实验</td><td>各生成器</td></tr>
 <tr><td><code>复现-2-…ipynb</code></td><td>交付物</td><td>25 单元实跑复现</td><td>numpy/matplotlib</td></tr>

@@ -1,0 +1,186 @@
+{
+  "link": {
+    "f_carrier_hz": 1.591549,
+    "omega_rad_s": 10.0,
+    "fs_hz": 500.0,
+    "dt_s": 0.002,
+    "h1": 0.02,
+    "n_samples": 47124,
+    "duration_s": 94.25,
+    "n_cycles": 150.0,
+    "lam0": 0.72,
+    "lambda_c": 0.7335,
+    "sigma": 0.05,
+    "alpha": 0.0,
+    "snr_def": "SNR_E = 10*log10((A^2/2)/sigma^2)",
+    "bands": "近场磁偶极 1/r^3：每 ×10 距离 −60 dB"
+  },
+  "demo": {
+    "snr_db": -7.4,
+    "amp": 0.03016,
+    "w_hat": 9.99901,
+    "freq_err_pct": -0.00995,
+    "pstd_ch_on": [
+      0.0023318636819102743,
+      0.4786647481724409,
+      0.6088709520647948
+    ],
+    "pstd_ch_off": [
+      0.4391376441544792,
+      0.49190527065556244,
+      0.5641184201899253
+    ],
+    "detected_on": true,
+    "detected_off": false,
+    "gamma_hat": 0.03026,
+    "gamma_true": 0.03016,
+    "gamma_rel_err_pct": 0.32,
+    "theta_hat_deg": -51.7,
+    "theta_true_deg": -52.2,
+    "adc_pstd": {
+      "8": 0.0022587847214488965,
+      "12": 0.002219930953389234,
+      "16": 0.0022209399456781915
+    }
+  },
+  "sweep": {
+    "rows": [
+      {
+        "snr_db": -23.0,
+        "amp": 0.005,
+        "pd_single": 0.04,
+        "pd_array": 0.04,
+        "cover_single": 0.0,
+        "cover_array": 0.0,
+        "n": 100
+      },
+      {
+        "snr_db": -18.9,
+        "amp": 0.008,
+        "pd_single": 0.04,
+        "pd_array": 0.04,
+        "cover_single": 0.0,
+        "cover_array": 0.0,
+        "n": 100
+      },
+      {
+        "snr_db": -17.0,
+        "amp": 0.01,
+        "pd_single": 0.04,
+        "pd_array": 0.04,
+        "cover_single": 0.0,
+        "cover_array": 0.0,
+        "n": 100
+      },
+      {
+        "snr_db": -15.4,
+        "amp": 0.012,
+        "pd_single": 0.03,
+        "pd_array": 0.03,
+        "cover_single": 0.0,
+        "cover_array": 0.0,
+        "n": 100
+      },
+      {
+        "snr_db": -13.5,
+        "amp": 0.0149,
+        "pd_single": 0.19,
+        "pd_array": 0.47,
+        "cover_single": 0.1425,
+        "cover_array": 0.4276,
+        "n": 100
+      },
+      {
+        "snr_db": -11.0,
+        "amp": 0.0199,
+        "pd_single": 0.36,
+        "pd_array": 0.82,
+        "cover_single": 0.2663,
+        "cover_array": 0.799,
+        "n": 100
+      },
+      {
+        "snr_db": -7.4,
+        "amp": 0.0302,
+        "pd_single": 0.43,
+        "pd_array": 1.0,
+        "cover_single": 0.3582,
+        "cover_array": 1.0,
+        "n": 100
+      },
+      {
+        "snr_db": -3.0,
+        "amp": 0.0501,
+        "pd_single": 0.46,
+        "pd_array": 1.0,
+        "cover_single": 0.4237,
+        "cover_array": 1.0,
+        "n": 100
+      }
+    ],
+    "thr_single": 0.3466,
+    "thr_array": 0.3466,
+    "pfa_single": 0.025,
+    "pfa_array": 0.025,
+    "n_cal": 200,
+    "n_val": 200,
+    "min_snr_pd90_single": null,
+    "min_snr_pd90_array": -7.4
+  },
+  "estimate": {
+    "rows": [
+      {
+        "snr_db": -11.0,
+        "amp": 0.0199,
+        "gamma_hat": [
+          0.020804146221366105,
+          0.020348525745124198,
+          0.019764235376051948,
+          0.0187499999999996,
+          0.020348525745124198
+        ],
+        "gamma_rel_err_pct": 3.0689,
+        "theta_err_deg": 2.9354
+      },
+      {
+        "snr_db": -7.4,
+        "amp": 0.0302,
+        "gamma_hat": [
+          0.030872722588070514,
+          0.030259296092274866,
+          0.031249999999999334,
+          0.030103986446980098,
+          0.030872722588070514
+        ],
+        "gamma_rel_err_pct": 1.7634,
+        "theta_err_deg": 1.2718
+      },
+      {
+        "snr_db": -3.0,
+        "amp": 0.0501,
+        "gamma_hat": [
+          0.0490216788778179,
+          0.04952903189039632,
+          0.050882831092617965,
+          0.04978076937934863,
+          0.048541219597367964
+        ],
+        "gamma_rel_err_pct": 1.6733,
+        "theta_err_deg": 0.4025
+      }
+    ]
+  },
+  "budgets": {
+    "model": "B = (mu0/4pi)*m/r^3，近场磁偶极",
+    "example": "m=100 A·m²（N=2000, I=1 A, S=0.05 m²）：r=10 m ≈ 0.1 nT，r=100 m ≈ 0.1 pT",
+    "caveat": "归一化幅值 A 与绝对磁感应强度的换算系数 B_ref 需实测标定，本仿真不作绝对灵敏度断言"
+  },
+  "notes": [
+    "接收端只拿采样序列与 dt，不知道 ω；R 由序列自身扫出，R=ω 时共振",
+    "门限由 H0 单独标定、另用 H0 验证集复核，不拿 H1 调阈值",
+    "单振子随机初相下 Pd 被相位覆盖率封顶（λ0+A·cosθ 须越过 λc），与噪声无关",
+    "三相位阵列（β=0, ±120°）取 min pstd（OR 融合），把相位盲区补上",
+    "λ* 差分估计器不需要知道 λc，差值把平台相关偏置消掉",
+    "无板级实测：全部为数值仿真；定点/FPGA 见阶段 5"
+  ]
+}

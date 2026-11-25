@@ -38,7 +38,7 @@ strong{font-weight:650}
 </head><body>
 <div class="bar"><a href="../index.html">← 返回资料索引</a>
 <a href="阶段4-检测与估计-问题回答.md">查看 Markdown 源码</a><span class="fn">06-阶段四/阶段4-检测与估计-问题回答.md</span></div>
-<div class="staticnote">这是 <b>静态排版副本</b>，生成于 2026-11-25 21:02。直接双击 <code>index.html</code> 时看到的就是它；若 Markdown 刚改过，请在工作区运行 <code>py build_static.py</code> 重新生成，或用 <code>start_index.bat</code> 启动本地服务查看实时渲染版。页内公式由 MathJax 渲染，需要联网。</div><main><h1>阶段 4：含噪检测与参数估计 —— 问题回答</h1>
+<div class="staticnote">这是 <b>静态排版副本</b>，生成于 2026-11-25 21:41。直接双击 <code>index.html</code> 时看到的就是它；若 Markdown 刚改过，请在工作区运行 <code>py build_static.py</code> 重新生成，或用 <code>start_index.bat</code> 启动本地服务查看实时渲染版。页内公式由 MathJax 渲染，需要联网。</div><main><h1>阶段 4：含噪检测与参数估计 —— 问题回答</h1>
 <blockquote><p><strong>阶段定位</strong>：第 9–11 周｜回答「最低能测到多弱、估得准不准」。<a href="../00-总览/阅读路线.html">阅读路线阶段 4</a> 的过关产出是：蒙特卡洛实验表（不同 SNR 下的 $P_d$、$P_{fa}$、幅值估计相对误差）+ $P_d$–SNR 曲线 + 误差–SNR 曲线，直接兑现课题「预期目标」的两项指标。</p><p><strong>核实时点</strong>：2026-11-23｜全部数字取自 <a href="../learn/4.ipynb">learn/4.ipynb</a> 的<strong>实跑输出</strong>（22 单元 / 12 段代码 / 4 张内嵌图 / 0 报错 / 237 s），机器可读汇总见 <a href="../复现输出/阶段4-检测性能与参数估计汇总.json">阶段4-检测性能与参数估计汇总.json</a>。</p><p><strong>边界</strong>：检测与估计的<strong>仿真指标</strong>；H0 用仿真噪声（A 档白噪 + B 档 1/f 色噪），C 档实测数据到位后须替换重标；定点化是阶段 5。</p><p><strong>科学依据</strong>：SNR 口径与二元假设纪律据<a href="../01-阶段一/阶段1-信号与噪声模型假设.html">阶段 1 信号与噪声模型假设</a>；融合规则对照据<a href="../01-阶段一/阶段1-问题销账.html">阶段 1 问题销账 Q7/Q11</a>；参数估计据 C1（初值敏感估幅估相）与阶段 2 Eq.(15–17)。</p></blockquote>
 <hr>
 <h2>一个先说的结论：两项指标已兑现，但必须带条件抄</h2>

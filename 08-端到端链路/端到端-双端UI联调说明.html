@@ -1,0 +1,173 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>08-端到端链路/端到端-双端UI联调说明.md</title><style>
+:root{--bg:#f6f7f9;--panel:#fff;--line:#e3e7ec;--text:#1b232c;--muted:#63707e;--accent:#2f6fd0;--soft:#eaf1fc}
+@media(prefers-color-scheme:dark){:root{--bg:#14181d;--panel:#1d232a;--line:#303a45;--text:#e7edf3;--muted:#a7b3c0;--accent:#7fb0f5;--soft:#21334d}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.8 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+.bar{position:sticky;top:0;background:var(--panel);border-bottom:1px solid var(--line);padding:9px 24px;font-size:13px;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.bar a{color:var(--accent);text-decoration:none}.bar a:hover{text-decoration:underline}
+.bar .fn{color:var(--muted);margin-left:auto;word-break:break-all}
+main{max-width:980px;margin:0 auto;padding:26px 28px 70px;background:var(--panel);min-height:calc(100vh - 44px);
+  border-left:1px solid var(--line);border-right:1px solid var(--line)}
+h1,h2,h3,h4{line-height:1.4;margin:1.5em 0 .6em;font-weight:650}
+h1{font-size:25px;border-bottom:1px solid var(--line);padding-bottom:10px;margin-top:.4em}
+h2{font-size:20px;border-bottom:1px solid var(--line);padding-bottom:7px}
+h3{font-size:17px}h4{font-size:15px}
+p,li{color:var(--text)}li{margin:.25em 0}
+a{color:var(--accent)}
+code{background:var(--soft);padding:1px 5px;border-radius:4px;font:12.6px ui-monospace,Consolas,monospace}
+pre{background:var(--soft);border:1px solid var(--line);border-radius:8px;padding:14px 16px;overflow:auto}
+pre code{background:none;padding:0}
+blockquote{border-left:3px solid var(--accent);background:var(--soft);margin:12px 0;padding:8px 16px;color:var(--muted)}
+blockquote p{margin:.3em 0}
+.staticnote{max-width:980px;margin:14px auto -8px;padding:9px 14px;border:1px solid var(--line);
+  border-left:3px solid var(--accent);border-radius:0 8px 8px 0;background:var(--soft);
+  font-size:12.6px;color:var(--muted)}
+.staticnote a{color:var(--accent)}
+table{border-collapse:collapse;width:100%;margin:14px 0;font-size:13.4px;display:block;overflow:auto}
+th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top}
+th{background:var(--soft);color:var(--muted);white-space:nowrap}
+tr:nth-child(even) td{background:rgba(127,150,180,.045)}
+hr{border:none;border-top:1px solid var(--line);margin:26px 0}
+strong{font-weight:650}
+</style>
+<script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']]},
+  options:{skipHtmlTags:['script','noscript','style','textarea','pre','code','annotation']}};</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+</head><body>
+<div class="bar"><a href="../index.html">← 返回资料索引</a>
+<a href="端到端-双端UI联调说明.md">查看 Markdown 源码</a><span class="fn">08-端到端链路/端到端-双端UI联调说明.md</span></div>
+<div class="staticnote">这是 <b>静态排版副本</b>，生成于 2026-11-25 21:41。直接双击 <code>index.html</code> 时看到的就是它；若 Markdown 刚改过，请在工作区运行 <code>py build_static.py</code> 重新生成，或用 <code>start_index.bat</code> 启动本地服务查看实时渲染版。页内公式由 MathJax 渲染，需要联网。</div><main><h1>端到端双端 UI：发送端与接收端</h1>
+<p>前面几份文档都是"离线跑一遍出图"，<strong>这一份是实时联调</strong>：一个窗口发、另一个窗口收，点按钮就能看到判决。</p>
+<ul><li>发送端 <code>tools/tx_app.py</code>：模拟目标发出的极低频磁场，可独立开关<strong>信号</strong>与<strong>噪声</strong>，按 SNR 反算幅值。</li><li>接收端 <code>tools/rx_app.py</code>：监听、收帧、判「有/无目标」，显示<strong>波形图</strong>与<strong>阵列图</strong>。</li><li>两者共用 <code>tools/link_proto.py</code>（协议 + 算法），数值内核仍是 <code>kernel_src.simulate_seq</code>，<strong>没有第二套积分器</strong>。</li></ul>
+<p><img src="../复现输出/界面-发送端.png" alt="发送端" style="display:block;max-width:100%;height:auto;margin:10px 0"></p>
+<p><img src="../复现输出/界面-接收端.png" alt="接收端" style="display:block;max-width:100%;height:auto;margin:10px 0"></p>
+<hr>
+<h2>一、启动方式</h2>
+<p>两个脚本各自独立运行，任一方先开后开都不影响（接收端先开更方便：可以看日志里"等发送端"的状态）。</p>
+<pre><code>:: 窗口 1：接收端（默认监听 0.0.0.0:50500，R 用已知值 10.0）
+.venv\Scripts\python.exe tools\rx_app.py
+
+:: 窗口 2：发送端（默认打向 127.0.0.1:50500）
+.venv\Scripts\python.exe tools\tx_app.py</code></pre>
+<p>跨机联调时两头都要指定地址：</p>
+<pre><code>:: 接收端（在 192.168.1.20 上监听所有网卡）
+.venv\Scripts\python.exe tools\rx_app.py --host 0.0.0.0 --port 50500
+
+:: 发送端（从另一台机器发过去）
+.venv\Scripts\python.exe tools\tx_app.py --host 192.168.1.20 --port 50500</code></pre>
+<p>发送端界面上还有个「打开接收端」按钮，会以子进程方式拉起 <code>rx_app.py</code> 并带上同一个端口号，省得手敲命令。</p>
+<p>命令行参数一览（都很短，其余全在界面上）：</p>
+<table><thead><tr><th>脚本</th><th>参数</th><th>默认</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>tx_app.py</code></td><td><code>--host</code></td><td><code>127.0.0.1</code></td><td>目标地址</td></tr>
+<tr><td></td><td><code>--port</code></td><td><code>50500</code></td><td>目标端口</td></tr>
+<tr><td><code>rx_app.py</code></td><td><code>--host</code></td><td><code>0.0.0.0</code></td><td>监听地址（填 0.0.0.0 收所有网卡）</td></tr>
+<tr><td></td><td><code>--port</code></td><td><code>50500</code></td><td>监听端口</td></tr>
+<tr><td></td><td><code>--mode</code></td><td><code>known</code></td><td><code>known</code> 已知 R / <code>hint</code> 跟随发送端 / <code>auto</code> 盲测扫 R</td></tr>
+</tbody></table>
+<hr>
+<h2>二、发送端参数</h2>
+<table><thead><tr><th>参数</th><th>默认</th><th>作用与约束</th></tr></thead><tbody>
+<tr><td>载波角频率 ω</td><td>10.0 rad/s</td><td>即 $f_0=1.5915$ Hz。接收端的 R 必须与它一致（或由它扫出来）</td></tr>
+<tr><td>信噪比 SNR</td><td>−11.0 dB</td><td>滑块 −30…+5 dB。<strong>幅值由它反算</strong>：$A=\sigma\sqrt{2\cdot10^{\text{SNR}/10}}$</td></tr>
+<tr><td>基线噪声 σ</td><td>0.05</td><td>归一化策动力单位。噪声每样本标准差 $=\sigma\sqrt{\omega/f_s}$（力口径）</td></tr>
+<tr><td>采样率 $f_s$</td><td>500 Hz</td><td>与接收端共享；收端默认"跟随发送端 fs"</td></tr>
+<tr><td>发送时长</td><td>94.2 s</td><td>一帧的物理时长＝47100 点 ≈ 150 个载波周期。<strong>低于 48 周期判据会抖</strong>（见第七节）</td></tr>
+<tr><td>噪声类型</td><td>白噪</td><td>另可选 $1/f$ 色噪（去 DC 的一阶积分噪声）</td></tr>
+<tr><td>发送信号</td><td>开</td><td><strong>独立开关</strong>。关掉后只发噪声 → 用来做"无目标"对照</td></tr>
+<tr><td>发送噪声</td><td>开</td><td>独立开关。关掉则是干净信号（$p_{std}$ 会低到 $10^{-3}$，无悬念）</td></tr>
+<tr><td>连发帧数</td><td>1</td><td>一次发 N 帧，接收端逐帧判决并累计 Pd/Pfa</td></tr>
+<tr><td>随机种子</td><td>0</td><td>0 = 每次随机初相；填定值可复现同一帧</td></tr>
+<tr><td>发送节奏</td><td>尽快</td><td>尽快 = 包间 2 ms；实时 = 每包按 $\Delta t$ 停，可填倍率（如 ×10 就是 10 倍速）</td></tr>
+<tr><td>目标地址 / 端口</td><td>127.0.0.1 : 50500</td><td>与接收端一致</td></tr>
+</tbody></table>
+<p><strong>为什么 SNR 与幅值是绑定的</strong>：接收端判的是"驱动幅值有没有把振子推过阈值"，物理量是幅值 $A$；而工程上人们更习惯说信噪比。所以界面上让你调 SNR，程序内部换成 $A$ 再发给接收端——头包里两个都带，方便对表。</p>
+<p><strong>信号与噪声两个开关要分开</strong>，是因为它们回答不同的问题：</p>
+<ul><li>只开信号（无噪声）→ 检查判据的<strong>物理正确性</strong>（$p_{std}$ 该到 $10^{-3}$）；</li><li>只开噪声（无信号）→ 测<strong>虚警率</strong>（$p_{std}$ 该停在 0.4 以上，判「无」）；</li><li>都开 → 真实工况。</li></ul>
+<hr>
+<h2>三、接收端参数</h2>
+<table><thead><tr><th>参数</th><th>默认</th><th>作用与约束</th></tr></thead><tbody>
+<tr><td>监听地址 / 端口</td><td>0.0.0.0 : 50500</td><td>与发送端一致</td></tr>
+<tr><td>采样间隔 $\Delta t$</td><td>0.002 s</td><td>勾「跟随发送端的 fs」时自动取头包里的 $1/f_s$（<strong>推荐</strong>）</td></tr>
+<tr><td>R 模式</td><td><strong>已知 R</strong></td><td>三选一，见下</td></tr>
+<tr><td>已知 R</td><td>10.0 rad/s</td><td>已知模式用。必须与发送端 ω 一致，<strong>偏 5% 就判不出来</strong></td></tr>
+<tr><td>工作点 $\lambda_0$</td><td>0.72</td><td>与阶段 2–5 同一个工作点（比 $\lambda_c\approx0.7335$ 低 0.0135）</td></tr>
+<tr><td>判态门限</td><td>0.08</td><td>$p_{std}$ 低于它算"该路共振"。混沌态约 0.4，周期态约 $10^{-3}$，中间没有含糊地带</td></tr>
+<tr><td>阵列</td><td>三相位 ±120°</td><td>三路或单路。三相位是为了补相位盲区（见第七节）</td></tr>
+<tr><td>估计幅值/相位</td><td>勾</td><td>$\lambda^*$ 差分估计 $\hat\gamma$、$\hat\theta$，每帧多约 2.5 s</td></tr>
+<tr><td>每帧自动重算</td><td>勾</td><td>收到就自动算；取消则只记录不计算</td></tr>
+</tbody></table>
+<h3>三种 R 模式</h3>
+<p>用户明确说「可以已知 R，不用扫描 R」，所以默认走<strong>已知 R</strong>，扫 R 保留为论文的盲测流程：</p>
+<table><thead><tr><th>模式</th><th>用时（47100 点）</th><th>适用场景</th></tr></thead><tbody>
+<tr><td><strong>已知 R</strong>（默认）</td><td><strong>约 1.4 s</strong>（含估幅约 4 s）</td><td>联调、演示、已知目标频率的场合</td></tr>
+<tr><td>跟随发送端</td><td>同上</td><td>联调最省事：不用两头各填一次，直接用头包里的 ω</td></tr>
+<tr><td>自动扫 R</td><td>约 3.5 s</td><td>论文流程：只拿序列与 $\Delta t$，FFT 粗估后在 ±1% 内两级细扫</td></tr>
+</tbody></table>
+<p>已知 R 时仍然<strong>不是"作弊"</strong>：检测判决完全由 $p_{std}$ 与门限决定，R 只决定"在哪个时间尺度上看这个振子"。R 偏 5% 时驱动频率失谐到 1.05，共振塌掉、$p_{std}$ 从 $2.3\times10^{-3}$ 回到 $0.43$——这说明判决对 R 是敏感的，而<strong>检测这件事本身仍然是靠动力学，不是靠对表</strong>。</p>
+<hr>
+<h2>四、数据交互</h2>
+<h3>4.1 为什么用 UDP 而不是共享文件</h3>
+<p>"一端发、一端收"要能跨进程、跨机器，还要能一帧一帧流式判。UDP 的好处是<strong>不建立连接</strong>：接收端先开就先听着，发送端后开也不会报错；发送端重启也不影响接收端。代价是可能丢包——这一点在 4.3 里专门处理。</p>
+<h3>4.2 包结构</h3>
+<p>统一 4 字节魔数 <code>WBDX</code> + 1 字节类型，三类包：</p>
+<pre><code>H 头包   WBDX H &lt;UTF-8 JSON&gt;
+         字段：v, frame, n, fs, w_hint, amp, sigma, alpha,
+               snr_db, has_sig, has_noise, duration, phase, ts
+D 数据包 WBDX D &lt;4s c I I I f&gt; &lt;float32[1024]&gt;
+         (magic, 'D', frame, seq, nseq, fs) + 1024 个样本 = 4117 字节
+T 尾包   WBDX T &lt;UTF-8 JSON&gt;   {frame, sent, nseq}</code></pre>
+<p>一帧 = 1 个 H + $\lceil n/1024\rceil$ 个 D + 1 个 T。默认 $n=47100$ → 47 个数据包，整帧约 190 KB。</p>
+<p>数据包选 1024 样本（4117 字节）是为了留足余量：单包不超过 MTU，跨机不会 IP 分片，丢一个包也只丢 1024 点。</p>
+<h3>4.3 接收端怎么装配</h3>
+<pre><code>收到 H → 新建 FrameBuf(n)，按 seq 把 D 包写进定长数组
+        ├─ 重复 seq 直接丢弃（回环/重传可能重复）
+        ├─ 收够 n 点 或 收到 T → 提交给计算线程
+        └─ 3 s 内没凑齐 → 丢弃残帧并报「缺 x 点」</code></pre>
+<p>缺包时<strong>补零后仍然参与计算</strong>并打警告——因为补零相当于"那段时间信号是 0"，会把 $p_{std}$ 抬高（偏保守，不会误判成"有"）。日志里会写明缺了多少点，便于判断这次判决可不可信。</p>
+<h3>4.4 时序</h3>
+<pre><code>发送端                                 接收端
+  │  H(n, fs, ω, A, SNR, 开关)  ────▶   新建帧缓冲
+  │  D(seq=0..46, 1024 点/包)   ────▶   按 seq 填数组
+  │  T(sent=n)                  ────▶   提交 → 计算线程（FFT/扫 R/阵列）
+  │                                      ▼
+  │                                   判决 + 画图（100 ms 内刷新界面）</code></pre>
+<p>发送端"尽快"模式下包间停 2 ms，一帧约 0.1 s 发完，但<strong>接收端的计算要 1.4–4 s</strong>。所以连发多帧时会在接收端排队——这是正常的，队列积压时界面会连续刷新好帧。</p>
+<hr>
+<h2>五、联调步骤</h2>
+<ol><li><strong>先开接收端</strong>，点「开始监听」。状态栏显示"监听中…"，日志出现"已绑定 0.0.0.0:50500，等待发送端…"。</li><li><strong>检查两端参数</strong>：接收端 R 与发送端 ω 是否一致（都是 10.0）；接收端勾了"跟随发送端的 fs"就不会错。</li><li><strong>开发送端</strong>，点「预览波形」确认 $f_0$、$A$、周期数都正常（周期数低于 48 会标黄/标红）。</li><li><strong>点「开始发送」</strong>。接收端日志会出现"← 来自 127.0.0.1:xxxxx 帧 0，n=47100，fs=500.0，SNR=-11.0，信号=开 噪声=开"，然后 1–4 s 后出判决。</li><li><strong>做对照</strong>：把发送端的「发送信号」取消勾选，再发一帧 → 接收端应判「未检测到目标」，$p_{std}$ 回到 0.4 以上。</li></ol>
+<p>判断联调是否正常，看三个数：<strong>有目标时 min pstd 应在 $10^{-3}$ 量级、无目标时在 0.4 以上、门限 0.08 落在两者中间</strong>。如果两端都在 0.4 以上，先查 R 是否填错；如果都在 $10^{-3}$，先查是不是关掉了噪声。</p>
+<hr>
+<h2>六、实测结果</h2>
+<p>条件：$\omega=10$、$f_s=500$、$\Delta t=0.002$、一帧 94.2 s（47100 点，150 周期）、$\lambda_0=0.72$、$\sigma=0.05$、$A=0.02$（−11 dB）。</p>
+<table><thead><tr><th>场景</th><th>三路 $p_{std}$</th><th>判决</th><th>用时</th></tr></thead><tbody>
+<tr><td>有目标，$\theta=0$，已知 R=10</td><td><strong>2.83e−03</strong> / 5.02e−01 / 6.20e−01</td><td>✅ 有</td><td>4.1 s（含估幅）</td></tr>
+<tr><td>同一条帧，R 填成 10.5</td><td>4.26e−01 / 5.11e−01 / 5.88e−01</td><td>❌ 无</td><td>1.4 s</td></tr>
+<tr><td>纯噪声（信号关闭）</td><td>4.45e−01 / 5.47e−01 / 6.64e−01</td><td>❌ 无</td><td>0.5 s</td></tr>
+</tbody></table>
+<ul><li>已知 R 时频率误差 <strong>+0.000%</strong>（R 直接就是真值），幅值 $\hat\gamma=0.0200$、相位 $\hat\theta=+3.6°$。</li><li>三路里只有<strong>正对相位的那一路</strong>跌破门限，其余两路停在 0.5 上下——这正是三相位阵列"谁共振谁报警"的工作方式。</li><li>自动扫 R 时 $\hat R=9.9993$（误差 −0.007%），比已知 R 多花约 2 s。</li></ul>
+<hr>
+<h2>七、已知边界与坑</h2>
+<p><strong>1. 帧长低于约 48 个载波周期，判据开始抖。</strong> 实测（同相、5 个噪声种子）：</p>
+<table><thead><tr><th>帧长</th><th>8 周期</th><th>16 周期</th><th>32 周期</th><th>48 周期</th><th>95 周期</th><th>150 周期</th></tr></thead><tbody>
+<tr><td>$p_{std}$（有信号）</td><td>0.42</td><td>0.32</td><td>0.31</td><td><strong>1.8e−3</strong></td><td>2.2e−3</td><td>2.3e−3</td></tr>
+<tr><td>跨种子离散</td><td>0.026–0.54</td><td>0.14–0.51</td><td>1.7e−3–0.43</td><td>1.5e−3–0.48</td><td>稳定</td><td>稳定</td></tr>
+</tbody></table>
+<p>原因是 <code>burn_frac=0.5</code> 丢掉前一半做瞬态，剩下的 Poincaré 点只有周期数的一半——16 周期只剩 8 个点算标准差，本身就不可靠。发送端界面因此在周期数 &lt;60 时标橙、&lt;30 时标红。</p>
+<p><strong>2. 相位盲区：单振子会被"信号相位"封顶。</strong> 相变由合成幅值 $\sqrt{\lambda_0^2+A^2+2\lambda_0A\cos\theta}$ 决定，$\lambda_0$ 只比 $\lambda_c$ 低 0.0135，所以 $A=0.02$ 时要求 $|\theta|&lt;47.5°$——<strong>单路覆盖率只有 26%，再大的 SNR 也救不回来</strong>。三相位阵列把覆盖率补到约 79%，剩下的 21% 只能靠多发几帧。这也是"连发帧数"这个参数的用处。</p>
+<p><strong>3. R 偏 5% 就判不出来。</strong> 频率选择带宽只有 ±0.1%（阶段 2 实测），5% 远在带外。所以"已知 R"这条路要求 R 确实知道——联调时建议用"跟随发送端"，让包头把 ω 带过来。</p>
+<p><strong>4. 参数改动即时生效，但只对</strong>下一帧<strong>。</strong> 监听中改 R、$\lambda_0$、门限都会在下一帧生效（主线程每 100 ms 刷新一次参数快照），不用停止重开。</p>
+<p><strong>5. 端口占用的处理。</strong> 接收端绑定时设了 <code>SO_REUSEADDR</code> 与 4 MB 接收缓冲；如果 50500 被别的程序占了，日志会明确报"绑定失败"，换端口即可（记得发送端同步改）。</p>
+<p><strong>6. 无板级实测。</strong> 这套 UI 是<strong>数值仿真链路</strong>：发送端产生的是"归一化策动力单位"的序列，不是真实的磁通密度（pT）；$A$ 与 pT 的换算系数需要实测标定。界面上的"幅值"一律是同一套无量纲单位。</p>
+<hr>
+<h2>八、代码边界</h2>
+<table><thead><tr><th>文件</th><th>职责</th><th>与内核的关系</th></tr></thead><tbody>
+<tr><td><code>tools/link_proto.py</code></td><td>协议打包/解析、帧装配、信号生成、<code>analyze()</code> 全流程</td><td>只调 <code>simulate_seq</code>，无独立积分器</td></tr>
+<tr><td><code>tools/tx_app.py</code></td><td>发送端界面与发送线程</td><td>不碰内核，只用 <code>make_frame</code> + <code>split_frame</code></td></tr>
+<tr><td><code>tools/rx_app.py</code></td><td>接收端界面、接收线程、计算线程、四联图</td><td>不碰内核，只用 <code>analyze</code></td></tr>
+<tr><td><code>tests/test_link_apps.py</code></td><td>14 项：协议往返、切包重组、UDP 环回、三种 R 模式、盲区、缺包统计</td><td>全部不启动 tkinter</td></tr>
+</tbody></table>
+<p>跑测试：</p>
+<pre><code>.venv\Scripts\python.exe -m pytest tests\test_link_apps.py -q</code></pre>
+<p>界面截图可用 <code>tools/shot_ui.py</code> 重新生成（它会给窗口置顶后按窗口外框截，避免被其他窗口盖住、或被 DPI 缩放截掉一半）。</p></main></body></html>

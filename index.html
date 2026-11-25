@@ -344,6 +344,13 @@ footer{border-top:1px solid var(--line);padding:20px 0 34px;color:var(--faint);f
       <div class="foot"><span>Markdown · 阶段 5 过关产出 · 含内嵌图</span><span class="go">打开 →</span></div>
     </a>
 
+    <a class="card item" data-search="双端 UI 图形界面 发送端 接收端 tkinter UDP 50500 联调 已知R 不扫描 波形图 阵列图 送 SNR 发送时长 信号噪声开关 协议 分帧 丢包 相位盲区 帧长" href="08-端到端链路/端到端-双端UI联调说明.md" target="_blank">
+      <div class="kicker">新增 · 图形化联调</div>
+      <h3>双端 UI：一个窗口发，一个窗口收</h3>
+      <p>两个独立脚本各自带图形界面：<b>发送端</b>可调 SNR、发送时长、独立开关信号与噪声；<b>接收端</b>默认用<b>已知 R</b>（不扫频，1.4 s 出一帧），收到就判「有/无目标」并画<b>波形图</b>与<b>阵列图</b>（三路 pstd 柱 + 相轨迹）。数据走 UDP 分帧，含头包/数据包/尾包与缺包告警。实测有目标 $p_{std}=2.8	imes10^{-3}$、纯噪声 0.44，门限 0.08 卡在中间。</p>
+      <div class="foot"><span>Markdown · 含界面截图 · 附协议表</span><span class="go">打开 →</span></div>
+    </a>
+
     <a class="card item" data-search="端到端 链路仿真 发射端 信道 接收端 检测 目标 有无 simulate_seq 盲测 扫R FFT 三相位阵列 相位盲区 Pd Pfa 幅值估计 λ* 差分 Python" href="08-端到端链路/端到端-发射接收检测.md" target="_blank">
       <div class="kicker">新增 · 端到端链路仿真</div>
       <h3>端到端链路：一端发射、一端接收并识别目标</h3>

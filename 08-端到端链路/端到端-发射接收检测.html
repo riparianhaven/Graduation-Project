@@ -38,7 +38,7 @@ strong{font-weight:650}
 </head><body>
 <div class="bar"><a href="../index.html">← 返回资料索引</a>
 <a href="端到端-发射接收检测.md">查看 Markdown 源码</a><span class="fn">08-端到端链路/端到端-发射接收检测.md</span></div>
-<div class="staticnote">这是 <b>静态排版副本</b>，生成于 2026-11-25 21:02。直接双击 <code>index.html</code> 时看到的就是它；若 Markdown 刚改过，请在工作区运行 <code>py build_static.py</code> 重新生成，或用 <code>start_index.bat</code> 启动本地服务查看实时渲染版。页内公式由 MathJax 渲染，需要联网。</div><main><h1>端到端链路仿真：一端发射、一端接收并识别目标</h1>
+<div class="staticnote">这是 <b>静态排版副本</b>，生成于 2026-11-25 21:41。直接双击 <code>index.html</code> 时看到的就是它；若 Markdown 刚改过，请在工作区运行 <code>py build_static.py</code> 重新生成，或用 <code>start_index.bat</code> 启动本地服务查看实时渲染版。页内公式由 MathJax 渲染，需要联网。</div><main><h1>端到端链路仿真：一端发射、一端接收并识别目标</h1>
 <blockquote><p><strong>一句话结论</strong>：用同一段 RK4 内核跑通「发射 → 信道 → 接收 → 判决」全链路。有目标时接收端把采样序列扫到 $R=\omega$ 共振，$p_{std}$ 从 0.44 塌到 $2.3\times10^{-3}$，判「有」；无目标时三路 $p_{std}$ 都在 0.44–0.56，判「无」。<strong>频率估计误差 −0.010%</strong>，<strong>幅值误差 0.3%</strong>（−7.4 dB）。三相位阵列在 <strong>−7.4 dB</strong> 达到 $P_d\ge0.9$，而单振子即便信号强到 −3 dB 也只有 <strong>0.46</strong>——限制它的是<strong>相位盲区</strong>，不是噪声。</p></blockquote>
 <blockquote><p>代码：<a href="../tools/link_sim.py"><code>tools/link_sim.py</code></a>（约 500 行，命令行直接跑）；数字：<a href="../复现输出/端到端链路-发射接收检测汇总.json"><code>复现输出/端到端链路-发射接收检测汇总.json</code></a>。</p></blockquote>
 <hr>

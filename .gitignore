@@ -7,9 +7,8 @@ __pycache__/
 .pytest_cache/
 .ipynb_checkpoints/
 
-# 工具内置的临时工作区（脚本、探针、旧版备份，仅本机留档）
-.workbuddy/tmp/
-.workbuddy/backup/
+# 工具内置工作区（临时脚本、备份、工作日志，仅本机留档，不入库）
+.workbuddy/
 
 # 文献残料（重名副本、格式转换中间件），正文引用的 PDF 照常入库
 文献/_archive/

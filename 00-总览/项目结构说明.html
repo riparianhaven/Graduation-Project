@@ -38,13 +38,13 @@ strong{font-weight:650}
 </head><body>
 <div class="bar"><a href="../index.html">← 返回资料索引</a>
 <a href="项目结构说明.md">查看 Markdown 源码</a><span class="fn">00-总览/项目结构说明.md</span></div>
-<div class="staticnote">这是 <b>静态排版副本</b>，生成于 2026-11-26 00:37。直接双击 <code>index.html</code> 时看到的就是它；若 Markdown 刚改过，请在工作区运行 <code>py build_static.py</code> 重新生成，或用 <code>start_index.bat</code> 启动本地服务查看实时渲染版。页内公式由 MathJax 渲染，需要联网。</div><main><h1>项目结构说明</h1>
-<blockquote><p><strong>一句话</strong>：这是一个「<strong>本地站点 + 可复现实验 + 文献库</strong>」的混合体。分类主轴是<strong>主题与用途</strong>：文档按主题归入 9 个子目录，代码/数据按职责分层。</p><p></p><p>初版整理：2026-11-15｜2026-11-23 上午做引用与信息整理｜2026-11-23 晚做主题目录重组｜<strong>2026-11-26 同步双端 UI、框架演示与内核提速（本版）</strong>｜范围：整个工作区（不含 <code>.venv</code> 与 <code>.workbuddy</code>）</p></blockquote>
+<div class="staticnote">这是 <b>静态排版副本</b>，生成于 2026-11-26 18:02。直接双击 <code>index.html</code> 时看到的就是它；若 Markdown 刚改过，请在工作区运行 <code>py build_static.py</code> 重新生成，或用 <code>start_index.bat</code> 启动本地服务查看实时渲染版。页内公式由 MathJax 渲染，需要联网。</div><main><h1>项目结构说明</h1>
+<blockquote><p><strong>一句话</strong>：这是一个「<strong>本地站点 + 可复现实验 + 文献库</strong>」的混合体。分类主轴是<strong>主题与用途</strong>：文档按主题归入 9 个子目录，代码/数据按职责分层。</p><p></p><p>初版整理：2026-11-15｜2026-11-23 上午做引用与信息整理｜2026-11-23 晚做主题目录重组｜2026-11-26 同步双端 UI、框架演示与内核提速｜<strong>2026-11-26 晚 GitHub 展示整理：新增根目录 <code>README.md</code>（本版）</strong>｜范围：整个工作区（不含 <code>.venv</code> 与 <code>.workbuddy</code>）</p></blockquote>
 <hr>
 <h2>一、当前结构速览</h2>
 <table><thead><tr><th>项目</th><th>状态（截至 2026-11-26 凌晨）</th></tr></thead><tbody>
 <tr><td>文档分层</td><td><strong>34 份 <code>.md</code> + 34 份同名 <code>.html</code> 副本，归入 9 个主题子目录</strong>；另 <code>文献/</code> 下 1 份</td></tr>
-<tr><td>根目录顶层文件</td><td><strong>7 个非隐藏文件</strong> —— 只留站点入口、主交付 notebook 对、一键脚本与配置</td></tr>
+<tr><td>根目录顶层文件</td><td><strong>8 个非隐藏文件</strong> —— 站点入口 + GitHub 首页 <code>README.md</code>、主交付 notebook 对、一键脚本与配置</td></tr>
 <tr><td>主题目录</td><td><code>00-总览</code>(6 文档) / <code>01-阶段一</code>(7) / <code>02-阶段二</code>(4) / <code>03-阶段三</code>(2) / <code>04-论文精读</code>(4) / <code>05-方法创新</code>(4) / <code>06-阶段四</code>(2) / <code>07-阶段五</code>(3) / <code>08-端到端链路</code>(2)</td></tr>
 <tr><td>脚本位置</td><td><code>tools/</code> 18 个（运行链 3 + 唯一内核 <code>kernel_src.py</code> + notebook 生成器 5 + 链路与双端 5 + 基准/黄金/同步 4）；<strong>无 <code>legacy/</code></strong></td></tr>
 <tr><td>测试</td><td><code>tests/</code> 6 个；<strong>111 passed，0 failed</strong>（含 13 项逐位黄金样本）</td></tr>
@@ -58,8 +58,10 @@ strong{font-weight:650}
 <hr>
 <h2>二、目录结构（2026-11-23 晚实况）</h2>
 <pre><code>毕设/
+├─ README.md                     GitHub 首页：定位 / 指标 / 导航 / 快速开始
 ├─ index.html                    站点入口（也是 8765 服务 web root）
 ├─ 复现-2-混沌振子建模与临界阈值.ipynb / .html   主交付复现（留根目录）
+├─ 开题报告-基于混沌振子的极低频磁场微弱信号检测.docx  开题报告成稿（官方模板封面）
 ├─ .gitignore / requirements.txt 配置
 ├─ start_index.bat / start_notebook.bat / run_ipynb.bat   一键脚本（靠 %~dp0 锚定，必须留根）
 │
@@ -286,4 +288,14 @@ run_ipynb.bat                 :: 无界面重跑并写回
 <tr><td>新增文档</td><td><code>00-总览/性能优化与基准.md</code>、<code>07-阶段五/README-ESP32-固件实现.md</code>（固件规格，代码待创建）</td></tr>
 <tr><td>新增工具</td><td><code>kernel_cases.py</code>（算例矩阵）、<code>bench_speed.py</code>（速度+逐位）、<code>make_kernel_golden.py</code>（重冻结）、<code>sync_kernel_notebooks.py</code>（内核同步进 notebook）</td></tr>
 <tr><td>新增测试</td><td><code>test_kernel_golden.py</code>（13 项）+ <code>tests/golden/kernel_ref.json</code>（改动前冻结的 sha256）；<code>test_link_apps.py</code> 增 4 项框架演示统计</td></tr>
+</tbody></table>
+<hr>
+<h2>十一、2026-11-26 晚 · GitHub 展示整理</h2>
+<table><thead><tr><th>类别</th><th>改动</th></tr></thead><tbody>
+<tr><td>新增首页</td><td>根目录 <code>README.md</code>：徽章式指标速览、三张关键结果图（阈值扫描 / Pd–SNR / 端到端）、9 目录导航表、快速开始四步、研究纪律与口径、文献规范说明；39 条本地链接全部有效</td></tr>
+<tr><td>文档同步</td><td>本文件「结构速览」「目录树」「改动清单」补入 <code>README.md</code> 与开题报告成稿；<code>index.html</code> 改版后的 6 分组结构保持不变</td></tr>
+<tr><td>交付收敛</td><td>封面修复产生的 2 份临时 docx（<code>.fix</code> / <code>（封面已对齐）</code>）已覆盖回正式文件后，归档至 <code>.workbuddy/tmp/kaiti/归档-封面过程稿/</code>（不删除，可回滚）；根目录只留 1 份开题报告</td></tr>
+<tr><td>忽略规则</td><td><code>.gitignore</code> 新增 <code>output/</code>（开题报告流水线一次性 UUID 目录，56 KB 中间产物），正式 docx 仍在库内</td></tr>
+<tr><td>引用完整性</td><td>未移动/重命名任何被引用文件；954 条本地引用、111 项测试在整理后复校通过（见文末校验记录）</td></tr>
+<tr><td>远程发布</td><td>首次配置 <code>origin</code> 指向 <code>https://github.com/riparianhaven/Graduation-Project</code>，master 分支整库推送</td></tr>
 </tbody></table></main></body></html>
